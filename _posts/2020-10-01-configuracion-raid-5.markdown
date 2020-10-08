@@ -2,7 +2,7 @@
 layout: post
 title:  "Configuración RAID 5"
 banner: "/assets/images/banners/raid.jpg"
-date:   2020-10-03 11:31:00 +0200
+date:   2020-10-01 13:05:00 +0200
 categories: raid seguridad
 ---
 ## Tarea 1: Crea un RAID llamado md5 con los discos que hemos conectado a la máquina. ¿Cuántos discos tienes que conectar? ¿Qué diferencia existe entre el RAID 5 y el RAID 1?
@@ -19,7 +19,7 @@ También tendremos que añadir la clave pública GPG de Oracle a nuestro anillo 
 wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | apt-key add -
 {% endhighlight %}
 
-Listo. El siguiente paso consiste en realizar la instalación, pero hay una cosa muy importante a tener en cuenta. La versión actual de Vagrant en la rama stable (**2.2.3**) soporta hasta la versión **6.0** de Virtualbox, tal y como se puede ver en el [changelog](https://metadata.ftp-master.debian.org/changelogs//main/v/vagrant/vagrant_2.2.3+dfsg-1_changelog), por lo que no podemos instalar la **6.1**, ya que no la soportaría. Procedemos a la instalación (no sin antes actualizar la paquetería disponible) ejecutando el comando:
+Listo. El siguiente paso consiste en realizar la instalación, pero hay una cosa muy importante a tener en cuenta. La versión actual de Vagrant en la rama stable (**2.2.3**) soporta hasta la versión **6.0** de Virtualbox, tal y como se puede ver en el [changelog](https://github.com/hashicorp/vagrant/blob/master/CHANGELOG.md), por lo que no podemos instalar la **6.1**, ya que no la soportaría. Procedemos a la instalación (no sin antes actualizar la paquetería disponible) ejecutando el comando:
 
 {% highlight shell %}
 apt-get -y update && apt-get -y install virtualbox-6.0 vagrant
