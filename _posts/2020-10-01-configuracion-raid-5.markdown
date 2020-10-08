@@ -3,7 +3,7 @@ layout: post
 title:  "Configuración RAID 5"
 banner: "/assets/images/banners/raid.jpg"
 date:   2020-10-01 13:05:00 +0200
-categories: raid seguridad
+categories: almacenamiento seguridad
 ---
 ## Tarea 1: Crea un RAID llamado md5 con los discos que hemos conectado a la máquina. ¿Cuántos discos tienes que conectar? ¿Qué diferencia existe entre el RAID 5 y el RAID 1?
 
@@ -136,7 +136,7 @@ apt-get -y update && apt-get -y upgrade && apt-get -y install mdadm
 Ya tenemos todo lo necesario para crear un RAID 5, así que ahora seguiremos la siguiente estructura para ejecutar la instrucción:
 
 {% highlight shell %}
-mdadm --create /dev/[nombreraid] --level=[nivel] --raid-devices=[numdiscos] /dev/[disco1].../dev/[discoN]
+mdadm --create /dev/<nombreraid> --level=<nivel> --raid-devices=<numdiscos> /dev/<disco1>.../dev/<discoN>
 {% endhighlight %}
 
 En este caso, el nombre del raid tiene que ser **md5**, de nivel **5**, con un total de **3** discos (**sdb**, **sdc** y **sdd**, por ejemplo). La instrucción quedaría de la siguiente forma:
@@ -154,7 +154,7 @@ En un principio, el RAID 5 ya está creado e iniciado, gracias a la información
 Para comprobar las características (detalles) de un RAID debemos hacer uso de la sintaxis:
 
 {% highlight shell %}
-mdadm --detail /dev/[nombreraid]
+mdadm --detail /dev/<nombreraid>
 {% endhighlight %}
 
 En este caso, el comando a ejecutar sería:
@@ -225,7 +225,7 @@ Esta estructura tiene una gran ventaja y es que al ser volúmenes dinámicos, po
 Antes de nada, añadiremos el RAID 5 como volumen físico, haciendo uso de la sintaxis:
 
 {% highlight shell %}
-pvcreate /dev/[nombreraid]
+pvcreate /dev/<nombreraid>
 {% endhighlight %}
 
 En este caso, el comando a ejecutar sería:
@@ -238,7 +238,7 @@ root@practicaraid:~# pvcreate /dev/md5
 El dispositivo de bloques ya se ha añadido como volumen físico, así que el siguiente paso será crear un grupo de volúmenes (de nombre **raid5**, por ejemplo) y añadirlo al mismo, haciendo uso de la sintaxis:
 
 {% highlight shell %}
-vgcreate [nombrevg] /dev/[nombrepv]
+vgcreate <nombrevg> /dev/<nombrepv>
 {% endhighlight %}
 
 En este caso, el comando a ejecutar sería:
@@ -264,7 +264,7 @@ Efectivamente, un volumen físico de nombre **/dev/md5** se encuentra creado, pe
 Ha llegado el momento de crear el volumen lógico (de nombre **volumen1**, por ejemplo), así que haremos uso de la sintaxis:
 
 {% highlight shell %}
-lvcreate -L [tamaño] -n [nombrelv] [nombrevg]
+lvcreate -L <tamaño> -n <nombrelv> <nombrevg>
 {% endhighlight %}
 
 En este caso, el comando a ejecutar sería:
@@ -317,7 +317,7 @@ apt-get -y install xfsprogs
 Ya podemos crear el sistema de ficheros XFS en el volumen lógico **volumen1**. Para ello, haremos uso de la sintaxis:
 
 {% highlight shell %}
-mkfs.xfs /dev/[nombrevg]/[nombrelv]
+mkfs.xfs /dev/<nombrevg>/<nombrelv>
 {% endhighlight %}
 
 En este caso, el comando a ejecutar sería:
@@ -371,7 +371,7 @@ mkdir /mnt/raid5
 Una vez creado, ya podremos montar el sistema de ficheros. Para ello, haremos uso de la sintaxis:
 
 {% highlight shell %}
-mount /dev/[nombrevg]/[nombrelv] [puntomontaje]
+mount /dev/<nombrevg>/<nombrelv> <puntomontaje>
 {% endhighlight %}
 
 En este caso, el comando a ejecutar sería:
@@ -441,7 +441,7 @@ UUID=04559374-06db-46f1-aa31-e7a4e6ec3286       none     swap        sw       0 
 Como se puede apreciar, la última línea contiene el UUID en cuestión. Tenemos que dejar dicha línea con la siguiente estructura:
 
 {% highlight shell %}
-[UUID] [punto_de_montaje] [sistema_de_archivos] [opciones] [dump] [pass]
+<UUID> <punto_de_montaje> <sistema_de_archivos> <opciones> <dump> <pass>
 {% endhighlight %}
 
 Siendo:
@@ -499,7 +499,7 @@ Efectivamente, así ha sido.
 Para marcar un disco como estropeado en el RAID 5, haremos uso de la sintaxis:
 
 {% highlight shell %}
-mdadm -f /dev/[nombreraid] /dev/[disco]
+mdadm -f /dev/<nombreraid> /dev/<disco>
 {% endhighlight %}
 
 En este caso, marcaré como estropeado el disco **sdb**, por ejemplo. El comando a ejecutar sería:
@@ -534,7 +534,7 @@ Efectivamente, el fichero **prueba.txt** todavía es accesible.
 Para retirar un disco estropeado del RAID 5, haremos uso de la sintaxis:
 
 {% highlight shell %}
-mdadm --remove /dev/[nombreraid] /dev/[disco]
+mdadm --remove /dev/<nombreraid> /dev/<disco>
 {% endhighlight %}
 
 En este caso, eliminaré el disco estropeado **sdb**. El comando a ejecutar sería:
@@ -564,7 +564,7 @@ Si nos fijamos en la parte inferior, podemos ver que nos pone **[3/2] [_UU]**, i
 Para añadir un nuevo disco al RAID 5, haremos uso de la sintaxis:
 
 {% highlight shell %}
-mdadm --add /dev/[nombreraid] /dev/[disco]
+mdadm --add /dev/<nombreraid> /dev/<disco>
 {% endhighlight %}
 
 En este caso, añadiré al RAID 5 el disco **sde**. El comando a ejecutar sería:
@@ -665,7 +665,7 @@ El disco ya ha sido eliminado.
 Para redimensionar un volumen lógico LVM haremos uso de la sintaxis:
 
 {% highlight shell %}
-lvextend -l +[extents] /dev/[nombrevg]/[nombrelv]
+lvextend -l +<extents> /dev/<nombrevg>/<nombrelv>
 {% endhighlight %}
 
 En este caso, especificaremos **+100%FREE** como parámetro **-l**, para que así coja todos los extents disponibles y haga uso de todo el espacio libre. El comando a ejecutar sería:
@@ -701,7 +701,7 @@ sdf                  linux_raid_member practicaraid:5 9974942d-1a0a-0bc2-538d-51
 Si nos fijamos, el espacio disponible sigue apareciendo que es de **470.6MB**. ¿A qué se debe esto? Bien, hemos redimensionado el volumen lógico, pero no hemos redimensionado lo más importante, el sistema de ficheros que hay en su interior. Para redimensionar un sistema de ficheros XFS haremos uso de la sintaxis:
 
 {% highlight shell %}
-xfs_growfs [puntomontaje]
+xfs_growfs <puntomontaje>
 {% endhighlight %}
 
 En este caso, el comando a ejecutar sería:
