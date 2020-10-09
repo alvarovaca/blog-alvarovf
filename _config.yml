@@ -20,12 +20,40 @@
 
 title: ASIr se hace
 email: avacaferreras@gmail.com
+author: Álvaro Vaca Ferreras
+lang: "es"
+copyright: Copyright © 2020
 description: >- # this means to ignore newlines until "baseurl:"
   Blog de un informático
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: jekyllrb
 github_username:  alvarovaca
+translate_langs:
+  - lang: en
+    img: https://www.countryflags.io/US/flat/64.png
+    text: English
+  - lang: fr
+    img: https://www.countryflags.io/fr/flat/64.png
+    text: Franch
+  - lang: zh-CN
+    img: https://www.countryflags.io/cn/flat/64.png
+    text: Chinese(Simple)
+  - lang: zh-TW
+    img: https://www.countryflags.io/tw/flat/64.png
+    text: Chinese(Traditional)
+  - lang: ja
+    img: https://www.countryflags.io/jp/flat/64.png
+    text: Japan
+  - lang: ko
+    img: https://www.countryflags.io/kr/flat/64.png
+    text: Korean
+  - lang: ru
+    img: https://www.countryflags.io/ru/flat/64.png
+    text: Russia
+defaults:
+  home:
+    heading: "Prueba"
+    subheading: "Prueba 2"
 
 # Build settings
 theme: jekyll-theme-yat
