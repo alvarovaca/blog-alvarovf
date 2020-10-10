@@ -10,7 +10,7 @@ categories: almacenamiento seguridad
 Lo primero será instalar el paquete rclone en nuestro equipo. Para ello, ejecutaremos el comando (con permisos de administrador, ejecutando el comando `su -`):
 
 {% highlight shell %}
-apt-get -y install rclone
+apt install rclone
 {% endhighlight %}
 
 Listo. Así de sencillo es tener instalado el paquete.

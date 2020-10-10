@@ -22,7 +22,7 @@ wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | apt-key a
 Listo. El siguiente paso consiste en realizar la instalación, pero hay una cosa muy importante a tener en cuenta. La versión actual de Vagrant en la rama stable (**2.2.3**) soporta hasta la versión **6.0** de Virtualbox, tal y como se puede ver en el [changelog](https://github.com/hashicorp/vagrant/blob/master/CHANGELOG.md), por lo que no podemos instalar la **6.1**, ya que no la soportaría. Procedemos a la instalación (no sin antes actualizar la paquetería disponible) ejecutando el comando:
 
 {% highlight shell %}
-apt-get -y update && apt-get -y install virtualbox-6.0 vagrant
+apt update && apt install virtualbox-6.0 vagrant
 {% endhighlight %}
 
 Durante la instalación, nos preguntará el hipervisor que usaremos, por lo que en este caso, debemos elegir **Virtualbox** (opción 2).
@@ -130,7 +130,7 @@ Efectivamente, se han creado y anexado 5 discos de 1GB (_sdb_, _sdc_, _sdd_, _sd
 Lo siguiente será instalar el paquete necesario para crear RAID software (**mdadm**), no sin antes upgradear los paquetes instalados, ya que el box con el tiempo se va quedando desactualizado. Para ello, ejecutaremos el comando (con permisos de administrador, ejecutando el comando `sudo su -`):
 
 {% highlight shell %}
-apt-get -y update && apt-get -y upgrade && apt-get -y install mdadm
+apt update && apt upgrade && apt install mdadm
 {% endhighlight %}
 
 Ya tenemos todo lo necesario para crear un RAID 5, así que ahora seguiremos la siguiente estructura para ejecutar la instrucción:
@@ -213,7 +213,7 @@ Como se puede apreciar, el RAID 5 de nombre **md5** se encuentra actualmente act
 Lo primero será instalar el paquete necesario para usar LVM (**lvm2**), ya que en el box no se encuentra instalado. Para ello, ejecutamos el comando:
 
 {% highlight shell %}
-apt-get -y install lvm2
+apt install lvm2
 {% endhighlight %}
 
 En LVM tenemos que realizar una serie de pasos antes de crear un volumen lógico. El primero es añadir el dispositivo de bloques (en este caso el RAID 5 que acabamos de crear) como volumen físico (**PV**). Tras ello, dicho volumen físico tendremos que añadirlo a un "contenedor" conocido como grupo de volúmenes (**VG**), y de ahí es de donde posteriormente cogeremos la capacidad para crear un volumen lógico (**LV**).
@@ -311,7 +311,7 @@ De aquí podemos deducir que el RAID 5 de nombre **md5** se encuentra contenido 
 Lo primero será instalar el paquete necesario para poder crear sistemas de ficheros XFS (**xfsprogs**), ya que en el box no se encuentra instalado. Para ello, ejecutamos el comando:
 
 {% highlight shell %}
-apt-get -y install xfsprogs
+apt install xfsprogs
 {% endhighlight %}
 
 Ya podemos crear el sistema de ficheros XFS en el volumen lógico **volumen1**. Para ello, haremos uso de la sintaxis:
