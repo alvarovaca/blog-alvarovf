@@ -26,7 +26,7 @@ copyright: Copyright © 2020
 description: Blog de un informático
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "http://www.alvarovf.com" # the base hostname & protocol for your site, e.g. http://example.com
-favicon: "assets/images/favicon.ico"
+favicon: "/assets/images/favicon.ico"
 translate_langs:
   - lang: en
     img: https://www.countryflags.io/US/flat/64.png
