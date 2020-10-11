@@ -25,7 +25,7 @@ lang: "es"
 copyright: Copyright © 2020
 description: Blog de un informático
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "http://www.alvarovf.com" # the base hostname & protocol for your site, e.g. http://example.com
 favicon: "assets/images/favicon.ico"
 translate_langs:
   - lang: en
