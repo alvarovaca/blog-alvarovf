@@ -52,8 +52,8 @@ translate_langs:
     text: Russia
 defaults:
   home:
-    heading: "Prueba"
-    subheading: "Prueba 2"
+    heading: "ASIr se hace"
+    subheading: "El blog de un informático"
 
 # Build settings
 theme: jekyll-theme-yat
