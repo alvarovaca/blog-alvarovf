@@ -53,7 +53,7 @@ translate_langs:
 defaults:
   home:
     heading: "ASIr se hace"
-    subheading: "El blog de un informático"
+    subheading: "Blog de un informático"
 
 # Build settings
 theme: jekyll-theme-yat
