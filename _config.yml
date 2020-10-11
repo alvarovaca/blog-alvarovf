@@ -27,7 +27,7 @@ description: >- # this means to ignore newlines until "baseurl:"
   Blog de un informático
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-github_username:  alvarovaca
+favicon: "assets/images/favicon.ico"
 translate_langs:
   - lang: en
     img: https://www.countryflags.io/US/flat/64.png
@@ -54,6 +54,7 @@ defaults:
   home:
     heading: "ASIr se hace"
     subheading: "Blog de un informático"
+    banner: "assets/images/banners/home.jpg"
 
 # Build settings
 theme: jekyll-theme-yat
