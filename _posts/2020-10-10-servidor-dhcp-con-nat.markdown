@@ -482,7 +482,14 @@ Tras ello, tendremos que instalar el paquete que nos va a permitir hacer NAT. En
 root@servidor:~# apt install nftables
 {% endhighlight %}
 
-Una vez finalizada la instalación, tendremos que crear una nueva tabla en nftables de nombre **nat**. Para ello, ejecutamos el comando:
+Cuando el paquete haya terminado de instalarse, tendremos que arrancar y habilitar el demonio, de manera que se inicie cada vez que se arranque la máquina y lea la configuración almacenada en el fichero (lo veremos a continuación). Para ello, ejecutamos los comandos:
+
+{% highlight shell %}
+root@servidor:~# systemctl start nftables.service
+root@servidor:~# systemctl enable nftables.service
+{% endhighlight %}
+
+Una vez habilitado y arrancado el demonio, tendremos que crear una nueva tabla en nftables de nombre **nat**. Para ello, ejecutamos el comando:
 
 {% highlight shell %}
 root@servidor:~# nft add table nat
@@ -492,6 +499,7 @@ Para verificar que la creación de dicha tabla se ha realizado correctamente, ej
 
 {% highlight shell %}
 root@servidor:~# nft list tables
+table inet filter
 table ip nat
 {% endhighlight %}
 
@@ -507,6 +515,17 @@ De nuevo, vamos a verificar que dicha cadena se ha generado correctamente, ejecu
 
 {% highlight shell %}
 root@servidor:~# nft list chains
+table inet filter {
+	chain input {
+		type filter hook input priority 0; policy accept;
+	}
+	chain forward {
+		type filter hook forward priority 0; policy accept;
+	}
+	chain output {
+		type filter hook output priority 0; policy accept;
+	}
+}
 table ip nat {
 	chain postrouting {
 		type nat hook postrouting priority 100; policy accept;
@@ -540,7 +559,7 @@ Efectivamente, así ha sido. Al igual que pasaba con el **bit de forward**, esta
 root@servidor:~# nft list ruleset > /etc/nftables.conf
 {% endhighlight %}
 
-Gracias a ello, habremos guardado la configuración en un fichero en **/etc/** de nombre **nftables.conf** que podremos importar cuando reiniciemos la máquina con el comando `nft -f /etc/nftables.conf`. Este comando podemos introducirlo por ejemplo en el script del Vagrantfile para que se ejecute automáticamente durante el arranque.
+Gracias a ello, habremos guardado la configuración en un fichero en **/etc/** de nombre **nftables.conf** que se importará de forma automática cuando reiniciemos la máquina gracias al daemon que se encuentra habilitado. En caso de que no cargase de nuevo la configuración, podríamos hacerlo manualmente con el comando `nft -f /etc/nftables.conf`.
 
 Es hora de comprobar que esta configuración funciona, así que volveremos a la máquina cliente y trataremos de hacer `ping` a un nombre, para así comprobar además que la resolución DNS se lleva a cabo, por ejemplo a **google.es**. Para ello, ejecutamos el comando:
 
@@ -969,14 +988,18 @@ Como se puede apreciar, en ambas máquinas se ha configurado correctamente la pu
 
 ## Tarea 9: Realiza las modificaciones necesarias para que los cliente de la segunda red local tengan acceso a Internet. Entrega las comprobaciones necesarias.
 
-Actualmente, debido al reinicio por parte del servidor, la configuración del cortafuegos se ha reseteado y no está haciendo función NAT. Para verificarlo vamos a hacer `ping` desde ambos clientes a **8.8.8.8**:
+Para verificar que tras el reinicio se ha restaurado correctamente la configuración de _nftables_ y por tanto el cliente **nodo_lan1** sigue teniendo conectividad al exterior, vamos a hacer `ping` desde ambos clientes a **8.8.8.8**:
 
 {% highlight shell %}
 vagrant@nodolan1:~$ ping 8.8.8.8
 PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=113 time=41.6 ms
+64 bytes from 8.8.8.8: icmp_seq=2 ttl=113 time=41.6 ms
+64 bytes from 8.8.8.8: icmp_seq=3 ttl=113 time=57.7 ms
 ^C
 --- 8.8.8.8 ping statistics ---
-11 packets transmitted, 0 received, 100% packet loss, time 246ms
+3 packets transmitted, 3 received, 0% packet loss, time 6ms
+rtt min/avg/max/mdev = 41.550/46.952/57.675/7.584 ms
 {% endhighlight %}
 
 {% highlight shell %}
@@ -985,12 +1008,6 @@ PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
 ^C
 --- 8.8.8.8 ping statistics ---
 6 packets transmitted, 0 received, 100% packet loss, time 202ms
-{% endhighlight %}
-
-Para recuperar dicha configuración podríamos haber configurado un script que se ejecute durante el arranque, pero se sale del objetivo de esta tarea, así que vamos a hacerlo manualmente, ejecutando para ello el comando:
-
-{% highlight shell %}
-root@servidor:~# nft -f /etc/nftables.conf
 {% endhighlight %}
 
 Actualmente, la máquina cliente **nodo_lan1** tiene conectividad al exterior, pero la máquina cliente **nodo_lan2** no, ya que no hemos configurado la correspondiente regla para la cadena **POSTROUTING**. Para añadir dicha regla, ejecutamos el comando:
@@ -1005,6 +1022,19 @@ Por último, vamos a volver a verificar que dicha regla se ha añadido correctam
 
 {% highlight shell %}
 root@servidor:~# nft list ruleset
+table inet filter {
+	chain input {
+		type filter hook input priority 0; policy accept;
+	}
+
+	chain forward {
+		type filter hook forward priority 0; policy accept;
+	}
+
+	chain output {
+		type filter hook output priority 0; policy accept;
+	}
+}
 table ip nat {
 	chain postrouting {
 		type nat hook postrouting priority 100; policy accept;
@@ -1014,24 +1044,13 @@ table ip nat {
 }
 {% endhighlight %}
 
-Efectivamente, así ha sido. Una vez más, vamos a guardar dicha configuración para posteriormente poder importarla en caso de ser necesario:
+Efectivamente, así ha sido. Una vez más, vamos a guardar dicha configuración para que perdure tras los reinicios:
 
 {% highlight shell %}
 root@servidor:~# nft list ruleset > /etc/nftables.conf
 {% endhighlight %}
 
-Nos falta hacer la última prueba, para verificar que ambos clientes son capaces de salir a Internet. Para ello, haremos `ping` a **google.es**, obligándolos así a resolver DNS, de manera que también podremos comprobar si funciona.
-
-{% highlight shell %}
-vagrant@nodolan1:~$ ping google.es
-PING google.es (216.58.211.227) 56(84) bytes of data.
-64 bytes from mad01s24-in-f3.1e100.net (216.58.211.227): icmp_seq=1 ttl=118 time=10.8 ms
-64 bytes from mad01s24-in-f3.1e100.net (216.58.211.227): icmp_seq=2 ttl=118 time=10.7 ms
-^C
---- google.es ping statistics ---
-2 packets transmitted, 2 received, 0% packet loss, time 2ms
-rtt min/avg/max/mdev = 10.667/10.726/10.785/0.059 ms
-{% endhighlight %}
+Nos falta hacer la última prueba, para verificar que el último cliente es capaz de salir a Internet. Para ello, haremos `ping` a **google.es**, obligándolo así a resolver DNS, de manera que también podremos comprobar si funciona.
 
 {% highlight shell %}
 vagrant@nodolan2:~$ ping google.es
