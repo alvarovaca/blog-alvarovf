@@ -545,6 +545,19 @@ Por último, vamos a volver a verificar que dicha regla se ha añadido correctam
 
 {% highlight shell %}
 root@servidor:~# nft list ruleset
+table inet filter {
+	chain input {
+		type filter hook input priority 0; policy accept;
+	}
+
+	chain forward {
+		type filter hook forward priority 0; policy accept;
+	}
+
+	chain output {
+		type filter hook output priority 0; policy accept;
+	}
+}
 table ip nat {
 	chain postrouting {
 		type nat hook postrouting priority 100; policy accept;
