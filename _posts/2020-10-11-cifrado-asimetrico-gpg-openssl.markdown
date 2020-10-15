@@ -358,7 +358,7 @@ Como se puede apreciar, no ha quedado ningún rastro de nuestro par de claves, l
 
 ### 1. Genera la clave de revocación de tu clave pública para utilizarla en caso de que haya problemas.
 
-En realidad, **gpg** ha generado una clave de revocación de forma automática cuando se generó el par de claves, pero para mostrarlo, vamos a generar uno nuevo. Para ello, haremos uso de la opción `--gen-revoke <ID>` de **gpg**. En este caso, el **ID** que debemos introducir es aquel identificador de 40 dígitos que encontramos al ejecutar el comando `gpg --list-keys`. El comando a ejecutar sería:
+En realidad, **gpg** ha generado una clave de revocación de forma automática cuando se generó el par de claves, pero para mostrarlo, vamos a generar uno nuevo. Para ello, haremos uso de la opción `--gen-revoke <ID>` de **gpg**. En este caso, el **ID** que debemos introducir es aquel identificador (comunmente conocido como _fingerprint_) de 40 dígitos que encontramos al ejecutar el comando `gpg --list-keys`, aunque si especificamos los últimos 8 dígitos del mismo también sería válido. El comando a ejecutar sería:
 
 {% highlight shell %}
 alvaro@debian:~$ gpg --gen-revoke A0BE5CA7A9DC70AD3D619467CC02797F092855F6
@@ -428,7 +428,7 @@ El certificado de revocación es aquello contenido entre **-----BEGIN PGP PUBLIC
 
 ### 2. Exporta tu clave pública al servidor pgp.rediris.es.
 
-Para exportar la clave pública a un servidor de claves públicas haremos uso de la opción `--keyserver <servidor>` de **gpg** junto con la opción `--send-key <ID>`. En este caso, el **servidor** que debemos introducir es **pgp.rediris.es** y el **ID** es aquel identificador de 40 dígitos que encontramos al ejecutar el comando `gpg --list-keys`. El comando a ejecutar sería:
+Para exportar la clave pública a un servidor de claves públicas haremos uso de la opción `--keyserver <servidor>` de **gpg** junto con la opción `--send-key <ID>`. En este caso, el **servidor** que debemos introducir es **pgp.rediris.es** y el **ID** es aquel identificador (_fingerprint_) de 40 dígitos que encontramos al ejecutar el comando `gpg --list-keys`, aunque si especificamos los últimos 8 dígitos del mismo también sería válido. El comando a ejecutar sería:
 
 {% highlight shell %}
 alvaro@debian:~$ gpg --keyserver pgp.rediris.es --send-key A0BE5CA7A9DC70AD3D619467CC02797F092855F6
@@ -475,7 +475,7 @@ sub   rsa3072 2020-10-07 [E] [caduca: 2022-10-07]
 
 Como se puede apreciar, no ha quedado ningún rastro de su clave pública.
 
-Una vez que la clave pública ha sido totalmente eliminada, es hora de volver a importarla, pero esta vez, desde el servidor de claves públicas. Para ello, haremos uso de la opción `--keyserver <servidor>` de **gpg** junto con la opción `--recv-keys <ID>`. En este caso, el **servidor** que debemos introducir es **pgp.rediris.es** y el **ID** es aquel identificador de 40 dígitos de la clave de Alejandro. El comando a ejecutar sería:
+Una vez que la clave pública ha sido totalmente eliminada, es hora de volver a importarla, pero esta vez, desde el servidor de claves públicas. Para ello, haremos uso de la opción `--keyserver <servidor>` de **gpg** junto con la opción `--recv-keys <ID>`. En este caso, el **servidor** que debemos introducir es **pgp.rediris.es** y el **ID** es aquel identificador (_fingerprint_) de 40 dígitos de la clave de Alejandro, aunque si especificamos los últimos 8 dígitos del mismo también sería válido. El comando a ejecutar sería:
 
 {% highlight shell %}
 alvaro@debian:~$ gpg --keyserver pgp.rediris.es --recv-keys 443D661D9AAF3ABAEDCA93E1C3B291882C4EE5DF
