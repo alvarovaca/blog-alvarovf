@@ -399,10 +399,10 @@ De esta forma, la interfaz se levantará automáticamente durante el arranque (*
 vagrant@nodolan1:~$ sudo dhclient eth1
 {% endhighlight %}
 
-Tras ello, ejecutaremos el comando `ip a show eth1` para que nos muestre información referente únicamente a la interfaz de red de nombre **eth1**, pues es la que nos interesa:
+Tras ello, ejecutaremos el comando `ip a show dev eth1` para que nos muestre información referente únicamente a la interfaz de red de nombre **eth1**, pues es la que nos interesa:
 
 {% highlight shell %}
-vagrant@nodolan1:~$ ip a show eth1
+vagrant@nodolan1:~$ ip a show dev eth1
 3: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
     link/ether 08:00:27:2c:25:72 brd ff:ff:ff:ff:ff:ff
     inet 192.168.100.10/24 brd 192.168.100.255 scope global dynamic eth1
@@ -602,7 +602,7 @@ Killed old client process
 Para verificar que la dirección IP se ha liberado correctamente, volvemos a ejecutar el comando:
 
 {% highlight shell %}
-vagrant@nodolan1:~$ ip a show eth1
+vagrant@nodolan1:~$ ip a show dev eth1
 3: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
     link/ether 08:00:27:2c:25:72 brd ff:ff:ff:ff:ff:ff
     inet6 fe80::a00:27ff:fe2c:2572/64 scope link 
@@ -631,7 +631,7 @@ vagrant@nodolan1:~$ sudo dhclient eth1
 Para verificar que el cliente ha obtenido correctamente una dirección IP por DHCP en dicha interfaz, ejecutaremos el comando:
 
 {% highlight shell %}
-vagrant@nodolan1:~$ ip a show eth1
+vagrant@nodolan1:~$ ip a show dev eth1
 3: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
     link/ether 08:00:27:2c:25:72 brd ff:ff:ff:ff:ff:ff
     inet 192.168.100.10/24 brd 192.168.100.255 scope global dynamic eth1
@@ -735,7 +735,7 @@ En mi caso opté por reiniciar la máquina cliente (comando `reboot`) para así 
 Para verificar que el cliente ha obtenido dicha dirección IP ejecutaremos el comando:
 
 {% highlight shell %}
-vagrant@nodolan1:~$ ip a show eth1
+vagrant@nodolan1:~$ ip a show dev eth1
 3: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
     link/ether 08:00:27:2c:25:72 brd ff:ff:ff:ff:ff:ff
     inet 192.168.100.100/24 brd 192.168.100.255 scope global dynamic eth1
