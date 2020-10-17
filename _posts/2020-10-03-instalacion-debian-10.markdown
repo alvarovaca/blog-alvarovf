@@ -73,7 +73,7 @@ Nuestras dos particiones físicas ya están creadas, así que es hora de configu
 
 Hemos llegado a la parte más importante de la instalación, así que considero oportuno explicar el funcionamiento de LVM antes de configurarlo.
 
-El **Logical Volume Manager** o **LVM** es un gestor de volúmenes lógicos para el kernel Linux. En castellano, significa que vamos a poder gestionar nuestro almacenamiento de una forma mucho más flexible que hasta ahora. Estoy seguro que no soy el primero ni el último que se ha quedado sin espacio en una partición física y ha tenido que borrarla para crear una de mayor tamaño. Este problema se acaba con LVM, ya que nos permite añadir nuestros dispositivos de bloques (no tiene por qué ser un disco duro físico como tal, también puede ser una partición del mismo, un RAID...) como **volúmenes físicos** (PV) que añadiremos a su vez a una especie de "contenedor" llamado **grupo de volúmenes** (VG), y de ahí es de donde posteriormente cogeremos la capacidad para crear un **volumen lógico** (LV), que sería lo equivalente a una partición.
+El **Logical Volume Manager** o **LVM** es un gestor de volúmenes lógicos para el _kernel_ Linux. En castellano, significa que vamos a poder gestionar nuestro almacenamiento de una forma mucho más flexible que hasta ahora. Estoy seguro que no soy el primero ni el último que se ha quedado sin espacio en una partición física y ha tenido que borrarla para crear una de mayor tamaño. Este problema se acaba con LVM, ya que nos permite añadir nuestros dispositivos de bloques (no tiene por qué ser un disco duro físico como tal, también puede ser una partición del mismo, un RAID...) como **volúmenes físicos** (PV) que añadiremos a su vez a una especie de "contenedor" llamado **grupo de volúmenes** (VG), y de ahí es de donde posteriormente cogeremos la capacidad para crear un **volumen lógico** (LV), que sería lo equivalente a una partición.
 
 Esto nos permite, por ejemplo, crear un volumen lógico de 1.5 TB, uniendo dos discos de 1 TB y dejar 500 GB libres, por si en algún momento necesitamos aumentar la capacidad de dicho volumen. Esa es la principal ventaja de LVM: si nos quedamos sin espacio en un volumen lógico, simplemente bastaría con comprar un nuevo disco duro, añadirlo como volumen físico y al grupo de volúmenes y posteriormente, extender el volumen lógico. Finalmente, redimensionamos el sistema de ficheros y listo. Sin embargo, esto no es posible con las particiones físicas, ya que al estar delimitado por sectores, el hecho de extender la partición puede afectar a los datos que se encuentren contiguos.
 
@@ -127,7 +127,7 @@ Tras la instalación del sistema base, se nos preguntará por el país para la r
 ## Post-instalación
 ---
 
-Una vez que la instalación ha finalizado, se reiniciará el equipo, así que una vez más, volveremos a presionar **SUPR** durante el arranque para acceder a la UEFI. Esta vez, tendremos que dejarla como la teníamos antes de comenzar con la instalación de Debian, es decir, dejando que el disco duro tenga mayor prioridad durante el arranque que el USB, de lo contrario, volvería a bootear desde ahí.
+Una vez que la instalación ha finalizado, se reiniciará el equipo, así que una vez más, volveremos a presionar **SUPR** durante el arranque para acceder a la UEFI. Esta vez, tendremos que dejarla como la teníamos antes de comenzar con la instalación de Debian, es decir, dejando que el disco duro tenga mayor prioridad durante el arranque que el USB, de lo contrario, volvería a _bootear_ desde ahí.
 
 En mi caso, el orden que he puesto ha sido el siguiente:
 
@@ -151,7 +151,7 @@ Sin embargo, el problema más grande no es ese, es el que viene ahora. Tras term
 
 ![arranque3](https://i.ibb.co/gTT1whF/20201003-090556.jpg "Errores arranque")
 
-Al ver que no podía hacer nada, hice un REISUB y accedí al **modo Recovery**. Tras leer un poco por Internet, descubrí que lo que estaba dando conflicto eran los drivers de código abierto de la tarjeta gráfica NVIDIA (**nouveau**), así que accedí al fichero de configuración del grub (**/etc/default/grub**) para desactivar el **Kernel Mode Setting (KMS)**, un método que permite fijar la resolución y la profundidad de la pantalla en el espacio del kernel, en vez de en el espacio de usuario, que es lo que nos estaba causando el conflicto. Este es el fichero de configuración del grub por defecto:
+Al ver que no podía hacer nada, hice un REISUB y accedí al **modo Recovery**. Tras leer un poco por Internet, descubrí que lo que estaba dando conflicto eran los drivers de código abierto de la tarjeta gráfica NVIDIA (**nouveau**), así que accedí al fichero de configuración del grub (**/etc/default/grub**) para desactivar el **_Kernel_ Mode Setting (KMS)**, un método que permite fijar la resolución y la profundidad de la pantalla en el espacio del _kernel_, en vez de en el espacio de usuario, que es lo que nos estaba causando el conflicto. Este es el fichero de configuración del grub por defecto:
 
 {% highlight shell %}
 # If you change this file, run 'update-grub' afterwards to update
@@ -261,19 +261,19 @@ Volví a reiniciar y todos los fallos habían desaparecido, pero el problema de 
 
 * Instalar el paquete **nvidia-driver** desde stable sin realizar ninguna configuración extra.
 * Instalar el paquete **nvidia-driver** desde stable junto a **nvidia-xconfig** y ejecutar este último para generar el fichero _xorg.conf_ dentro de _/etc/X11/_.
-* Pasar al kernel 5.7 (se encuentra en los backports), ya que yo me encontraba en el 4.19 y volver a hacer lo mencionado anteriormente.
+* Pasar al _kernel_ 5.7 (se encuentra en los backports), ya que yo me encontraba en el 4.19 y volver a hacer lo mencionado anteriormente.
 
 Sin embargo, nada funcionaba, pues se quedaba en la pantalla de arranque mostrando un error **"[OK] Started GNOME Display Manager"** hasta que hice lo siguiente:
 
-Primero instalé de nuevo el kernel 5.7 junto a los correspondientes headers desde backports:
+Primero instalé de nuevo el _kernel_ 5.7 junto a los correspondientes headers desde backports:
 
 {% highlight shell %}
 apt install -t buster-backports linux-image-amd64 linux-headers-amd64
 {% endhighlight %}
 
-Una vez el kernel 5.7 estaba instalado, lógicamente era necesario reiniciar para cargar ese nuevo kernel en memoria, ya que ahora mismo estaba cargado el 4.19 y no iba a notar diferencia, pero antes de ello, decidí volver a modificar el fichero _/etc/default/grub_ y dejar la línea que habia modificado como estaba en un principio, es decir, pasar de **GRUB_CMDLINE_LINUX_DEFAULT="nouveau.modeset=0 quiet"** a **GRUB_CMDLINE_LINUX_DEFAULT="quiet"**. Tras ello, generé un nuevo grub con el comando `update-grub`.
+Una vez el _kernel_ 5.7 estaba instalado, lógicamente era necesario reiniciar para cargar ese nuevo _kernel_ en memoria, ya que ahora mismo estaba cargado el 4.19 y no iba a notar diferencia, pero antes de ello, decidí volver a modificar el fichero _/etc/default/grub_ y dejar la línea que habia modificado como estaba en un principio, es decir, pasar de **GRUB_CMDLINE_LINUX_DEFAULT="nouveau.modeset=0 quiet"** a **GRUB_CMDLINE_LINUX_DEFAULT="quiet"**. Tras ello, generé un nuevo grub con el comando `update-grub`.
 
-Acto seguido, decidí reiniciar la máquina y arrancar con el nuevo kernel instalado. Mi sorpresa fue que consiguió llegar al entorno de escritorio, pero aun así, quería instalar los drivers propietarios de NVIDIA. Para verificar que el kernel se había cargado correctamente en memoria y estaba trabajando con el 5.7, ejecuté el comando:
+Acto seguido, decidí reiniciar la máquina y arrancar con el nuevo _kernel_ instalado. Mi sorpresa fue que consiguió llegar al entorno de escritorio, pero aun así, quería instalar los drivers propietarios de NVIDIA. Para verificar que el _kernel_ se había cargado correctamente en memoria y estaba trabajando con el 5.7, ejecuté el comando:
 
 {% highlight shell %}
 alvaro@debian:~$ uname -r
