@@ -32,13 +32,13 @@ Este procedimiento lo he hecho con un software que llevo usando varios años cad
 
 Una vez que el disco se encuentra completamente limpio, ya podemos dar el siguiente paso. Lo siguiente que hice fue descargar la ISO Netinst de [Debian 10](https://www.debian.org/distrib/netinst) de la página oficial, para la arquitectura **amd64**.
 
-Una vez descargada, creé un medio booteable para poder realizar la instalación, en mi caso decidí crear un USB booteable, haciendo uso de [Rufus](https://rufus.ie/), que permite hacerlo de una manera muy sencilla. Lo único que tuve que especificar fue el USB, la imagen ISO y el resto de la configuración, bastará con dejarla por defecto, pues generará un esquema de particiones MBR enfocado a un sistema destino BIOS o UEFI (nosotros vamos a instalar en UEFI).
+Una vez descargada, creé un medio arrancable para poder realizar la instalación, en mi caso decidí hacerlo mediante un USB usando [Rufus](https://rufus.ie/), que permite hacerlo de una manera muy sencilla. Lo único que tuve que especificar fue el USB, la imagen ISO y el resto de la configuración, bastará con dejarla por defecto, pues generará un esquema de particiones MBR enfocado a un sistema destino BIOS o UEFI (nosotros vamos a instalar en UEFI).
 
-Una creado el USB booteable, ya podremos proceder a apagar la máquina y volverla a encender, pulsando **SUPR** durante el arranque (en mi caso) para poder acceder a la UEFI. Una vez dentro, nos iremos al apartado **Boot** y marcaremos el **pendrive** como **primera opción**, para que al volver a arrancar, inicie el instalador de Debian. Tendremos que asegurarnos que el **Boot mode** es **UEFI with CSM**, de manera que el GRUB podrá reconocer también a Windows, pues también fue instalado en modo UEFI with CSM, a diferencia de la anterior instalación, que tenía que cambiar las opciones de arranque cada vez que quisiera cambiar de sistema operativo, dado que tuve que instalar Debian 9 con LEGACY.
+Una creado el medio de instalación, ya podremos proceder a apagar la máquina y volverla a encender, pulsando **SUPR** durante el arranque (en mi caso) para poder acceder a la UEFI. Una vez dentro, nos iremos al apartado **Boot** y marcaremos el **pendrive** como **primera opción**, para que al volver a arrancar, inicie el instalador de Debian. Tendremos que asegurarnos que el **Boot mode** es **UEFI with CSM**, de manera que el GRUB podrá reconocer también a Windows, pues también fue instalado en modo UEFI with CSM, a diferencia de la anterior instalación, que tenía que cambiar las opciones de arranque cada vez que quisiera cambiar de sistema operativo, dado que tuve que instalar Debian 9 con LEGACY.
 
 ![uefi1](https://i.ibb.co/M1mhtLY/20201003-131329.jpg "UEFI")
 
-Tras ello, iremos al apartado **Save & Exit** y guardaremos los cambios, reiniciendo por consecuencia la máquina, para que así arranque desde el USB booteable.
+Tras ello, iremos al apartado **Save & Exit** y guardaremos los cambios, reiniciendo por consecuencia la máquina, para que así arranque desde el USB.
 
 ## Instalación
 ---
@@ -127,7 +127,7 @@ Tras la instalación del sistema base, se nos preguntará por el país para la r
 ## Post-instalación
 ---
 
-Una vez que la instalación ha finalizado, se reiniciará el equipo, así que una vez más, volveremos a presionar **SUPR** durante el arranque para acceder a la UEFI. Esta vez, tendremos que dejarla como la teníamos antes de comenzar con la instalación de Debian, es decir, dejando que el disco duro tenga mayor prioridad durante el arranque que el USB, de lo contrario, volvería a _bootear_ desde ahí.
+Una vez que la instalación ha finalizado, se reiniciará el equipo, así que una vez más, volveremos a presionar **SUPR** durante el arranque para acceder a la UEFI. Esta vez, tendremos que dejarla como la teníamos antes de comenzar con la instalación de Debian, es decir, dejando que el disco duro tenga mayor prioridad durante el arranque que el USB, de lo contrario, volvería a iniciar desde ahí.
 
 En mi caso, el orden que he puesto ha sido el siguiente:
 
@@ -273,7 +273,7 @@ apt install -t buster-backports linux-image-amd64 linux-headers-amd64
 
 Una vez el _kernel_ 5.7 estaba instalado, lógicamente era necesario reiniciar para cargar ese nuevo _kernel_ en memoria, ya que ahora mismo estaba cargado el 4.19 y no iba a notar diferencia, pero antes de ello, decidí volver a modificar el fichero _/etc/default/grub_ y dejar la línea que habia modificado como estaba en un principio, es decir, pasar de **GRUB_CMDLINE_LINUX_DEFAULT="nouveau.modeset=0 quiet"** a **GRUB_CMDLINE_LINUX_DEFAULT="quiet"**. Tras ello, generé un nuevo grub con el comando `update-grub`.
 
-Acto seguido, decidí reiniciar la máquina y arrancar con el nuevo _kernel_ instalado. Mi sorpresa fue que consiguió llegar al entorno de escritorio, pero aun así, quería instalar los drivers propietarios de NVIDIA. Para verificar que el _kernel_ se había cargado correctamente en memoria y estaba trabajando con el 5.7, ejecuté el comando:
+Acto seguido, decidí reiniciar la máquina para cargar el nuevo _kernel_ instalado. Mi sorpresa fue que consiguió llegar al entorno de escritorio, pero aun así, quería instalar los drivers propietarios de NVIDIA. Para verificar que el _kernel_ se había cargado correctamente en memoria y estaba trabajando con el 5.7, ejecuté el comando:
 
 {% highlight shell %}
 alvaro@debian:~$ uname -r

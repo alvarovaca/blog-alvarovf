@@ -234,19 +234,42 @@ Dentro del mismo, indicaremos como **ServerName** el nombre **www.departamentosg
 
 Una vez que los ficheros de configuración hayan sido creados y correctamente modificados, me gustaría comentar una pequeña curiosidad, y es que al haber configurado los tres sitios para que sean accesibles desde cualquier dirección IP, en caso de acceder a través de la **dirección IP** en lugar de hacerlo mediante nombres de dominio, el servidor web no sabrá a cuál de ellos referirse, por lo que ordenará alfabéticamente el nombre de los sitios y te mostrará el primero (es por eso que el VirtualHost por defecto de _apache2_ tiene como nombre **000-default**).
 
-Tras esta pequeña curiosidad, podremos proceder a crear el fichero **index.html** que servirá cada uno de los sitios web. En este caso, he creado un fichero muy simple para cada uno de ellos con la siguiente estructura:
-
-{% highlight html %}
-<h2>
-   [texto]
-</h2>
-{% endhighlight %}
-
-Para crear dichos ficheros en sus respectivos directorios, con el correspondiente contenido en su interior, ejecutaremos los comandos:
+Tras esta pequeña curiosidad, podremos proceder a crear los ficheros **index.html** que servirá cada uno de los sitios web. En este caso, he creado un fichero muy simple para cada uno de ellos:
 
 {% highlight shell %}
-root@apache:~# echo -e "<h2>\n\tBienvenidos a iesgn\n<h2>" > /srv/www/iesgn/index.html
-root@apache:~# echo -e "<h2>\n\tBienvenidos a los departamentos de iesgn\n<h2>" > /srv/www/departamentos/index.html
+root@apache:/etc/apache2/sites-available# nano /srv/www/iesgn/index.html
+{% endhighlight %}
+
+{% highlight html %}
+<!DOCTYPE html>
+
+<html lang="es">
+    <head>
+        <meta charset="utf-8">
+        <title>Iesgn</title>
+    </head>
+    <body>
+        <h2>Bienvenidos a Iesgn</h2>
+    </body>
+</html>
+{% endhighlight %}
+
+{% highlight shell %}
+root@apache:/etc/apache2/sites-available# nano /srv/www/departamentos/index.html
+{% endhighlight %}
+
+{% highlight html %}
+<!DOCTYPE html>
+
+<html lang="es">
+    <head>
+        <meta charset="utf-8">
+        <title>Departamentos Iesgn</title>
+    </head>
+    <body>
+        <h2>Bienvenidos a los departamentos de Iesgn</h2>
+    </body>
+</html>
 {% endhighlight %}
 
 Para verificar que dichos ficheros se han generado correctamente en sus correspondientes directorios, procedemos a listar el contenido del directorio **/srv/www** de forma recursiva, haciendo uso del comando `ls -lR`:
@@ -345,10 +368,10 @@ ff02::2 ip6-allrouters
 
 Tras ello, podremos acceder al navegador e introducir el nombre de dominio para que se lleve a cabo la resolución estática de nombres, que tiene prioridad sobre las peticiones al servidor DNS. Al primero que intentaré acceder será a **www.iesgn.org**:
 
-![iesgn](https://i.ibb.co/CVJMcmc/Captura-de-pantalla-de-2020-10-13-14-38-50.png "www.iesgn.org")
+![iesgn](https://i.ibb.co/z844Smj/apacheantiguo1.png "www.iesgn.org")
 
 Como podemos apreciar, se ha podido acceder sin problema, ya que hemos realizado correctamente la configuración del **ServerName** en el fichero de configuración y a la hora de comparar la cabecera **Host** existente en la petición HTTP, ha encontrado coincidencia con dicho VirtualHost. Por último, probaré también con **www.departamentosgn.org**:
 
-![departamentosgn](https://i.ibb.co/TBFQ7Qp/Captura-de-pantalla-de-2020-10-13-14-38-52.png "www.departamentosgn.org")
+![departamentosgn](https://i.ibb.co/bNRHbyq/apacheantiguo2.png "www.departamentosgn.org")
 
 Efectivamente, también ha sido accesible, por lo que podemos concluir que hemos conseguido alojar dos sitios web en una única máquina, siendo accesibles ambos de ellos desde la misma dirección IP y puerto.

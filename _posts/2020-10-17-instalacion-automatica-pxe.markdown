@@ -205,21 +205,21 @@ lrwxrwxrwx 1 root root   35 Sep 20 23:11 pxelinux.cfg -> debian-installer/amd64/
 -rw-rw-r-- 1 root root   63 Sep 20 23:11 version.info
 {% endhighlight %}
 
-Como se puede apreciar, el fichero se ha descomprimido correctamente y tras ello, ha sido eliminado. Además, ya existe el fichero **pxelinux.0** que los clientes van a usar para _bootear_ a través de la red.
+Como se puede apreciar, el fichero se ha descomprimido correctamente y tras ello, ha sido eliminado. Además, ya existe el fichero **pxelinux.0** que los clientes van a usar para arrancar a través de la red.
 
-Llegados a este punto, ya tenemos una configuración totalmente funcional que permitiría a la máquina arrancar a través de la red, pero todavía nos falta llevar a cabo la configuración para automatizar dicha instalación. De igual forma, vamos a proceder a crear una máquina virtual que bootee a través de la red para asegurarnos que hasta ahora, no hemos cometido ningún error.
+Llegados a este punto, ya tenemos una configuración totalmente funcional que permitiría a la máquina arrancar a través de la red, pero todavía nos falta llevar a cabo la configuración para automatizar dicha instalación. De igual forma, vamos a proceder a crear una máquina virtual que inicie a través de la red para asegurarnos que hasta ahora, no hemos cometido ningún error.
 
 En este caso, he creado una máquina en VirtualBox sin ningún tipo de imagen ISO anexada, especificando el siguiente orden de arranque:
 
 ![boot](https://i.ibb.co/2WYgNsX/Captura-de-pantalla-de-2020-10-15-17-52-42.png "Orden de arranque")
 
-Gracias al mismo, primero tratará de arrancar usando el disco duro, pero al no tener nada dentro, pasará a la siguiente opción, la **red**. Si el orden fuese al revés (primero red y luego disco duro), tras terminar la instalación tendríamos que volver a invertir el orden de arranque ya que volverá a intentar _bootear_ desde la red.
+Gracias al mismo, primero tratará de arrancar usando el disco duro, pero al no tener nada dentro, pasará a la siguiente opción, la **red**. Si el orden fuese al revés (primero red y luego disco duro), tras terminar la instalación tendríamos que volver a invertir el orden de arranque ya que volverá a intentar iniciar desde la red.
 
-La otra parte de la configuración muy importante es la configuración de red. Tendremos que asegurarnos que el adaptador de red de la máquina virtual pertenezca a la red interna creada con anterioridad, "**lan1**", ya que de lo contrario, no podrá _bootear_ desde la red gracias al servidor previamente configurado.
+La otra parte de la configuración muy importante es la configuración de red. Tendremos que asegurarnos que el adaptador de red de la máquina virtual pertenezca a la red interna creada con anterioridad, "**lan1**", ya que de lo contrario, no podrá arrancar desde la red gracias al servidor previamente configurado.
 
 ![red](https://i.ibb.co/6Zfh39d/Captura-de-pantalla-de-2020-10-15-17-52-46.png "Red interna")
 
-Una vez realizadas ambas configuraciones, podremos aplicar los cambios y tratar de iniciar la máquina para ver si bootea correctamente.
+Una vez realizadas ambas configuraciones, podremos aplicar los cambios y tratar de iniciar la máquina para ver si inicia correctamente.
 
 ![dhcp](https://i.ibb.co/M5vFxKW/Virtual-Box-Debian-Test-15-10-2020-20-04-44.png "Petición DHCP")
 
