@@ -9,7 +9,7 @@ Gracias a la funcionalidad "**VirtualHost**" del servidor web _apache2_ podemos 
 
 Para ello, se hace uso de las cabeceras HTTP que contiene la petición que recibe el servidor, que contiene un parámetro "**Host**" que indica el nombre del servidor al que se le hace la petición (por ejemplo, **www.prueba1.com** o **www.prueba2.com**).
 
-Al igual que se puede especificar que la separación se haga mediante los nombres de dominio, también se puede hacer basada en la dirección IP, de manera que cada sitio tenga una dirección IP diferente, pero no es algo tan "sorprendente", por lo que no lo trataremos en este post.
+Al igual que se puede especificar que la separación se haga mediante los nombres de dominio, también se puede hacer basada en la dirección IP, de manera que cada sitio tenga una dirección IP diferente, pero no es algo tan "sorprendente", por lo que no lo trataremos en este _post_.
 
 Es muy probable que hasta el día de hoy no supieses de la existencia de dicha funcionalidad, y pensabas que por cada sitio web que tuviese que servir _apache2_, había que tener una máquina (ya sea física o virtual) para cada uno de ellos, pero gracias a esta funcionalidad, se ahorrarán costes tanto monetarios como computacionales, al servir todos los sitios web desde la misma máquina, sin necesidad de ejecutar ninguna máquina virtual.
 

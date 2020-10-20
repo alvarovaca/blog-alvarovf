@@ -496,7 +496,7 @@ else:
     print("La contraseña introducida es incorrecta.")
 {% endhighlight %}
 
-No voy a entrar a explicar su funcionamiento de forma detallada ya que no es el objetivo de este post, pero en pocas palabras, lo que hace, tal y como he mencionado antes, es encriptar una contraseña que le pasemos por teclado y comparar que el resultado de dicha encriptación es igual al almacenado en dicho fichero. Si coinciden, significa que la contraseña es la misma, si no lo hace, significa que las contraseñas son diferentes.
+No voy a entrar a explicar su funcionamiento de forma detallada ya que no es el objetivo de este _post_, pero en pocas palabras, lo que hace, tal y como he mencionado antes, es encriptar una contraseña que le pasemos por teclado y comparar que el resultado de dicha encriptación es igual al almacenado en dicho fichero. Si coinciden, significa que la contraseña es la misma, si no lo hace, significa que las contraseñas son diferentes.
 
 Primero lo comprobaré con el usuario **alvaro**, introduciendole al programa la línea completa del **/etc/shadow** referente (el propio programa se encargará de separar la contraseña del resto de campos) y la **contraseña** en claro, que en este caso es **prueba123123**.
 
