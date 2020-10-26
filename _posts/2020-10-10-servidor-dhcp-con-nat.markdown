@@ -3,7 +3,7 @@ layout: post
 title:  "Servidor DHCP con NAT"
 banner: "/assets/images/banners/dhcp.jpg"
 date:   2020-10-10 13:42:00 +0200
-categories: dhcp nat servicios
+categories: servicios
 ---
 ## Tarea 1: Lee el documento [Teoría: Servidor DHCP](https://fp.josedomingo.org/serviciosgs/u02/dhcp.html) y explica el funcionamiento del servidor DHCP resumido en este gráfico.
 

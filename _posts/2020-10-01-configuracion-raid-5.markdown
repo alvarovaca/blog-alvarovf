@@ -3,7 +3,7 @@ layout: post
 title:  "Configuración RAID 5"
 banner: "/assets/images/banners/raid.jpg"
 date:   2020-10-01 13:05:00 +0200
-categories: almacenamiento seguridad
+categories: seguridad
 ---
 ## Tarea 1: Crea un RAID llamado md5 con los discos que hemos conectado a la máquina. ¿Cuántos discos tienes que conectar? ¿Qué diferencia existe entre el RAID 5 y el RAID 1?
 

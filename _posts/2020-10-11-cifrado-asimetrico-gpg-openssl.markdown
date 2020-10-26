@@ -3,7 +3,7 @@ layout: post
 title:  "Cifrado asimétrico con gpg y openssl"
 banner: "/assets/images/banners/cifrado.jpg"
 date:   2020-10-11 10:05:00 +0200
-categories: cifrado seguridad
+categories: seguridad
 ---
 ## Tarea 1: Generación de claves (gpg).
 

@@ -3,7 +3,7 @@ layout: post
 title:  "Gestionando el almacenamiento con rclone"
 banner: "/assets/images/banners/raid.jpg"
 date:   2020-10-02 19:53:00 +0200
-categories: almacenamiento seguridad
+categories: seguridad
 ---
 ## Tarea 1: Instala rclone en tu equipo.
 

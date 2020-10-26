@@ -3,7 +3,7 @@ layout: post
 title:  "Instalación Debian 10"
 banner: "/assets/images/banners/debian.jpg"
 date:   2020-10-03 19:42:00 +0200
-categories: debian sistemas
+categories: sistemas
 ---
 Esta tarea he optado por separarla en 3 partes claramente diferenciadas.
 
