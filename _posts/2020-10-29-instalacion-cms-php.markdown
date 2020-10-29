@@ -2,7 +2,7 @@
 layout: post
 title:  "Instalación de un CMS PHP"
 banner: "/assets/images/banners/cms.jpg"
-date:   2020-10-28 12:32:00 +0200
+date:   2020-10-29 19:45:00 +0200
 categories: aplicaciones
 ---
 Se recomienda realizar una previa lectura del _post_ [VirtualHosting con Apache](http://www.alvarovf.com/servicios/2020/10/17/virtualhosting-con-apache.html), pues en este artículo se tratarán con menor profundidad u obviarán algunos aspectos vistos con anterioridad.
