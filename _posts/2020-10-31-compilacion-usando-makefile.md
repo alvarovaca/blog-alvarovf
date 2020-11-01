@@ -264,7 +264,7 @@ alvaro@debian:~/emacs$ sudo apt install build-essential
 
 Una vez instalado el paquete, ya podremos lanzar el script, sin embargo, tal y como se ha mencionado con anterioridad, cuando vayamos a realizar la instalación tras haber compilado (con **make install**), se instalará por defecto en **/usr/local**, un directorio que está destinado a albergar el software instalado localmente por el administrador, generalmente como resultado de una compilación, de manera que no sobreescriba el paquete original, que se encontrará en **/usr**. Más adelante entraremos con mayor profundidad en este tema.
 
-Sin embargo, tras informarme un poco sobre el tema, a la hora de desinstalar el paquete con **make uninstall** (también lo veremos con más detalle a continuación), dependemos en cierta forma de lo bien que haya hecho el desarrollador el script de desinstalación, que en ciertas ocasiones, puede dejar algún rastro en la máquina no deseado. Para solucionar esto, tenemos varias opciones:
+Sin embargo, tras informarme un poco sobre el tema, a la hora de desinstalar el paquete con **make uninstall** (también lo veremos con más detalle a continuación), dependemos en cierta forma de lo bien que haya hecho el desarrollador el script de desinstalación, que en ciertas ocasiones, puede dejar algún rastro en la máquina no deseado (suponiendo que haya hecho dicho script, ya que hay algunos que no lo proporcionan). Para solucionar esto, tenemos varias opciones:
 
 * Ejecutar el comando **make -n install**, de manera que nos informará de los pasos que ha seguido **make** para instalar el software, permitiéndonos realizarlos de forma inversa, llevando a cabo por tanto la desinstalación de forma manual. Esta opción puede llegar a ser algo tediosa.
 * Usar **make checkinstall** en lugar de **make install**, que generará un fichero **.deb** que podremos instalar con nuestro gestor de paquetes favorito, como por ejemplo **dpkg**.
@@ -558,7 +558,7 @@ lrwxrwxrwx 1 root root       10 Oct 28 10:03 emacs -> emacs-27.1
 
 Como se puede apreciar, se han generado varios binarios, que cuentan con permisos de ejecución para todos los usuarios, de manera que cualquier usuario en la máquina podría hacer uso de los mismos. Como curiosidad, cuando ejecutemos **emacs** en ese directorio, realmente lo que estamos ejecutando es un enlace simbólico que apunta al binario real de nombre **emacs-27.1**.
 
-De todas formas, dado que la ruta **/opt/emacs/bin/** no se encuentra contemplada en la variable de entorno **PATH**, aunque ejecutemos **emacs**, no será capaz de encontrar el binario. Es por ello que vamos a crear un enlace simbólico a todos los binarios dentro de **/usr/local/bin**, que sí está contemplada como primera opción en la variable **PATH**, de manera que aunque tuviésemos _emacs_ instalado en **/usr/bin**, el enlace simbólico tendría prioridad. Antes de crear dichos enlaces simbólicos, vamos a listar el contenido de **/usr/local/bin/**, para ver el contenido:
+De todas formas, dado que la ruta **/opt/emacs/bin/** no se encuentra contemplada en la variable de entorno **PATH**, aunque ejecutemos **emacs**, no será capaz de encontrar el binario. Es por ello que vamos a crear un enlace simbólico a todos los binarios dentro de **/usr/local/bin**, que sí está contemplada como primera opción en la variable **PATH**, de manera que aunque tuviésemos _emacs_ instalado en **/usr/bin**, el enlace simbólico tendría prioridad. Antes de crear dichos enlaces simbólicos, vamos a listar el contenido de **/usr/local/bin/**, para ver qué hay:
 
 {% highlight shell %}
 alvaro@debian:~/emacs$ ls /usr/local/bin/
@@ -597,7 +597,69 @@ alvaro@debian:~/emacs$ emacs
 
 Como se puede apreciar, ya hemos sido capaces de encontrar el binario y su ejecución se ha llevado a cabo correctamente.
 
-Tras ello, listaremos de forma recursiva y un poco más visual el contenido del directorio **/opt/emacs/lib/** haciendo uso del comando `tree`, para ver las librerías existentes:
+Para verificar que el binario lo está encontrando en la ruta en la que hemos ubicado el enlace simbólico, haremos uso del comando `which`, que nos devolverá la ruta del mismo:
+
+{% highlight shell %}
+alvaro@debian:~/emacs$ which emacs
+/usr/local/bin/emacs
+{% endhighlight %}
+
+Como era de esperar, la ruta del binario es aquella en la que se encuentra ubicado el enlace simbólico que apunta al binario real.
+
+Sin embargo, todo es muy bonito, pero no nos hemos parado a pensar en el hipotético caso de que necesitásemos leer la documentación de ayuda de _emacs_, haciendo uso del comando `man`. Vamos a intentarlo:
+
+{% highlight shell %}
+alvaro@debian:~/emacs$ man emacs
+No manual entry for emacs
+See 'man 7 undocumented' for help when manual pages are not available.
+{% endhighlight %}
+
+Como se puede apreciar, nos ha informado de que no existe ninguna entrada en el manual para _emacs_. ¿A qué se debe esto? Bien, tiene una sencilla explicación, y es que hemos creado enlaces simbólicos para los binarios pero no para las páginas del manual (que se encuentran en **/opt/emacs/share/man/man1/**). Tras leer un poco de documentación (principalmente del fichero **/etc/manpath.config**), he descubierto que las páginas del manual para aquel software instalado localmente se ubican en **/usr/local/man/**, dentro de diferentes subdirectorios, que van desde **man1/** hasta **man8/**, teniendo diferentes finalidades cada uno de ellos:
+
+{% highlight shell %}
+man1/ - Comandos del usuario
+man2/ - Llamadas del sistema
+man3/ - Funciones de librerías de C
+man4/ - Dispositivos y ficheros especiales
+man5/ - Formatos de ficheros y convenciones
+man6/ - Juegos
+man7/ - Miscelánea
+man8/ - Herramientas de administración del sistema y demonios
+{% endhighlight %}
+
+Dado que lo que nosotros hemos instalado es un comando para el usuario, tendremos que incluir dichas páginas del manual en **man1/**, así que lo primero que tendremos que hacer será crear dicho subdirectorio en caso de que no se encuentre ya creado (como es mi caso), ejecutando para ello el comando:
+
+{% highlight shell %}
+alvaro@debian:~/emacs$ sudo mkdir /usr/local/man/man1
+{% endhighlight %}
+
+Una vez que el subdirectorio esté generado, ya podremos realizar la creación de dichos enlaces simbólicos que apunten a los correspondientes ficheros dentro de **/opt/emacs/share/man/man1/**, haciendo uso del comando visto con anterioridad:
+
+{% highlight shell %}
+alvaro@debian:~/emacs$ sudo ln -s /opt/emacs/share/man/man1/* /usr/local/man/man1/
+{% endhighlight %}
+
+Lo siguiente que haremos será listar el contenido de dicho directorio, para verificar la creación de los enlaces simbólicos:
+
+{% highlight shell %}
+alvaro@debian:~/emacs$ ls -l /usr/local/man/man1/
+total 0
+lrwxrwxrwx 1 root root 36 Nov  1 13:05 ctags.1.gz -> /opt/emacs/share/man/man1/ctags.1.gz
+lrwxrwxrwx 1 root root 38 Nov  1 13:05 ebrowse.1.gz -> /opt/emacs/share/man/man1/ebrowse.1.gz
+lrwxrwxrwx 1 root root 36 Nov  1 13:05 emacs.1.gz -> /opt/emacs/share/man/man1/emacs.1.gz
+lrwxrwxrwx 1 root root 42 Nov  1 13:05 emacsclient.1.gz -> /opt/emacs/share/man/man1/emacsclient.1.gz
+lrwxrwxrwx 1 root root 36 Nov  1 13:05 etags.1.gz -> /opt/emacs/share/man/man1/etags.1.gz
+{% endhighlight %}
+
+Efectivamente, los enlaces simbólicos han sido correctamente generados, de manera que si ahora mismo ejecutásemos **man emacs**, sería capaz de encontrar la página del manual, gracias a dicho enlace:
+
+{% highlight shell %}
+alvaro@debian:~/emacs$ man emacs
+{% endhighlight %}
+
+![emacs3](https://i.ibb.co/FJB3rrL/Captura-de-pantalla-de-2020-11-01-18-15-28.png "Página del manual")
+
+Tras finalizar con la configuración de los enlaces simbólicos, listaremos de forma recursiva y un poco más visual el contenido del directorio **/opt/emacs/lib/** haciendo uso del comando `tree`, para ver las librerías existentes:
 
 {% highlight shell %}
 alvaro@debian:~/emacs$ tree /opt/emacs/lib/
@@ -642,11 +704,11 @@ alvaro@debian:~/emacs$ emacs
 
 El modo Hexl es accesible ejecutando la combinación de teclas **ALT + x** y escribiendo posteriormente **hexl-find-file**. Tras ello, pulsaremos **INTRO** y tendremos que ver algo similar a esto en la parte inferior:
 
-![emacs3](https://i.ibb.co/K77g4S6/Captura.jpg "Hexl mode")
+![emacs4](https://i.ibb.co/K77g4S6/Captura.jpg "Hexl mode")
 
 Ahí tendremos que escribir la ruta al fichero en cuestión, que en este caso, se encuentra en el directorio padre (**../**), con el nombre de **fichero.txt**:
 
-![emacs4](https://i.ibb.co/Pwp9dcB/Captura2.jpg "Hexl mode")
+![emacs5](https://i.ibb.co/Pwp9dcB/Captura2.jpg "Hexl mode")
 
 Como se puede apreciar, la traducción se ha llevado a cabo correctamente haciendo uso del binario **hexl** situado en **/opt/emacs/libexec/**. Por cierto, para salir de _emacs_ hay que ejecutar la combinación **CTRL + x** seguido de **CTRL + c**, pues me llevé más de 10 minutos tratando de averiguar cómo salir, debido a mis nulos conocimientos del programa (por ahora).
 
@@ -676,13 +738,44 @@ alvaro@debian:~/emacs$ ldd /opt/emacs/bin/emacs
 
 Como se puede apreciar, existen unas cuantas librerías como dependencias enlazadas dinámicamente al binario, de manera que será un requisito que estén instaladas en el sistema a la hora de la ejecución del mismo. En este caso, dichas librerías se encuentran en **/lib**, directorio que contiene las librerías "esenciales" que podrían ser necesitadas incluso antes de que el directorio **/usr** se encuentre montado.
 
-Por último, vamos a llevar a cabo la desinstalación de _emacs_. Lo óptimo sería hacerlo en el orden inverso al que hemos hecho la instalación, de manera que lo último que hicimos fue generar los correspondientes enlaces simbólicos en **/usr/local/bin/**, así que empezaremos por borrarlos. Para ello, nos moveremos a dicho directorio:
+Por último, vamos a llevar a cabo la desinstalación de _emacs_. Lo óptimo sería hacerlo en el orden inverso al que hemos hecho la instalación, de manera que lo último que hicimos fue generar los correspondientes enlaces simbólicos en **/usr/local/man/man1/**, así que empezaremos por borrarlos. Para ello, nos moveremos a dicho directorio:
 
 {% highlight shell %}
-alvaro@debian:~/emacs$ cd /usr/local/bin/
+alvaro@debian:~/emacs$ cd /usr/local/man/man1/
 {% endhighlight %}
 
-Una vez dentro del mismo, listaremos el contenido para comprobar que se encuentran creados los enlaces simbólicos en el mismo:
+Una vez dentro del mismo, listaremos el contenido para comprobar que se encuentran creados los enlaces simbólicos:
+
+{% highlight shell %}
+alvaro@debian:/usr/local/man/man1$ ls -l
+total 0
+lrwxrwxrwx 1 root root 36 Nov  1 13:05 ctags.1.gz -> /opt/emacs/share/man/man1/ctags.1.gz
+lrwxrwxrwx 1 root root 38 Nov  1 13:05 ebrowse.1.gz -> /opt/emacs/share/man/man1/ebrowse.1.gz
+lrwxrwxrwx 1 root root 36 Nov  1 13:05 emacs.1.gz -> /opt/emacs/share/man/man1/emacs.1.gz
+lrwxrwxrwx 1 root root 42 Nov  1 13:05 emacsclient.1.gz -> /opt/emacs/share/man/man1/emacsclient.1.gz
+lrwxrwxrwx 1 root root 36 Nov  1 13:05 etags.1.gz -> /opt/emacs/share/man/man1/etags.1.gz
+{% endhighlight %}
+
+Efectivamente, se encuentran creados, así que vamos a hacer uso de `xargs` para su correspondiente eliminación, que ejecuta una determinada acción para aquello que le llegue por **stdin**, de manera que podemos listar el contenido de **/opt/emacs/share/man/man1/** y eliminar todas las coincidencias una por una (en realidad, con hacer un __rm *__ bastaría, pero lo hago suponiendo que hubiesen más ficheros en dicho directorio):
+
+{% highlight shell %}
+alvaro@debian:/usr/local/man/man1$ ls /opt/emacs/share/man/man1/ | sudo xargs rm
+{% endhighlight %}
+
+Tras ello, vamos a listar el contenido de nuevo para verificar que se han eliminado:
+
+{% highlight shell %}
+alvaro@debian:/usr/local/man/man1$ ls -l
+total 0
+{% endhighlight %}
+
+Todavía nos queda repetir el mismo proceso para el directorio donde se encuentran los enlaces simbólicos de los binarios, es decir, **/usr/local/bin/**, así que nos moveremos dentro del mismo, ejecutando para ello la instrucción:
+
+{% highlight shell %}
+alvaro@debian:/usr/local/man/man1$ cd /usr/local/bin/
+{% endhighlight %}
+
+Una vez dentro del mismo, listaremos el contenido para comprobar que se encuentran creados los enlaces simbólicos:
 
 {% highlight shell %}
 alvaro@debian:/usr/local/bin$ ls -l
@@ -695,7 +788,7 @@ lrwxrwxrwx 1 root root 26 Oct 28 10:11 emacsclient -> /opt/emacs/bin/emacsclient
 lrwxrwxrwx 1 root root 20 Oct 28 10:11 etags -> /opt/emacs/bin/etags
 {% endhighlight %}
 
-Efectivamente, se encuentran creados, así que vamos a hacer uso de `xargs` para su correspondiente eliminación, que ejecuta una determinada acción para aquello que le llegue por **stdin**, de manera que podemos listar el contenido de **/opt/emacs/bin/** y eliminar todas las coincidencias una por una (en realidad, con hacer un __rm *__ bastaría, pero lo hago suponiendo que hubiesen más ficheros en dicho directorio):
+Efectivamente, se encuentran creados, así que vamos a volver a hacer uso de `xargs` para su correspondiente eliminación, de manera que podemos listar el contenido de **/opt/emacs/bin/** y eliminar todas las coincidencias una por una (en realidad, con hacer un __rm *__ bastaría, pero lo hago suponiendo que hubiesen más ficheros en dicho directorio):
 
 {% highlight shell %}
 alvaro@debian:/usr/local/bin$ ls /opt/emacs/bin/ | sudo xargs rm
@@ -708,7 +801,7 @@ alvaro@debian:/usr/local/bin$ ls -l
 total 0
 {% endhighlight %}
 
-Efectivamente, los enlaces simbólicos ya se encuentran eliminados, así que podremos volver al directorio **emacs/** de nuestro directorio personal para proseguir con la desinstalación:
+Efectivamente, todos los enlaces simbólicos se encuentran ya eliminados, así que podremos volver al directorio **emacs/** de nuestro directorio personal para proseguir con la desinstalación:
 
 {% highlight shell %}
 alvaro@debian:/usr/local/bin$ cd ~/emacs
@@ -738,7 +831,7 @@ alvaro@debian:~/emacs$ du -sh /opt/emacs/
 136K    /opt/emacs/
 {% endhighlight %}
 
-Efectivamente, el contenido del mismo se ha visto reducido considerablemente, pero todavía pesa **136K**, indicativo de que todavía quedan ficheros en su interior. Vamos a listar el contenido de dicho directorio de manera recursiva y gráfica con `tree`:
+Efectivamente, el contenido del mismo se ha visto reducido considerablemente, pero todavía pesa **136K**, indicativo de que quedan algunos ficheros en su interior. Vamos a listar el contenido de dicho directorio de manera recursiva y gráfica con `tree`:
 
 {% highlight shell %}
 alvaro@debian:~/emacs$ tree /opt/emacs/
@@ -789,7 +882,7 @@ Listo. El directorio ha sido eliminado, pero para asegurarnos, vamos a listar el
 alvaro@debian:~/emacs$ ls /opt/
 {% endhighlight %}
 
-Como era de esperar, el directorio **/opt/** ahora se encuentra vacío. Por último, vamos a comprobar el tamaño del directorio actual, para comprobar que la desinstalación no ha afectado al mismo:
+Como era de esperar, el directorio **/opt/** se encuentra ahora vacío. Por último, vamos a comprobar el tamaño del directorio actual, para comprobar que la desinstalación no ha afectado al mismo:
 
 {% highlight shell %}
 alvaro@debian:~/emacs$ du -sh .

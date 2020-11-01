@@ -265,7 +265,7 @@ Volví a reiniciar y todos los fallos habían desaparecido, pero el problema de 
 
 Sin embargo, nada funcionaba, pues se quedaba en la pantalla de arranque mostrando un error **"[OK] Started GNOME Display Manager"** hasta que hice lo siguiente:
 
-Primero instalé de nuevo el _kernel_ 5.7 junto a los correspondientes headers desde backports:
+Primero instalé de nuevo el _kernel_ 5.7 junto a los correspondientes _headers_ desde backports:
 
 {% highlight shell %}
 apt install -t buster-backports linux-image-amd64 linux-headers-amd64

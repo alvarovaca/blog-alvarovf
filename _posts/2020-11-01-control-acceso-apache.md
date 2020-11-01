@@ -5,7 +5,10 @@ banner: "/assets/images/banners/controlacceso.jpg"
 date:   2020-11-01 11:03:00 +0200
 categories: servicios
 ---
-Se recomienda realizar una previa lectura del _post_ [VirtualHosting con Apache](http://www.alvarovf.com/servicios/2020/10/17/virtualhosting-con-apache.html), pues en este artículo se tratarán con menor profundidad u obviarán algunos aspectos vistos con anterioridad.
+Se recomienda realizar una previa lectura de los siguientes _posts_, pues en este artículo se tratarán con menor profundidad u obviarán algunos aspectos vistos con anterioridad:
+
+* [VirtualHosting con Apache](http://www.alvarovf.com/servicios/2020/10/17/virtualhosting-con-apache.html)
+* [Mapear URL en Apache](http://www.alvarovf.com/servicios/2020/10/20/mapear-url-en-apache.html)
 
 ## Crea un escenario en Vagrant que tenga un servidor con una red publica y una privada, y un cliente conectada a la red privada. Crea un host virtual departamentos.iesgn.org.
 
@@ -456,7 +459,7 @@ En este caso, dado que dicho directorio únicamente tiene permitido el acceso de
 Para esta tarea, tendremos que crear una sección **Directory** para el nuevo directorio que vamos a configurar, modificando el fichero de configuración del VirtualHost. En este caso, vamos a hacer uso de cuatro directivas para la **autentificación básica** del mismo:
 
 * **AuthUserFile**: Indicaremos la ruta del fichero que almacenará las credenciales de acceso de los usuarios (en caso de querer permitir el acceso mediante grupos en lugar de usuarios, tendríamos que hacer uso de **AuthGroupFile**). Debe estar fuera del DocumentRoot, para que no sea accesible.
-* **AuthName**: Es el texto informativo que se mostará en la ventana emergente a la hora de solicitar las credenciales de acceso al usuario que trata de acceder.
+* **AuthName**: Es el texto informativo que se mostrará en la ventana emergente a la hora de solicitar las credenciales de acceso al usuario que trata de acceder.
 * **AuthType**: Es el tipo de autentificación que vamos a usar. En este caso, **Basic**.
 * **Require**: Indicamos el método de verificación de acceso, que en este caso, será **valid-user**, de manera que dejará acceder a cualquier usuario existente en el fichero previamente mencionado que introduzca de forma correcta su contraseña.
 
@@ -590,7 +593,7 @@ Como se puede apreciar en los mensajes devueltos, el módulo ha sido correctamen
 Para esta tarea, tendremos que modificar la sección **Directory** anteriormente declarada en el fichero de configuración del VirtualHost. En este caso, vamos a hacer uso de cuatro directivas para la **autentificación digest** del mismo:
 
 * **AuthUserFile**: Indicaremos la ruta del fichero que almacenará las credenciales de acceso de los usuarios. Debe estar fuera del DocumentRoot, para que no sea accesible.
-* **AuthName**: Indicamos el nombre de dominio (grupo o realm) al que ha de pertenecer el usuario que trate de acceder. Además, se mostará en la ventana emergente a la hora de solicitar las credenciales de acceso al usuario que trata de acceder.
+* **AuthName**: Indicamos el nombre de dominio (grupo o realm) al que ha de pertenecer el usuario que trate de acceder. Además, se mostrará en la ventana emergente a la hora de solicitar las credenciales de acceso al usuario que trata de acceder.
 * **AuthType**: Es el tipo de autentificación que vamos a usar. En este caso, **Digest**.
 * **Require**: Indicamos el método de verificación de acceso, que en este caso, será **valid-user**, de manera que dejará acceder a cualquier usuario existente en el fichero previamente mencionado que introduzca de forma correcta su contraseña y pertenezca al realm indicado.
 
@@ -771,6 +774,18 @@ Como era de esperar, dado que el acceso se ha realizado desde la red externa, se
 
 Efectivamente, así ha sido. Todavía nos queda ver la otra _cara de la moneda_, así que trataremos acceder con **elinks** desde la máquina cliente (conexión que se llevaría a cabo desde la red **192.168.50.0/24**, por lo que no debería solicitar las credenciales de acceso):
 
+{% highlight shell %}
+root@cliente:~# elinks departamentos.iesgn.org/secreto
+{% endhighlight %}
+
 ![mix3](https://i.ibb.co/jDSD8BK/Captura-de-pantalla-de-2020-10-25-16-56-09.png "Acceso exitoso")
 
 Como era de esperar, dado que el acceso se ha realizado desde la red interna, no se han solicitado las credenciales, mostrándose el contenido directamente. Por lo tanto, podemos asegurar que la configuración ha funcionado correctamente.
+
+Por último, me gustaría dejar una pequeña anotación. Por defecto, el usuario a través del cuál se sirven las páginas web en _apache2_ es **www-data** (en este caso no habría inconveniente ya que el grupo "otros", al que pertenece dicho usuario tiene permisos de **lectura**, que es lo único que necesitamos para servir el fichero, pero en caso de necesitar escribir en dichos ficheros, no contaría con dichos permisos de **escritura**), por lo que podemos proceder a cambiar dicho propietario y grupo de forma recursiva, en caso de así desearlo, ya que el usuario y grupo actual es **root**, haciendo para ello uso del comando `chown -R`:
+
+{% highlight shell %}
+root@servidor:/etc/apache2/sites-available# chown -R www-data:www-data /srv/*
+{% endhighlight %}
+
+Gracias al comando ejecutado con anterioridad, todos los directorios y ficheros hijos de **/srv** serían ahora propiedad de **www-data** y haciendo uso del grupo **www-data**.
