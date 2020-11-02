@@ -1169,7 +1169,7 @@ En este caso, tras leer la documentación de SendGrid, el usuario que debemos in
 [smtp.sendgrid.net]:587 apikey:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 {% endhighlight %}
 
-Por último, tendremos que cambiarle los permisos a dicho fichero para que únicamente el propietario tenga permisos de lectura y escritura (**rw-**, es decir, **600**), haciendo uso de `chmod`:
+Por último, tendremos que cambiarle los permisos a dicho fichero para que únicamente el propietario tenga permisos de lectura y escritura (es decir, **600**), haciendo uso de `chmod`:
 
 {% highlight shell %}
 root@cms:/srv/moodle# chmod 600 /etc/postfix/sasl_passwd

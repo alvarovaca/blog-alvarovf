@@ -659,6 +659,17 @@ alvaro@debian:~/emacs$ man emacs
 
 ![emacs3](https://i.ibb.co/FJB3rrL/Captura-de-pantalla-de-2020-11-01-18-15-28.png "Página del manual")
 
+Como se puede apreciar, ya hemos sido capaces de encontrar la correspondiente página del manual y su apertura se ha llevado a cabo correctamente.
+
+Para verificar que la página del manual la está encontrando en la ruta que realmente debería, haremos uso del comando `man -w`, que nos devolverá la ruta del mismo:
+
+{% highlight shell %}
+alvaro@debian:~/emacs$ man -w emacs
+/opt/emacs/share/man/man1/emacs.1.gz
+{% endhighlight %}
+
+En este caso, la ruta que nos ha devuelto es la ruta real, como consecuencia de haber seguido el enlace simbólico que habíamos generado anteriormente.
+
 Tras finalizar con la configuración de los enlaces simbólicos, listaremos de forma recursiva y un poco más visual el contenido del directorio **/opt/emacs/lib/** haciendo uso del comando `tree`, para ver las librerías existentes:
 
 {% highlight shell %}
