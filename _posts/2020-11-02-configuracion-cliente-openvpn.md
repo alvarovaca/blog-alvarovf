@@ -2,7 +2,7 @@
 layout: post
 title:  "Configuración de cliente OpenVPN con certificados X.509"
 banner: "/assets/images/banners/vpn.jpg"
-date:   2020-11-02 12:32:00 +0200
+date:   2020-11-02 19:14:00 +0200
 categories: hlc
 ---
 El objetivo de esta tarea es el de establecer una conexión de acceso remoto entre nuestro equipo de casa y _sputnik_, una máquina virtual contratada en OVH, a través de la cuál se va a crear una doble conexión **VPN** para poder acceder desde el exterior a las máquinas del departamento de informática del IES Gonzalo Nazareno, haciendo uso del puerto **1194/TCP**.
