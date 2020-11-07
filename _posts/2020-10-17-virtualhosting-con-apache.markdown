@@ -19,8 +19,8 @@ Podemos encontrar los ficheros de configuración de todos los VirtualHost creado
 
 El objetivo de esta práctica es el de construir en nuestro servidor web _apache2_ dos sitios web con nombres distintos pero compartiendo dirección IP y puerto:
 
-* El primero de ellos tendrá nombre de dominio **www.iesgn.org**, con DocumentRoot en **/srv/www/iesgn** y cuyo contenido será una página llamada **index.html**, donde se verá una bienvenida a la página del Instuto Gonzalo Nazareno.
-* El segundo de ellos tendrá nombre de dominio **www.departamentosgn.org**, con DocumentRoot en **/srv/www/departamentos** y cuyo contenido será una página llamada **index.html**, donde se verá una bienvenida a la página de los departamentos del instuto.
+* El primero de ellos tendrá nombre de dominio **www.iesgn.org**, con DocumentRoot en **/srv/www/iesgn** y cuyo contenido será una página llamada **index.html**, donde se verá una bienvenida a la página del instituto Gonzalo Nazareno.
+* El segundo de ellos tendrá nombre de dominio **www.departamentosgn.org**, con DocumentRoot en **/srv/www/departamentos** y cuyo contenido será una página llamada **index.html**, donde se verá una bienvenida a la página de los departamentos del instituto.
 
 Para la práctica he creado un pequeño escenario en **Vagrant**, quedando de la siguiente forma:
 
@@ -333,13 +333,13 @@ To activate the new configuration, you need to run:
 Como se puede apreciar en los mensajes devueltos, los sitios han sido correctamente habilitados, pero para activar la nueva configuración, tendremos que recargar el servicio _apache2_, ejecutando para ello el comando:
 
 {% highlight shell %}
-root@apache:~# systemctl reload apache2
+root@apache:/etc/apache2/sites-available# systemctl reload apache2
 {% endhighlight %}
 
 Una vez que el servicio se ha vuelto a cargar, vamos a listar el contenido de **/etc/apache2/sites-enabled** para verificar que los correspondientes enlaces simbólicos han sido correctamente creados. Para ello, ejecutaremos el comando:
 
 {% highlight shell %}
-root@apache:~# ls -l /etc/apache2/sites-enabled/
+root@apache:/etc/apache2/sites-available# ls -l /etc/apache2/sites-enabled/
 total 0
 lrwxrwxrwx 1 root root 35 Oct 15 07:47 000-default.conf -> ../sites-available/000-default.conf
 lrwxrwxrwx 1 root root 37 Oct 15 08:00 departamentos.conf -> ../sites-available/departamentos.conf

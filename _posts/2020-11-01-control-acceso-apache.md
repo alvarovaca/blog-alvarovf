@@ -425,9 +425,12 @@ Dentro del mismo, tendremos que añadir la línea anteriormente añadida al fich
 192.168.50.2    departamentos.iesgn.org
 
 # The following lines are desirable for IPv6 capable hosts
-::1     localhost ip6-localhost ip6-loopback
+::1 ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
 ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
 {% endhighlight %}
 
 Listo. La resolución estática de nombres ha sido correctamente configurada, pero dado que la máquina cliente no tiene interfaz gráfica, tendremos que hacer uso de un paquete que simula un navegador en la terminal, para así hacerlo más similar a la realidad. En este caso, haremos uso de **elinks**, paquete que debemos instalar, no sin antes upgradear los paquetes instalados, ya que el box con el tiempo se va quedando desactualizado. Para ello, ejecutaremos el comando (con permisos de administrador, ejecutando el comando `sudo su -`):
@@ -530,7 +533,7 @@ root@servidor:/etc/apache2/sites-available# cat /etc/apache2/claves/passwd.txt
 prueba:$apr1$shqJIbxC$FVdbC/Cs/xdF9JcXYmkZO0
 {% endhighlight %}
 
-Como se puede apreciar, existe un único usuario **prueba** cuya contraseña se encuentra encriptada como resultado de la aplicación de una función de numeración posicional. En caso de querer eliminar un usuario, es decir, hacer que deje de tener acceso, bastaría con eliminar la línea correspondiente al mismo.
+Como se puede apreciar, existe un único usuario **prueba** cuya contraseña se encuentra encriptada como resultado de la aplicación de una función hash con algoritmo MD5. En caso de querer eliminar un usuario, es decir, hacer que deje de tener acceso, bastaría con eliminar la línea correspondiente al mismo.
 
 Como anteriormente hemos modificado un fichero de configuración de un servicio, tendremos que volver a cargar dicha configuración, ejecutando para ello el comando:
 
@@ -772,7 +775,7 @@ Como era de esperar, dado que el acceso se ha realizado desde la red externa, se
 
 ![mix2](https://i.ibb.co/qkdcft0/Captura-de-pantalla-de-2020-10-25-16-42-09.png "Acceso exitoso")
 
-Efectivamente, así ha sido. Todavía nos queda ver la otra _cara de la moneda_, así que trataremos acceder con **elinks** desde la máquina cliente (conexión que se llevaría a cabo desde la red **192.168.50.0/24**, por lo que no debería solicitar las credenciales de acceso):
+Efectivamente, así ha sido. Todavía nos queda ver la otra _cara de la moneda_, así que trataremos de acceder con **elinks** desde la máquina cliente (conexión que se llevaría a cabo desde la red **192.168.50.0/24**, por lo que no debería solicitar las credenciales de acceso):
 
 {% highlight shell %}
 root@cliente:~# elinks departamentos.iesgn.org/secreto
