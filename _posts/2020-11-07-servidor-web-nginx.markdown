@@ -408,15 +408,17 @@ En este caso, queremos hacer una redirección que nos permita pedir al cliente q
 
 Podemos redireccionar a una URL en un **host diferente** (deberá ser **absoluta**, como por ejemplo de **"/service"** a **"http://foo2.example.com/service"**) o a una URL dentro del **mismo host** (deberá comenzar por **/**, como por ejemplo de **"/one"** a **"/two"**). En este caso, vamos a redireccionar a una URL del mismo host.
 
-La sintaxis para crear una redirección es:
+Dado que la redirección la queremos hacer de una forma más "granular", es decir, únicamente queremos se redirija en caso de acceder a **/**, mientras que si se accede a cualquier otro recurso, no, haremos uso de **rewrite**, en lugar de **return**, dado que permite el uso de expresiones regulares. Siempre que sea posible, se recomienda hacer uso de _return_, pues su procesamiento es más rápido, al no tener que evaluar expresiones regulares, pero no es el caso.
+
+La sintaxis para crear una redirección con _rewrite_ es:
 
 {% highlight shell %}
-rewrite ^<pathURL>$ <URL> <tipo>;
+rewrite <pathURL> <URL> <tipo>;
 {% endhighlight %}
 
 Donde:
 
-* **pathURL**: El recurso "virtual" que solicitaremos en la URL a la hora de hacer la petición al servidor. En este caso, la petición la haríamos a www.iesgn.org**/**, por lo que pathURL sería **/**.
+* **pathURL**: El recurso "virtual" que solicitaremos en la URL a la hora de hacer la petición al servidor. En este caso, la petición la haríamos a www.iesgn.org**/**, por lo que pathURL sería **^/$**.
 * **URL**: La ruta real a la que se va a mapear el pathURL, es decir, la URL a la que deseamos redirigir al cliente. En este caso, la redirección la queremos hacer a www.iesgn.org**/principal**, por lo que al tratarse de una redirección dentro del mismo host, la URL sería **/principal**.
 * **tipo**: El tipo de redirección que queremos llevar a cabo, ya sea temporal (**redirect**) o permanente (**permanent**). En este caso, es indiferente, así que usaremos una redirección temporal.
 

@@ -12,7 +12,7 @@ Se recomienda realizar una previa lectura del _post_ [VirtualHosting con Apache]
 Un servidor **LAMP** contiene una unión de diferentes tecnologías, con la que podremos definir la infraestructura de un servidor web. Las tecnologías implicadas son las siguientes:
 
 * **L**inux, el sistema operativo (en este caso, Debian Buster).
-* **A**pache, el servidor web (en este caso, Apache 2.4).
+* **A**pache, el servidor web (en este caso, _apache 2.4_).
 * **M**ySQL/**M**ariaDB, el gestor de bases de datos.
 * **P**HP, el lenguaje de programación.
 
