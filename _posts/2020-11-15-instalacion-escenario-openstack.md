@@ -3,7 +3,7 @@ layout: post
 title:  "Instalación y configuración del escenario OpenStack"
 banner: "/assets/images/banners/openstack.png"
 date:   2020-11-15 13:20:00 +0200
-categories: hlc
+categories: hlc openstack
 ---
 Se recomienda realizar una previa lectura del _post_ [Configuración de cliente OpenVPN con certificados X.509](http://www.alvarovf.com/hlc/2020/11/02/configuracion-cliente-openvpn.html), pues en este artículo se tratarán con menor profundidad u obviarán algunos aspectos vistos con anterioridad.
 
@@ -1129,6 +1129,26 @@ rtt min/avg/max/mdev = 1.022/1.830/3.369/1.088 ms
 {% endhighlight %}
 
 ### Quijote
+
+En las máquinas CentOS 7 de OpenStack existe una peculiaridad, y es que el **hostname** que se asigna por defecto durante la creación es **[hostname].novalocal**, cosa que no necesitamos, ya que llega a provocar incluso conflictos con el FQDN. Para llevar a cabo dicha modificación, podríamos hacer uso del comando `hostnamectl` o bien, modificar a mano el fichero **/etc/hostname**, que es lo que haré en mi caso. Para ello, ejecutaremos el comando:
+
+{% highlight shell %}
+[root@quijote ~]# vi /etc/hostname
+{% endhighlight %}
+
+Y modificaremos el contenido a lo siguiente:
+
+{% highlight shell %}
+quijote
+{% endhighlight %}
+
+Genial, ya hemos llevado a cabo el cambio necesario, pero para que surta efecto tendremos que reiniciar (comando `reboot`), pues hemos modificado el nombre de la máquina. Para ello, ejecutaremos el comando:
+
+{% highlight shell %}
+[root@quijote ~]# reboot
+{% endhighlight %}
+
+Tras unos segundos de espera mientras la máquina se reiniciaba, ya podremos proceder a llevar a cabo las modificaciones oportunas para establecer la resolución estática:
 
 {% highlight shell %}
 [root@quijote ~]# sudo vi /etc/hosts

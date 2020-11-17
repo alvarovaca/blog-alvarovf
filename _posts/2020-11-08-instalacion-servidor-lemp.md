@@ -480,7 +480,7 @@ Ya hemos recorrido la mitad del camino, pues hemos configurado correctamente el 
 root@vps:/srv/iesgn19/principal# nano /etc/nginx/sites-available/iesgn19
 {% endhighlight %}
 
-Dentro del mismo, encontraremos un bloque **location** comentado, que afecta a **~ \.php$**, es decir, a todos los ficheros **.php**. Tendremos que descomentar las líneas **include** y **fastcgi_pass**, indicando en ésta última la cadena **unix:** seguido de la ruta del _Socket UNIX_ (**/run/php/php7.3-fpm.sock**). El resultado final sería:
+Dentro del mismo, encontraremos un bloque **location** comentado, que afecta a **~ \.php$**, es decir, a todos los ficheros **.php**. Tendremos que descomentar las líneas **include** y **fastcgi_pass**, indicando en ésta última la cadena **unix:** seguido de la ruta del _Socket UNIX_ (**/run/php/php7.3-fpm.sock**). Además de ello, tendremos que añadir el fichero **index.php** a la lista de la directiva **index**, para que así también se haga la correspondiente búsqueda para dicho fichero y pueda ser servido. El resultado final sería:
 
 {% highlight shell %}
 server {
@@ -489,7 +489,7 @@ server {
 
         root /srv/iesgn19;
 
-        index index.html index.htm index.nginx-debian.html;
+        index index.php index.html index.htm index.nginx-debian.html;
 
         server_name www.iesgn19.es;
 
