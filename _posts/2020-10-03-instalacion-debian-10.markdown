@@ -292,7 +292,7 @@ Durante la instalación se me mostró el siguiente mensaje de advertencia:
 
 Nunca antes había llegado tan lejos en la instalación de los drivers, así que me puse bastante contento, pero no todo estaba hecho, todavía me quedaba reiniciar y rezar para que arrancase el entorno de escritorio. ¡Y así fue!, conseguí que funcionase.
 
-Para verificar que los módulos de NVIDIA se habían cargado en lugar de los nouveau, ejecuté el siguiente comando:
+Para verificar que los módulos de NVIDIA se habían cargado en lugar de los _nouveau_, ejecuté el siguiente comando:
 
 {% highlight shell %}
 alvaro@debian:~$ lsmod | egrep nvidia
@@ -305,4 +305,33 @@ drm                   602112  8 drm_kms_helper,nvidia_drm,i915
 alvaro@debian:~$ lsmod | egrep nouveau
 {% endhighlight %}
 
-Efectivamente, no hay módulos nouveau cargados, por lo que la instalación de Debian finaliza aquí.
+Efectivamente, no hay módulos _nouveau_ cargados.
+
+Considero también algo totalmente necesario en las instalaciones de Debian el hecho de modificar el valor de la **_swappiness_**. Dicho valor se encuentra almacenado en un parámetro del _kernel_, concretamente en **/proc/sys/vm/swappiness**, e indica en qué momento nuestra máquina empezará a usar la partición de _swap_ en lugar de la RAM. Su valor se encuentra entre **0** y **100**, siendo **0** un uso constante de RAM y **100**, un uso constante de _swap_. Por defecto tiene valor **60**, es decir, la _swap_ comenzará a usarse cuando nuestra RAM tenga un **40%** o más de uso, un valor totalmente absurdo si hablamos de máquinas de hoy en día, que cuentan con gran cantidad de memoria RAM. Vamos a comprobar el valor de _swappiness_ que tiene actualmente nuestra máquina, ejecutando para ello el comando:
+
+{% highlight shell %}
+alvaro@debian:~$ cat /proc/sys/vm/swappiness 
+60
+{% endhighlight %}
+
+Como se puede apreciar, el valor actual es totalmente absurdo para una máquina que cuenta con **16GB** de RAM. Para modificar dicho valor, podríamos modificar directamente el fichero anteriormente mencionado, pero en lugar de ello, haremos uso de `sysctl` para que la modificación sea persistente tras un reinicio. Para ello, ejecutamos el comando (con permisos de administrador, ejecutando para ello el comando `su -`):
+
+{% highlight shell %}
+root@debian:~# echo "vm.swappiness = 10" >> /etc/sysctl.conf
+{% endhighlight %}
+
+Gracias a la instrucción que acabamos de ejecutar, hemos añadido una línea al fichero de configuración **sysctl.conf**, el cuál contiene los valores de los parámetros del _kernel_, poniendo el valor del parámetro correspondiente para la _swappiness_ a **10**, pues considero que es un valor razonabñe. Sin embargo, el cambio todavía no ha entrado en vigor, ya que tendremos que volver a leer el contenido de dicho fichero para así cargar el valor del parámetro en memoria, ejecutando para ello el comando:
+
+{% highlight shell %}
+root@debian:~# sysctl -p
+vm.swappiness = 10
+{% endhighlight %}
+
+Como se puede apreciar, la salida del comando nos ha informado de que se ha percatado del cambio que acabamos de realizar en el fichero, por lo que el valor de la _swappiness_ se encuentra ya modificado a **10**. Aun así, vamos a volver a mostrar el contenido del fichero **/proc/sys/vm/swappiness** para asegurarnos:
+
+{% highlight shell %}
+root@debian:~# cat /proc/sys/vm/swappiness 
+10
+{% endhighlight %}
+
+Efectivamente, el valor de la _swappiness_ es ahora **10**, por lo que la zona de _swap_ únicamente se utilizará cuando el porcentaje de uso de la memoria RAM sea superior o igual al **90%**, por lo que la instalación de Debian finaliza aquí.

@@ -1142,7 +1142,7 @@ Y modificaremos el contenido a lo siguiente:
 quijote
 {% endhighlight %}
 
-Genial, ya hemos llevado a cabo el cambio necesario, pero para que surta efecto podemos reiniciar (comando `reboot`) o bien cerrar la sesión y volver a abrirla, que es lo que nosotros haremos, pues estamos intentando simular una situación real, con servidores reales. En caso de que tampoco muestre el nuevo _hostname_, podríamos modificar directamente el fichero **/proc/sys/kernel/hostname**, de manera que entraría en vigor automáticamente. Tras ello, ya podremos proceder a llevar a cabo las modificaciones oportunas para establecer la resolución estática:
+Genial, ya hemos llevado a cabo el cambio necesario, pero para que surta efecto podemos reiniciar (comando `reboot`) o bien cerrar la sesión y volver a abrirla, que es lo que nosotros haremos, pues estamos intentando simular una situación real, con servidores reales. En caso de que tampoco muestre el nuevo _hostname_, podríamos modificar directamente el fichero **/proc/sys/kernel/hostname**, de manera que el cambio entraría en vigor automáticamente. Tras ello, ya podremos proceder a llevar a cabo las modificaciones oportunas para establecer la resolución estática:
 
 {% highlight shell %}
 [root@quijote ~]# sudo vi /etc/hosts
