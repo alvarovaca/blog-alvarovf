@@ -1130,7 +1130,7 @@ rtt min/avg/max/mdev = 1.022/1.830/3.369/1.088 ms
 
 ### Quijote
 
-En las máquinas CentOS 7 de OpenStack existe una peculiaridad, y es que el **hostname** que se asigna por defecto durante la creación es **[hostname].novalocal**, cosa que no necesitamos, ya que llega a provocar incluso conflictos con el FQDN. Para llevar a cabo dicha modificación, podríamos hacer uso del comando `hostnamectl` o bien, modificar a mano el fichero **/etc/hostname**, que es lo que haré en mi caso. Para ello, ejecutaremos el comando:
+En las máquinas CentOS 7 de OpenStack existe una peculiaridad, y es que el **_hostname_** que se asigna por defecto durante la creación es **[hostname].novalocal**, cosa que no necesitamos, ya que llega a provocar incluso conflictos con el FQDN. Para llevar a cabo dicha modificación, podríamos hacer uso del comando `hostnamectl` o bien, modificar a mano el fichero **/etc/hostname**, que es lo que haré en mi caso. Para ello, ejecutaremos el comando:
 
 {% highlight shell %}
 [root@quijote ~]# vi /etc/hostname
@@ -1142,13 +1142,7 @@ Y modificaremos el contenido a lo siguiente:
 quijote
 {% endhighlight %}
 
-Genial, ya hemos llevado a cabo el cambio necesario, pero para que surta efecto tendremos que reiniciar (comando `reboot`), pues hemos modificado el nombre de la máquina. Para ello, ejecutaremos el comando:
-
-{% highlight shell %}
-[root@quijote ~]# reboot
-{% endhighlight %}
-
-Tras unos segundos de espera mientras la máquina se reiniciaba, ya podremos proceder a llevar a cabo las modificaciones oportunas para establecer la resolución estática:
+Genial, ya hemos llevado a cabo el cambio necesario, pero para que surta efecto podemos reiniciar (comando `reboot`) o bien cerrar la sesión y volver a abrirla, que es lo que nosotros haremos, pues estamos intentando simular una situación real, con servidores reales. En caso de que tampoco muestre el nuevo _hostname_, podríamos modificar directamente el fichero **/proc/sys/kernel/hostname**, de manera que entraría en vigor automáticamente. Tras ello, ya podremos proceder a llevar a cabo las modificaciones oportunas para establecer la resolución estática:
 
 {% highlight shell %}
 [root@quijote ~]# sudo vi /etc/hosts
