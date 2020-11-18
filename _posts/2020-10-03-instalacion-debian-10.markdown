@@ -320,7 +320,7 @@ Como se puede apreciar, el valor actual es totalmente absurdo para una máquina 
 root@debian:~# echo "vm.swappiness = 10" >> /etc/sysctl.conf
 {% endhighlight %}
 
-Gracias a la instrucción que acabamos de ejecutar, hemos añadido una línea al fichero de configuración **sysctl.conf**, el cuál contiene los valores de los parámetros del _kernel_, poniendo el valor del parámetro correspondiente para la _swappiness_ a **10**, pues considero que es un valor razonabñe. Sin embargo, el cambio todavía no ha entrado en vigor, ya que tendremos que volver a leer el contenido de dicho fichero para así cargar el valor del parámetro en memoria, ejecutando para ello el comando:
+Gracias a la instrucción que acabamos de ejecutar, hemos añadido una línea al fichero de configuración **sysctl.conf**, el cuál contiene los valores de los parámetros del _kernel_, poniendo el valor del parámetro correspondiente a la _swappiness_ a **10**, pues considero que es un valor razonable. Sin embargo, el cambio todavía no ha entrado en vigor, ya que tendremos que volver a leer el contenido de dicho fichero para así cargar el valor del parámetro en memoria, ejecutando para ello el comando:
 
 {% highlight shell %}
 root@debian:~# sysctl -p
@@ -334,4 +334,4 @@ root@debian:~# cat /proc/sys/vm/swappiness
 10
 {% endhighlight %}
 
-Efectivamente, el valor de la _swappiness_ es ahora **10**, por lo que la zona de _swap_ únicamente se utilizará cuando el porcentaje de uso de la memoria RAM sea superior o igual al **90%**, por lo que la instalación de Debian finaliza aquí.
+Efectivamente, el valor de la _swappiness_ es ahora **10**, de manera que la zona de _swap_ únicamente se utilizará cuando el porcentaje de uso de la memoria RAM sea superior o igual al **90%**, por lo que la instalación de Debian finaliza aquí.
