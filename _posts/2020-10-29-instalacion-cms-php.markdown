@@ -937,7 +937,7 @@ ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 {% endhighlight %}
 
-La máquina anfitriona ya es capaz de realizar la solución del nombre **www.alvaro-moodle.com**.
+La máquina anfitriona ya es capaz de realizar la resolución del nombre **www.alvaro-moodle.com**.
 
 ### Elige otro CMS realizado en PHP y realiza la instalación en tu infraestructura.
 
@@ -1020,7 +1020,7 @@ drwxr-xr-x  7 1005 1005   4096 Sep 11 02:41 webservice
 
 Efectivamente, todo el contenido se ha descomprimido tal y como queríamos (en lugar de descomprimir un directorio de nombre **moodle** del que posteriormente tendríamos que mover los ficheros contenidos al directorio actual).
 
-Ya tenemos todos los ficheros necesarios para llevar a cabo la instalación de Moodle, pero hay un pequeño detalle que todavía no hemos contemplado, pues el usuario creador y el grupo correspondiente a dichos ficheros y directorios es **root**, por lo que al igual que en el caso anterior, procedemos a cambiar dicho propietario y grupo de forma recursiva a **www-data**, haciendo para ello uso del comando `chown -R`, pues de otro modo no podría escribir en dichos ficheros durante la instalación:
+Ya tenemos todos los ficheros necesarios para llevar a cabo la instalación de Moodle, pero hay un pequeño detalle que todavía no hemos contemplado, pues el usuario creador y el grupo correspondiente a dichos ficheros y directorios es **1005**, por lo que al igual que en el caso anterior, procedemos a cambiar dicho propietario y grupo de forma recursiva a **www-data**, haciendo para ello uso del comando `chown -R`, pues de otro modo no podría escribir en dichos ficheros durante la instalación:
 
 {% highlight shell %}
 root@cms:/srv/moodle# chown -R www-data:www-data /srv/*
