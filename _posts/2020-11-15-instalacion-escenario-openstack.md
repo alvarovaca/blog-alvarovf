@@ -1022,7 +1022,7 @@ Dado que todavía no hemos configurado un servidor DNS, tendremos que configurar
 Donde:
 
 * **IP**: La IP de la máquina que queremos resolver.
-* **FQDN**: El _Fully Qualified Domain Name_, que se encuentra compuesto por **[hostname].alvaro.vaca.gonzalonazareno.org**.
+* **FQDN**: El _Fully Qualified Domain Name_, que se encuentra compuesto por **[hostname].alvaro.gonzalonazareno.org**.
 * **hostname**: El nombre corto de la máquina.
 
 En cada máquina debemos introducir dos líneas (de manera que conozca las otras dos máquinas restantes, además de a sí misma, modificando o añadiendo la línea **127.0.1.1**), es decir:
@@ -1058,10 +1058,10 @@ Efectivamente, su valor ha sido modificado, así que ya podemos proceder a modif
 
 {% highlight shell %}
 root@dulcinea:~# nano /etc/hosts
-127.0.1.1 dulcinea.alvaro.vaca.gonzalonazareno.org dulcinea.novalocal dulcinea
+127.0.1.1 dulcinea.alvaro.gonzalonazareno.org dulcinea.novalocal dulcinea
 127.0.0.1 localhost
-10.0.1.4 sancho.alvaro.vaca.gonzalonazareno.org sancho
-10.0.1.5 quijote.alvaro.vaca.gonzalonazareno.org quijote
+10.0.1.4 sancho.alvaro.gonzalonazareno.org sancho
+10.0.1.5 quijote.alvaro.gonzalonazareno.org quijote
 
 ::1 ip6-localhost ip6-loopback
 fe00::0 ip6-localnet
@@ -1071,34 +1071,34 @@ ff02::2 ip6-allrouters
 ff02::3 ip6-allhosts
 
 root@dulcinea:~# ping sancho
-PING sancho.alvaro.vaca.gonzalonazareno.org (10.0.1.4) 56(84) bytes of data.
-64 bytes from sancho.alvaro.vaca.gonzalonazareno.org (10.0.1.4): icmp_seq=1 ttl=64 time=2.31 ms
-64 bytes from sancho.alvaro.vaca.gonzalonazareno.org (10.0.1.4): icmp_seq=2 ttl=64 time=1.21 ms
-64 bytes from sancho.alvaro.vaca.gonzalonazareno.org (10.0.1.4): icmp_seq=3 ttl=64 time=1.17 ms
+PING sancho.alvaro.gonzalonazareno.org (10.0.1.4) 56(84) bytes of data.
+64 bytes from sancho.alvaro.gonzalonazareno.org (10.0.1.4): icmp_seq=1 ttl=64 time=2.45 ms
+64 bytes from sancho.alvaro.gonzalonazareno.org (10.0.1.4): icmp_seq=2 ttl=64 time=0.815 ms
+64 bytes from sancho.alvaro.gonzalonazareno.org (10.0.1.4): icmp_seq=3 ttl=64 time=1.61 ms
 ^C
---- sancho.alvaro.vaca.gonzalonazareno.org ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 6ms
-rtt min/avg/max/mdev = 1.173/1.562/2.308/0.527 ms
-
-root@dulcinea:~# ping quijote.alvaro.vaca.gonzalonazareno.org
-PING quijote.alvaro.vaca.gonzalonazareno.org (10.0.1.5) 56(84) bytes of data.
-64 bytes from quijote.alvaro.vaca.gonzalonazareno.org (10.0.1.5): icmp_seq=1 ttl=64 time=2.05 ms
-64 bytes from quijote.alvaro.vaca.gonzalonazareno.org (10.0.1.5): icmp_seq=2 ttl=64 time=0.875 ms
-64 bytes from quijote.alvaro.vaca.gonzalonazareno.org (10.0.1.5): icmp_seq=3 ttl=64 time=0.592 ms
-^C
---- quijote.alvaro.vaca.gonzalonazareno.org ping statistics ---
+--- sancho.alvaro.gonzalonazareno.org ping statistics ---
 3 packets transmitted, 3 received, 0% packet loss, time 5ms
-rtt min/avg/max/mdev = 0.592/1.173/2.054/0.634 ms
+rtt min/avg/max/mdev = 0.815/1.623/2.447/0.667 ms
+
+root@dulcinea:~# ping quijote.alvaro.gonzalonazareno.org
+PING quijote.alvaro.gonzalonazareno.org (10.0.1.5) 56(84) bytes of data.
+64 bytes from quijote.alvaro.gonzalonazareno.org (10.0.1.5): icmp_seq=1 ttl=64 time=1.15 ms
+64 bytes from quijote.alvaro.gonzalonazareno.org (10.0.1.5): icmp_seq=2 ttl=64 time=0.663 ms
+64 bytes from quijote.alvaro.gonzalonazareno.org (10.0.1.5): icmp_seq=3 ttl=64 time=0.711 ms
+^C
+--- quijote.alvaro.gonzalonazareno.org ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 5ms
+rtt min/avg/max/mdev = 0.663/0.841/1.151/0.222 ms
 {% endhighlight %}
 
 ### Sancho
 
 {% highlight shell %}
 root@sancho:~# sudo nano /etc/hosts
-127.0.1.1 sancho.alvaro.vaca.gonzalonazareno.org sancho
+127.0.1.1 sancho.alvaro.gonzalonazareno.org sancho
 127.0.0.1 localhost
-10.0.1.9 dulcinea.alvaro.vaca.gonzalonazareno.org dulcinea
-10.0.1.5 quijote.alvaro.vaca.gonzalonazareno.org quijote
+10.0.1.5 quijote.alvaro.gonzalonazareno.org quijote
+10.0.1.9 dulcinea.alvaro.gonzalonazareno.org dulcinea
 
 ::1 ip6-localhost ip6-loopback
 fe00::0 ip6-localnet
@@ -1107,25 +1107,25 @@ ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 ff02::3 ip6-allhosts
 
-root@sancho:~# ping dulcinea.alvaro.vaca.gonzalonazareno.org
-PING dulcinea.alvaro.vaca.gonzalonazareno.org (10.0.1.9) 56(84) bytes of data.
-64 bytes from dulcinea.alvaro.vaca.gonzalonazareno.org (10.0.1.9): icmp_seq=1 ttl=64 time=0.724 ms
-64 bytes from dulcinea.alvaro.vaca.gonzalonazareno.org (10.0.1.9): icmp_seq=2 ttl=64 time=1.22 ms
-64 bytes from dulcinea.alvaro.vaca.gonzalonazareno.org (10.0.1.9): icmp_seq=3 ttl=64 time=0.961 ms
+root@sancho:~# ping dulcinea.alvaro.gonzalonazareno.org
+PING dulcinea.alvaro.gonzalonazareno.org (10.0.1.9) 56(84) bytes of data.
+64 bytes from dulcinea.alvaro.gonzalonazareno.org (10.0.1.9): icmp_seq=1 ttl=64 time=0.984 ms
+64 bytes from dulcinea.alvaro.gonzalonazareno.org (10.0.1.9): icmp_seq=2 ttl=64 time=1.82 ms
+64 bytes from dulcinea.alvaro.gonzalonazareno.org (10.0.1.9): icmp_seq=3 ttl=64 time=1.34 ms
 ^C
---- dulcinea.alvaro.vaca.gonzalonazareno.org ping statistics ---
+--- dulcinea.alvaro.gonzalonazareno.org ping statistics ---
 3 packets transmitted, 3 received, 0% packet loss, time 2003ms
-rtt min/avg/max/mdev = 0.724/0.967/1.217/0.201 ms
+rtt min/avg/max/mdev = 0.984/1.379/1.816/0.340 ms
 
 root@sancho:~# ping quijote
-PING quijote.alvaro.vaca.gonzalonazareno.org (10.0.1.5) 56(84) bytes of data.
-64 bytes from quijote.alvaro.vaca.gonzalonazareno.org (10.0.1.5): icmp_seq=1 ttl=64 time=3.37 ms
-64 bytes from quijote.alvaro.vaca.gonzalonazareno.org (10.0.1.5): icmp_seq=2 ttl=64 time=1.02 ms
-64 bytes from quijote.alvaro.vaca.gonzalonazareno.org (10.0.1.5): icmp_seq=3 ttl=64 time=1.10 ms
+PING quijote.alvaro.gonzalonazareno.org (10.0.1.5) 56(84) bytes of data.
+64 bytes from quijote.alvaro.gonzalonazareno.org (10.0.1.5): icmp_seq=1 ttl=64 time=2.61 ms
+64 bytes from quijote.alvaro.gonzalonazareno.org (10.0.1.5): icmp_seq=2 ttl=64 time=1.08 ms
+64 bytes from quijote.alvaro.gonzalonazareno.org (10.0.1.5): icmp_seq=3 ttl=64 time=1.01 ms
 ^C
---- quijote.alvaro.vaca.gonzalonazareno.org ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 2004ms
-rtt min/avg/max/mdev = 1.022/1.830/3.369/1.088 ms
+--- quijote.alvaro.gonzalonazareno.org ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2003ms
+rtt min/avg/max/mdev = 1.009/1.568/2.613/0.739 ms
 {% endhighlight %}
 
 ### Quijote
@@ -1146,31 +1146,31 @@ Genial, ya hemos llevado a cabo el cambio necesario, pero para que surta efecto 
 
 {% highlight shell %}
 [root@quijote ~]# sudo vi /etc/hosts
-127.0.1.1 quijote.alvaro.vaca.gonzalonazareno.org quijote
+127.0.1.1 quijote.alvaro.gonzalonazareno.org quijote
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-10.0.1.9 dulcinea.alvaro.vaca.gonzalonazareno.org dulcinea
-10.0.1.4 sancho.alvaro.vaca.gonzalonazareno.org sancho
+10.0.1.4 sancho.alvaro.gonzalonazareno.org sancho
+10.0.1.9 dulcinea.alvaro.gonzalonazareno.org dulcinea
 
 [root@quijote ~]# ping dulcinea
-PING dulcinea.alvaro.vaca.gonzalonazareno.org (10.0.1.9) 56(84) bytes of data.
-64 bytes from dulcinea.alvaro.vaca.gonzalonazareno.org (10.0.1.9): icmp_seq=1 ttl=64 time=0.466 ms
-64 bytes from dulcinea.alvaro.vaca.gonzalonazareno.org (10.0.1.9): icmp_seq=2 ttl=64 time=0.688 ms
-64 bytes from dulcinea.alvaro.vaca.gonzalonazareno.org (10.0.1.9): icmp_seq=3 ttl=64 time=0.651 ms
+PING dulcinea.alvaro.gonzalonazareno.org (10.0.1.9) 56(84) bytes of data.
+64 bytes from dulcinea.alvaro.gonzalonazareno.org (10.0.1.9): icmp_seq=1 ttl=64 time=0.751 ms
+64 bytes from dulcinea.alvaro.gonzalonazareno.org (10.0.1.9): icmp_seq=2 ttl=64 time=0.651 ms
+64 bytes from dulcinea.alvaro.gonzalonazareno.org (10.0.1.9): icmp_seq=3 ttl=64 time=0.780 ms
 ^C
---- dulcinea.alvaro.vaca.gonzalonazareno.org ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 2000ms
-rtt min/avg/max/mdev = 0.466/0.601/0.688/0.101 ms
+--- dulcinea.alvaro.gonzalonazareno.org ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 20ms
+rtt min/avg/max/mdev = 0.651/0.727/0.780/0.059 ms
 
-[root@quijote ~]# ping sancho.alvaro.vaca.gonzalonazareno.org
-PING sancho.alvaro.vaca.gonzalonazareno.org (10.0.1.4) 56(84) bytes of data.
-64 bytes from sancho.alvaro.vaca.gonzalonazareno.org (10.0.1.4): icmp_seq=1 ttl=64 time=2.29 ms
-64 bytes from sancho.alvaro.vaca.gonzalonazareno.org (10.0.1.4): icmp_seq=2 ttl=64 time=1.01 ms
-64 bytes from sancho.alvaro.vaca.gonzalonazareno.org (10.0.1.4): icmp_seq=3 ttl=64 time=1.19 ms
+[root@quijote ~]# ping sancho.alvaro.gonzalonazareno.org
+PING sancho.alvaro.gonzalonazareno.org (10.0.1.4) 56(84) bytes of data.
+64 bytes from sancho.alvaro.gonzalonazareno.org (10.0.1.4): icmp_seq=1 ttl=64 time=2.25 ms
+64 bytes from sancho.alvaro.gonzalonazareno.org (10.0.1.4): icmp_seq=2 ttl=64 time=1.05 ms
+64 bytes from sancho.alvaro.gonzalonazareno.org (10.0.1.4): icmp_seq=3 ttl=64 time=1.32 ms
 ^C
---- sancho.alvaro.vaca.gonzalonazareno.org ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 2002ms
-rtt min/avg/max/mdev = 1.011/1.501/2.295/0.566 ms
+--- sancho.alvaro.gonzalonazareno.org ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 5ms
+rtt min/avg/max/mdev = 1.046/1.539/2.254/0.518 ms
 {% endhighlight %}
 
 ## Sincronización del reloj de las instancias utilizando un servidor NTP externo
