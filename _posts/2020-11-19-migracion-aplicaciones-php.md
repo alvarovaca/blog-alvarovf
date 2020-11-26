@@ -85,10 +85,6 @@ server {
 
         server_name portal.iesgn19.es;
 
-        location / {
-            try_files $uri /index.php?$query_string;
-        }
-
         location = /favicon.ico {
             log_not_found off;
             access_log off;
@@ -122,6 +118,10 @@ server {
 
         location ~ (^|/)\. {
             return 403;
+        }
+
+        location / {
+            try_files $uri /index.php?$query_string;
         }
 
         location @rewrite {
