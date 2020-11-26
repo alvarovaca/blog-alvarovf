@@ -293,7 +293,7 @@ La siguiente comprobación consistirá en verificar que la máquina tiene correc
 quijote
 
 [centos@quijote ~]$ hostname -f
-quijote.alvaro.vaca.gonzalonazareno.org
+quijote.alvaro.gonzalonazareno.org
 {% endhighlight %}
 
 Una vez más, la configuración es correcta.
@@ -302,24 +302,24 @@ He considerado necesario también el hecho de verificar que la resolución está
 
 {% highlight shell %}
 [centos@quijote ~]$ ping dulcinea
-PING dulcinea.alvaro.vaca.gonzalonazareno.org (10.0.1.9) 56(84) bytes of data.
-64 bytes from dulcinea.alvaro.vaca.gonzalonazareno.org (10.0.1.9): icmp_seq=1 ttl=64 time=0.496 ms
-64 bytes from dulcinea.alvaro.vaca.gonzalonazareno.org (10.0.1.9): icmp_seq=2 ttl=64 time=0.806 ms
-64 bytes from dulcinea.alvaro.vaca.gonzalonazareno.org (10.0.1.9): icmp_seq=3 ttl=64 time=0.665 ms
+PING dulcinea.alvaro.gonzalonazareno.org (10.0.1.9) 56(84) bytes of data.
+64 bytes from dulcinea.alvaro.gonzalonazareno.org (10.0.1.9): icmp_seq=1 ttl=64 time=0.699 ms
+64 bytes from dulcinea.alvaro.gonzalonazareno.org (10.0.1.9): icmp_seq=2 ttl=64 time=0.848 ms
+64 bytes from dulcinea.alvaro.gonzalonazareno.org (10.0.1.9): icmp_seq=3 ttl=64 time=0.715 ms
 ^C
---- dulcinea.alvaro.vaca.gonzalonazareno.org ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 82ms
-rtt min/avg/max/mdev = 0.496/0.655/0.806/0.130 ms
+--- dulcinea.alvaro.gonzalonazareno.org ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 65ms
+rtt min/avg/max/mdev = 0.699/0.754/0.848/0.066 ms
 
 [centos@quijote ~]$ ping sancho
-PING sancho.alvaro.vaca.gonzalonazareno.org (10.0.1.4) 56(84) bytes of data.
-64 bytes from sancho.alvaro.vaca.gonzalonazareno.org (10.0.1.4): icmp_seq=1 ttl=64 time=4.01 ms
-64 bytes from sancho.alvaro.vaca.gonzalonazareno.org (10.0.1.4): icmp_seq=2 ttl=64 time=1.22 ms
-64 bytes from sancho.alvaro.vaca.gonzalonazareno.org (10.0.1.4): icmp_seq=3 ttl=64 time=0.895 ms
+PING sancho.alvaro.gonzalonazareno.org (10.0.1.4) 56(84) bytes of data.
+64 bytes from sancho.alvaro.gonzalonazareno.org (10.0.1.4): icmp_seq=1 ttl=64 time=2.09 ms
+64 bytes from sancho.alvaro.gonzalonazareno.org (10.0.1.4): icmp_seq=2 ttl=64 time=1.20 ms
+64 bytes from sancho.alvaro.gonzalonazareno.org (10.0.1.4): icmp_seq=3 ttl=64 time=1.29 ms
 ^C
---- sancho.alvaro.vaca.gonzalonazareno.org ping statistics ---
+--- sancho.alvaro.gonzalonazareno.org ping statistics ---
 3 packets transmitted, 3 received, 0% packet loss, time 5ms
-rtt min/avg/max/mdev = 0.895/2.042/4.012/1.399 ms
+rtt min/avg/max/mdev = 1.204/1.528/2.093/0.403 ms
 {% endhighlight %}
 
 La resolución estática de nombres ha funcionado correctamente, de manera que nos quedaría comprobar que la resolución mediante servidores DNS también lo hace, tratando de llevar a cabo para ello un `ping` a **google.es**, por ejemplo:
