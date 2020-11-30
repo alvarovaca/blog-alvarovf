@@ -240,7 +240,7 @@ Como se puede apreciar, nos hemos autenticado correctamente y se ha mostrado la 
 
 Basado en la filosofía que hemos visto hasta ahora, surge el _Secure Sockets Layer_ (**SSL**), un protocolo que proporciona la posibilidad de cifrar el contenido que transmitimos en cualquier aplicación basada en **TCP** (_HTTP_, _SMTP_...), es decir, ofrece seguridad en la capa de transporte.
 
-Dicho protocolo se utiliza entre navegadores de Internet y servidores, e incluso entre servidores, es por ello que en aquellas páginas web que tienen dicha característica correctamente configurada, accedemos a través de **https://**.
+Dicho protocolo se utiliza entre navegadores de Internet y servidores, e incluso entre servidores, es por ello que en aquellos sitios web que tienen dicha característica correctamente configurada, accedemos a través de **https://**.
 
 Los servidores web tienen un certificado emitido por alguna autoridad de certificación de confianza. El certificado contiene la clave pública del servidor y es enviado al cliente en el momento de la petición.
 
