@@ -335,7 +335,7 @@ Efectivamente, se ha descargado un paquete de nombre "**tar.gz**" con un peso to
 Al estar comprimido el fichero, no podemos llevar a cabo la instalación hasta que no hagamos una extracción de los ficheros contenidos. Además, para liberar espacio, borraremos tras ello el fichero comprimido ya que no nos hará falta. Para ello, ejecutaremos el comando:
 
 {% highlight shell %}
-root@cms:/srv/drupal# tar -zxf tar.gz --strip 1 && rm -r tar.gz
+root@cms:/srv/drupal# tar -zxf tar.gz --strip 1 && rm tar.gz
 {% endhighlight %}
 
 Donde:
@@ -992,7 +992,7 @@ Efectivamente, se ha descargado un paquete de nombre "**moodle-3.9.2.tgz**" con 
 Al estar comprimido el fichero, no podemos llevar a cabo la instalación hasta que no hagamos una extracción de los ficheros contenidos. Además, para liberar espacio, borraremos tras ello el fichero comprimido ya que no nos hará falta. Para ello, ejecutaremos el comando:
 
 {% highlight shell %}
-root@cms:/srv/moodle# tar -zxf moodle-3.9.2.tgz --strip 1 && rm -r moodle-3.9.2.tgz
+root@cms:/srv/moodle# tar -zxf moodle-3.9.2.tgz --strip 1 && rm moodle-3.9.2.tgz
 {% endhighlight %}
 
 Para verificar que el fichero se ha descomprimido correctamente, haremos uso del comando:

@@ -55,12 +55,12 @@ root@vps:~# mysql_secure_installation
 NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
       SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!
 
-Enter current password for root (enter for none):
+Enter current password for root (enter for none): 
 OK, successfully used password, moving on...
 
 Set root password? [Y/n] Y
-New password:
-Re-enter new password:
+New password: 
+Re-enter new password: 
 Password updated successfully!
 Reloading privilege tables..
  ... Success!
@@ -74,7 +74,8 @@ Disallow root login remotely? [Y/n] Y
 Remove test database and access to it? [Y/n] Y
  - Dropping test database...
  ... Success!
- - Removing privileges on tes
+ - Removing privileges on test database...
+ ... Success!
 
 Reload privilege tables now? [Y/n] Y
  ... Success!

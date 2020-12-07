@@ -5,7 +5,7 @@ banner: "/assets/images/banners/oracle.jpg"
 date:   2020-12-03 12:41:00 +0200
 categories: bbdd
 ---
-El objetivo de este _post_ es el de mostrar el procedimiento a seguir para llevar a cabo una instalación básica de **Oracle 19c**, un gestor de bases de datos relacionales (_DBMS_) sobre una máquina **CentOS 8**, así como la configuración necesaria para admitir peticiones desde máquinas remotas dentro de una red local. Personalmente, hasta el día de hoy, únicamente he instalado _Oracle Database_ en máquinas _Windows_, cuyo proceso de instalación es bastante trivial, pues consiste en pulsar "**Siguiente**" en reiteradas ocasiones, por lo que además de ayudar a cualquier persona que pueda necesitarlo, este artículo lo escribo por si me hiciese falta en algún momento de mi vida laboral.
+El objetivo de este _post_ es el de mostrar el procedimiento a seguir para llevar a cabo una instalación básica de **Oracle 19c**, un gestor de bases de datos relacionales (_SQL_) sobre una máquina **CentOS 8**, así como la configuración necesaria para admitir peticiones desde máquinas remotas. Personalmente, hasta el día de hoy, únicamente he instalado _Oracle Database_ en máquinas _Windows_, cuyo proceso de instalación es bastante trivial, pues consiste en pulsar "**Siguiente**" en reiteradas ocasiones, por lo que además de ayudar a cualquier persona que pueda necesitarlo, este artículo lo escribo por si me hiciese falta en algún momento de mi vida laboral.
 
 Para esta ocasión, he traído los deberes hechos y he instalado previamente una máquina virtual con **CentOS 8**, pero no he llevado a cabo ninguna configuración, para así partir desde un punto totalmente limpio. No considero necesario explicar el proceso de instalación de dicha distribución, ya que es bastante sencillo, además de salirse del objetivo del artículo.
 
@@ -582,7 +582,7 @@ OK (0 msec)
 
 Como se puede apreciar en la última línea de la salida del comando, el intento de conexión con el _listener_ ha sido exitoso en un tiempo total de 0 ms, pues ambas máquinas virtuales están ubicadas en la misma máquina física, por lo que el tiempo de transferencia es ridículamente minúsculo.
 
-Esto es un buen indicio de que la configuración está funcionando tal y como debería, así que ahora, vamos a dar paso a _la prueba de fuego_, tratando de llevar a cabo una conexión real a la base de datos, como si de una situación normal y corriente se tratase, haciendo para ello uso de la siguiente sintaxis:
+Esto es un buen indicio de que la configuración está funcionando tal y como debería, así que ahora, vamos a dar paso a _la prueba de fuego_, tratando de llevar a cabo una conexión remota real a la base de datos, como si de una situación normal y corriente se tratase, haciendo para ello uso de la siguiente sintaxis:
 
 {% highlight shell %}
 sqlplus [usuario]/[contraseña]@[servidor]/[bd]

@@ -41,7 +41,7 @@ Efectivamente, el contenido es el correcto. Ya está todo listo para proceder co
 root@mongo:~# apt update && apt upgrade && apt install mongodb-org
 {% endhighlight %}
 
-El paquete **mongodb-org** ya ha sido instalado en la máquina, pero antes de continuar, me gustaría mencionar que por defecto, cuando en un futuro realicemos una actualización de la paquetería instalada en la máquina, va a actualizar también aquellos paquetes referentes a MongoDB, que en mi caso no es algo relevante, pero si ponemos el servidor en producción, puede ser aconsejable monitorizar las actualizaciones y los cambios que suponen antes de llevarlas a cabo. Para evitar lo que acabo de mencionar, podemos ejecutar los comandos:
+El paquete **mongodb-org** ha sido instalado en la máquina, pero antes de continuar, me gustaría mencionar que por defecto, cuando en un futuro realicemos una actualización de la paquetería instalada en la máquina, va a actualizar también aquellos paquetes referentes a MongoDB, que en mi caso no es algo relevante, pero si ponemos el servidor en producción, puede ser aconsejable monitorizar las actualizaciones y los cambios que suponen antes de llevarlas a cabo. Para evitar lo que acabo de mencionar, podemos ejecutar los comandos:
 
 {% highlight shell %}
 echo "mongodb-org hold" | sudo dpkg --set-selections
@@ -222,7 +222,7 @@ Donde:
 * **-u**: Indicamos el nombre del usuario del que queremos hacer uso. En este caso, **alvaro**.
 * **-p**: Indicamos la contraseña asociada al usuario del que queremos hacer uso. Podríamos obviarla y nos la pedirá por teclado de forma oculta. En este caso, **alvaro**.
 
-Como se puede apreciar, la autenticación ha funcionado correctamente y estamos actualmente conectados en una _mongo shell_ haciendo uso del usuario administrador previamente definido. El gestor de bases de datos ya se encuentra totalmente funcional y sin mostrar ningún tipo de advertencia, de manera que ya hemos finalizado la primera mitad del artículo, referente a la instalación del mismo.
+Como se puede apreciar, la autenticación ha funcionado correctamente y estamos actualmente conectados a una _mongo shell_ haciendo uso del usuario administrador previamente definido. El gestor de bases de datos se encuentra ya totalmente funcional y sin mostrar ningún tipo de advertencia, de manera que ya hemos finalizado la primera mitad del artículo, referente a la instalación del mismo.
 
 Para hacer un artículo un poco más completo, vamos a proceder a simular una situación real, en la que se tuviese que definir una nueva base de datos con un usuario con permisos para administrarla. En este caso, voy a crear una base de datos de nombre **empresa** en la que va a existir un usuario **empresario** que será el administrador de la misma, pero totalmente aislado del resto de bases de datos que se pudiesen crear en un futuro.
 
@@ -246,7 +246,7 @@ Muy posiblemente os estaréis preguntando por qué no aparece la base de datos q
 
 Antes de proceder con la inserción de documentos, vamos a crear el usuario **empresario** cuya contraseña será **password**, que contará con los privilegios suficientes para administrar la base de datos actual, consiguiendo así simular una situación más real, pues generalmente el administrador de sistemas no es el encargado de introducir dichos documentos. La creación la llevaremos a cabo haciendo uso del método **db.createUser()** previamente utilizado, pero adaptando en esta ocasión los roles para que únicamente tenga permisos de creador sobre la base de datos actual:
 
-{% highlight shell %}
+{% highlight json %}
 > db.createUser(
 ...   {
 ...     user: "empresario",
@@ -259,7 +259,7 @@ Successfully added user: { "user" : "empresario", "roles" : [ "dbOwner" ] }
 
 A pesar de que la salida del comando ha notificado que ha finalizado exitosamente, vamos a verificar que la creación de dicho usuario se ha realizado tal y como debería, listando para ello los usuarios definidos en la base de datos actual, haciendo uso de la instrucción:
 
-{% highlight shell %}
+{% highlight json %}
 > show users
 {
 	"_id" : "empresa.empresario",
@@ -344,7 +344,7 @@ net:
   bindIp: 127.0.0.1
 {% endhighlight %}
 
-En nuestro caso, nos interesa modificar únicamente el valor de la directiva **bindIp**, ya que el puerto asignado por defecto me parece correcto. En lugar de indicarle que escuche en la dirección **192.168.1.151**, vamos a darle el valor **0.0.0.0**, significando por tanto que escuchará en todas las interfaces de red existentes en la máquina, ya que de lo contrario, bloquearía las conexiones entrantes desde _localhost_, cosa que no nos interesa. El resultado final sería:
+En nuestro caso, nos interesa modificar el valor de la directiva **bindIp** para que en lugar de escuchar en la dirección **127.0.0.1**, escuche en **0.0.0.0**, significando por tanto que aceptará conexiones en todas las interfaces de red existentes en la máquina (ya que el puerto asignado por defecto me parece correcto). A pesar de ello, podríamos indicar que únicamente escuche en **192.168.1.151**, pero no tendría sentido, ya que en ese caso, bloquearía las conexiones entrantes desde _localhost_, cosa que no nos interesa. El resultado final sería:
 
 {% highlight shell %}
 net:
@@ -405,7 +405,7 @@ switched to db empresa
 
 Tras ello, acudiremos al método **db.updateUser()** para modificar un usuario ya existente, en este caso, el usuario **empresario**, añadiéndole al mismo una restricción de autenticación para así limitar su acceso a aquellas IPs que provengan de la red local, es decir, de **192.168.1.0/24** (en caso de ser necesario, podríamos definir una IP de _host_ en lugar de una red completa). La instrucción a ejecutar sería:
 
-{% highlight shell %}
+{% highlight json %}
 > db.updateUser(
 ...     "empresario",
 ...   {
@@ -418,7 +418,7 @@ Me gustaría puntualizar el hecho de que únicamente hemos permitido el acceso d
 
 En esta ocasión, la instrucción ejecutada no ha devuelto ninguna salida, generándome cierta inquietud ya que no tengo certeza de que la actualización se haya llevado a cabo, por lo que haré uso del método **db.runCommand()** para ejecutar el comando **usersInfo**, que recibe como parámetros el nombre de un usuario y la base de datos en la que se encuentra definido, mostrando por tanto la información que le solicitemos, en este caso, las restricciones de autenticación:
 
-{% highlight shell %}
+{% highlight json %}
 > db.runCommand(
 ...    {
 ...      usersInfo:  { user: "empresario", db: "empresa" },
@@ -476,7 +476,7 @@ Como era de esperar, la autenticación ha fallado, al no estar permitida para di
 
 De otro lado, he creado otra máquina virtual conectada a su vez en modo puente (_bridge_) a mi red doméstica, de manera que cuenta con direccionamiento dentro de la red permitida, con la que he seguido el mismo proceso de instalación que con la máquina servidora, pero sin llegar a levantar el proceso **mongod**, ya que no será necesario para realizar conexiones remotas.
 
-Para llevar a cabo la conexión haremos uso de las opciones **-u** y **-p** anteriormente utilizadas para indicar el usuario y contraseña a utilizar, con la única diferencia que tendremos que indicar al final la dirección IP del servidor al que vamos a tratar de conectar, en este caso, **192.168.1.151**, así como la base de datos, en este caso, **empresa**. La instrucción a ejecutar sería:
+Para llevar a cabo la conexión remota haremos uso de las opciones **-u** y **-p** anteriormente utilizadas para indicar el usuario y contraseña a utilizar, con la única diferencia que tendremos que indicar al final la dirección IP del servidor al que nos vamos a tratar de conectar, en este caso, **192.168.1.151**, así como la base de datos, en este caso, **empresa**. La instrucción a ejecutar sería:
 
 {% highlight shell %}
 debian@cliente:~$ mongo -u empresario -p password 192.168.1.151/empresa
@@ -513,7 +513,7 @@ reuniones
 
 Como era de esperar, las 3 colecciones que previamente he creado son visibles desde la máquina cliente, así que vamos a ir un paso mas allá y vamos a tratar de mostrar los documentos definidos en la colección **reuniones**, por ejemplo, haciendo para ello uso del método **db.[colección].find()**, que permitirá mostrar todos los documentos de una determinada colección, combinado con el método **pretty()**, que hará que la información se muestre de una forma más "visual" y fácil de entender. La instrucción de la que haremos uso sería:
 
-{% highlight shell %}
+{% highlight json %}
 > db.reuniones.find().pretty()
 {
 	"_id" : ObjectId("5fc913951ff28cf908abed20"),

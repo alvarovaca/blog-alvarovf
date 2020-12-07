@@ -132,7 +132,7 @@ alvaro@debian:~/emacs$ sudo apt install xz-utils
 Ya está todo listo para realizar la descompresión y la posterior eliminación del comprimido para liberar espacio. Para ello, ejecutaremos el comando:
 
 {% highlight shell %}
-alvaro@debian:~/emacs$ tar -Jxf emacs-27.1.tar.xz --strip 1 && rm -r emacs-27.1.tar.xz
+alvaro@debian:~/emacs$ tar -Jxf emacs-27.1.tar.xz --strip 1 && rm emacs-27.1.tar.xz
 {% endhighlight %}
 
 Donde:
