@@ -123,7 +123,7 @@ olcTLSCertificateFile: /etc/ssl/certs/openstack.crt
 * En la segunda línea (directiva **changetype**) hemos indicado el tipo de cambio a llevar a cabo, que en este caso, se trata de una modificación.
 * A partir de aquí tendremos que indicar pares de directivas (atributo a modificar seguido del nuevo valor asignado), separadas entre ellas con un guión (**-**), siendo el primer par el correspondiente al certificado de la autoridad certificadora, el segundo a nuestra clave privada y el tercero, al certificado firmado.
 
-Una vez definido el fichero **.ldif**, tendremos que importarlo para así modificar los atributos del objeto correspondiente a la configuración, haciendo para ello uso de `ldapadd`, pero utilizando en este caso unos parámetros concretos, ejecutando para ello el comando:
+Una vez definido el fichero **.ldif**, tendremos que importarlo para así modificar los atributos del objeto correspondiente a la configuración, haciendo para ello uso de `ldapmodify`, pero utilizando en este caso unos parámetros concretos, ejecutando para ello el comando:
 
 {% highlight shell %}
 root@freston:~# ldapmodify -Y EXTERNAL -H ldapi:/// -f ldaps.ldif
