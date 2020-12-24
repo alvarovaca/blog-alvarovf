@@ -445,7 +445,7 @@ En este caso, tras comparar ambas posibilidades, y dadas las circunstancias, har
 El primer paso será configurar el método de escucha del servicio **php-fpm**, configuración que se llevará a cabo en un archivo del grupo de recursos, pues dicho servicio puede ejecutar múltiples grupos de procesos con diferentes configuraciones, pero en este caso, haremos uso del que viene por defecto, **www.conf**. Para comprobar qué configuración está usando actualmente, ejecutaremos el comando:
 
 {% highlight shell %}
-root@vps:/srv/iesgn19/principal# cat /etc/php/7.3/fpm/pool.d/www.conf | egrep 'listen ='
+root@vps:/srv/iesgn19/principal# egrep 'listen =' /etc/php/7.3/fpm/pool.d/www.conf
 listen = /run/php/php7.3-fpm.sock
 {% endhighlight %}
 
@@ -454,7 +454,7 @@ Como se puede apreciar, hemos leído el contenido de dicho fichero, filtrando po
 Como hemos visto anteriormente, a los ficheros tipo _Socket UNIX_ se les puede cambiar los permisos, por lo que tendremos que verificar que los permisos de lectura y escritura son los correctos, de manera que el usuario **www-data**, que es el usuario que usa _nginx_ por defecto, tenga los permisos necesarios. Para ello, ejecutaremos el comando:
 
 {% highlight shell %}
-root@vps:/srv/iesgn19/principal# cat /etc/php/7.3/fpm/pool.d/www.conf | egrep 'listen\.'
+root@vps:/srv/iesgn19/principal# egrep 'listen\.' /etc/php/7.3/fpm/pool.d/www.conf
 ;listen.backlog = 511
 listen.owner = www-data
 listen.group = www-data

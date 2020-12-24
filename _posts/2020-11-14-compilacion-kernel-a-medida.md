@@ -174,10 +174,10 @@ alvaro@debian:~/compkernel/linux-5.7$ ls -la | egrep '.config'
 Efectivamente, el fichero **.config** ha sido generado, así que vamos a comprobar cuántos componentes del núcleo han sido enlazados estáticamente (**y**) y cuántos dinámicamente (**m**) en la configuración actual, leyendo el contenido del fichero, filtrando por líneas y posteriormente, contando las coincidencias para cada uno de los casos:
 
 {% highlight shell %}
-alvaro@debian:~/compkernel/linux-5.7$ cat .config | egrep '=y' | wc -l
+alvaro@debian:~/compkernel/linux-5.7$ egrep '=y' .config | wc -l
 2097
 
-alvaro@debian:~/compkernel/linux-5.7$ cat .config | egrep '=m' | wc -l
+alvaro@debian:~/compkernel/linux-5.7$ egrep '=m' .config | wc -l
 3417
 {% endhighlight %}
 
@@ -205,10 +205,10 @@ ASoC Simple sound card support (SND_SIMPLE_CARD) [N/m/?] n
 La salida del comando es muy grande, así que la he recortado para no ensuciar, pero [aquí](https://pastebin.com/bPjPSYER) se puede ver al completo. Una vez más, contaremos el número de componentes tanto estáticos como dinámicos, para así apreciar las diferencias:
 
 {% highlight shell %}
-alvaro@debian:~/compkernel/linux-5.7$ cat .config | egrep '=y' | wc -l
+alvaro@debian:~/compkernel/linux-5.7$ egrep '=y' .config | wc -l
 1539
 
-alvaro@debian:~/compkernel/linux-5.7$ cat .config | egrep '=m' | wc -l
+alvaro@debian:~/compkernel/linux-5.7$ egrep '=m' .config | wc -l
 271
 {% endhighlight %}
 
@@ -342,10 +342,10 @@ Como se puede apreciar, en esta ocasión no hemos tenido problemas para llevar a
 Una vez más, contaremos el número de componentes tanto estáticos como dinámicos, para así apreciar las diferencias:
 
 {% highlight shell %}
-alvaro@debian:~/compkernel/linux-5.7$ cat .config | egrep '=y' | wc -l
+alvaro@debian:~/compkernel/linux-5.7$ egrep '=y' .config | wc -l
 1469
 
-alvaro@debian:~/compkernel/linux-5.7$ cat .config | egrep '=m' | wc -l
+alvaro@debian:~/compkernel/linux-5.7$ egrep '=m' .config | wc -l
 263
 {% endhighlight %}
 
@@ -359,10 +359,10 @@ Como curiosidad, cada vez que compilemos, se generará un fichero **.deb** con u
 Tras repetir reiteradas veces el procedimiento anteriormente mencionado, he dejado el fichero **.config** con la siguiente cantidad de componentes enlazados estáticamente y dinámicamente:
 
 {% highlight shell %}
-alvaro@debian:~/compkernel/linux-5.7$ cat .config | egrep '=y' | wc -l
+alvaro@debian:~/compkernel/linux-5.7$ egrep '=y' .config | wc -l
 513
 
-alvaro@debian:~/compkernel/linux-5.7$ cat .config | egrep '=m' | wc -l
+alvaro@debian:~/compkernel/linux-5.7$ egrep '=m' .config | wc -l
 24
 {% endhighlight %}
 

@@ -1202,7 +1202,7 @@ Donde:
 Una vez enviado, vamos a consultar los logs de _postfix_ para verificar que se ha enviado correctamente, pero filtrando por **yopmail**, ya que es una cadena contenida en el correo electrónico del destinatario. Para ello, ejecutaremos el comando:
 
 {% highlight shell %}
-root@cms:/srv/moodle# cat /var/log/mail.log | egrep 'yopmail'
+root@cms:/srv/moodle# egrep 'yopmail' /var/log/mail.log
 Oct 24 08:48:21 cms postfix/smtp[4196]: 98BDDC2C63: to=<pruebapostfix@yopmail.com>, relay=smtp.sendgrid.net[159.122.219.43]:587, delay=0.85, delays=0.03/0.01/0.48/0.34, dsn=2.0.0, status=sent (250 Ok: queued as XXXXXXXXXXXXXXX)
 {% endhighlight %}
 
@@ -1264,7 +1264,7 @@ Por último, guardaremos los cambios y en la parte inferior de la misma página,
 Una vez más, volveremos a mirar los logs del servicio _postfix_ para verificar que no ha habido ningún error durante el envío:
 
 {% highlight shell %}
-root@cms:/srv/drupal# cat /var/log/mail.log | egrep 'pruebadrupal'
+root@cms:/srv/drupal# egrep 'pruebadrupal' /var/log/mail.log
 Oct 24 09:44:29 cms postfix/smtp[1153]: 2F636C2D7A: to=<pruebadrupal@yopmail.com>, relay=smtp.sendgrid.net[159.122.219.55]:587, delay=0.55, delays=0.05/0/0.42/0.08, dsn=2.0.0, status=sent (250 Ok: queued as XXXXXXXXXXXXXXX)
 {% endhighlight %}
 

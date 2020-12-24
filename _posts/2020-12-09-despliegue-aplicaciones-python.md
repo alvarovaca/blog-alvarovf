@@ -725,7 +725,7 @@ Para ello, volveremos a la máquina virtual y modificaremos el valor de la direc
 Para verificar que el cambio se ha producido correctamente, vamos a visualizar el contenido de dicho fichero, estableciendo a su vez un filtro por nombre:
 
 {% highlight shell %}
-(despliegue) root@django:/srv/django_tutorial# cat django_tutorial/settings.py | egrep 'DEBUG'
+(despliegue) root@django:/srv/django_tutorial# egrep 'DEBUG' django_tutorial/settings.py
 DEBUG = False
 {% endhighlight %}
 

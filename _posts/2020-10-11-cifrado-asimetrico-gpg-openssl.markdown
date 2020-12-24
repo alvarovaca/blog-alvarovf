@@ -237,10 +237,10 @@ puede contestar sí a la siguiente pregunta.
 ¿Usar esta clave de todas formas? (s/N) s
 {% endhighlight %}
 
-Tras mostrarnos una advertencia de seguridad y confirmar que queremos usar dicha clave, el fichero ya se encontrará cifrado, por lo que vamos a proceder a ejecutar el comando `ls -l | grep Apuntes` para asegurarnos de que así ha sido.
+Tras mostrarnos una advertencia de seguridad y confirmar que queremos usar dicha clave, el fichero ya se encontrará cifrado, por lo que vamos a proceder a ejecutar el correspondiente comando para asegurarnos de que así ha sido:
 
 {% highlight shell %}
-alvaro@debian:~$ ls -l | grep Apuntes
+alvaro@debian:~$ ls -l | egrep Apuntes
 -rw-r--r-- 1 alvaro alvaro 3497882 oct  8 17:30  Apuntes.pdf
 -rw-r--r-- 1 alvaro alvaro 3449802 oct  8 17:41  Apuntes.pdf.gpg
 {% endhighlight %}

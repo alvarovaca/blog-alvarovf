@@ -448,7 +448,7 @@ Aquí podemos ver todos los puertos existentes en nuestro proyecto, por lo que t
 * **10.0.0.7**: 488dc43f-3a9b-4981-8cf7-bc6cbcf82203
 * **10.0.1.9**: 0aab3e9c-c2c9-46c2-b6ed-e33447107554
 
-Tras ello, tendremos que deshabilitar la seguridad en dichos puertos, indicando para ello el identificador de los mismos, haciendo uso de los comandos:
+Tras ello, tendremos que deshabilitar la seguridad en dichos puertos, indicando para ello el identificador en cuestión, haciendo uso de los comandos:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~/virtualenv$ openstack port set --disable-port-security 488dc43f-3a9b-4981-8cf7-bc6cbcf82203
@@ -562,7 +562,7 @@ table ip nat {
 }
 {% endhighlight %}
 
-Efectivamente, así ha sido. Al igual que pasaba con el **_bit de forward_**, ésta configuración se encuentra cargada en memoria, por lo que para que conseguir que perdure en el tiempo, vamos a ejecutar el comando:
+Efectivamente, así ha sido. Al igual que pasaba con el **_bit de forward_**, ésta configuración se encuentra cargada en memoria, por lo que para conseguir que perdure en el tiempo, vamos a ejecutar el comando:
 
 {% highlight shell %}
 root@dulcinea:~# nft list ruleset > /etc/nftables.conf
@@ -611,7 +611,7 @@ En este caso, el servidor DNS que he decidido añadir es **8.8.8.8**, por lo que
 nameserver 8.8.8.8
 {% endhighlight %}
 
-Genial, todos los cambios se han llevado a cabo, pero para que surtan efecto podemos reiniciar (comando `reboot`) o bien reiniciar el servicio correspondiente, que es lo que nosotros haremos, pues estamos intentando simular una situación real, con servidores reales. Para ello, ejecutaremos el comando:
+Genial, todos los cambios referentes a la red se han llevado a cabo, pero para que surtan efecto podemos reiniciar la máquina (comando `reboot`) o bien reiniciar el servicio correspondiente, que es lo que nosotros haremos, pues estamos intentando simular una situación real, con servidores reales. Para ello, ejecutaremos el comando:
 
 {% highlight shell %}
 root@dulcinea:~# systemctl restart networking
@@ -706,7 +706,7 @@ network:
 
 Como se puede apreciar, hemos declarado la única interfaz de red (correspondiente a la red interna, **ens3**), cuya dirección IP estática es la misma que se le concedió en su momento por DHCP (**10.0.1.4**). Es importante mencionar que la puerta de enlace ha de ser la dirección de la máquina **Dulcinea** perteneciente a la red interna (concretamente, **10.0.1.9**), de manera que podrá hacer _SNAT_ con los paquetes que le lleguen. Por último, estableceremos los dos servidores DNS existentes en el instituto, **192.168.202.2** y **192.168.200.2**, además de un servidor extra para así aumentar la disponibilidad, como puede ser **8.8.8.8**.
 
-Genial, todos los cambios se han llevado a cabo, pero para que surtan efecto podemos reiniciar (comando `reboot`) o bien volver a cargar la configuración del servicio correspondiente, que es lo que nosotros haremos, pues estamos intentando simular una situación real, con servidores reales. Para ello, ejecutaremos el comando:
+Genial, todos los cambios referentes a la red se han llevado a cabo, pero para que surtan efecto podemos reiniciar la máquina (comando `reboot`) o bien volver a cargar la configuración del servicio correspondiente, que es lo que nosotros haremos, pues estamos intentando simular una situación real, con servidores reales. Para ello, ejecutaremos el comando:
 
 {% highlight shell %}
 root@sancho:~# netplan apply
@@ -813,7 +813,7 @@ DNS3=8.8.8.8
 
 Como se puede apreciar, hemos declarado la única interfaz de red (correspondiente a la red interna, **eth0**), cuya dirección IP estática es la misma que se le concedió en su momento por DHCP (**10.0.1.5**). Es importante mencionar que la puerta de enlace ha de ser la dirección de la máquina **Dulcinea** perteneciente a la red interna (concretamente, **10.0.1.9**), de manera que podrá hacer _SNAT_ con los paquetes que le lleguen. Por último, estableceremos los dos servidores DNS existentes en el instituto, **192.168.202.2** y **192.168.200.2**, además de un servidor extra para así aumentar la disponibilidad, como puede ser **8.8.8.8**.
 
-Genial, todos los cambios se han llevado a cabo, pero para que surtan efecto podemos reiniciar (comando `reboot`) o bien reiniciar el servicio correspondiente, que es lo que nosotros haremos, pues estamos intentando simular una situación real, con servidores reales. Para ello, ejecutaremos el comando:
+Genial, todos los cambios referentes a la red se han llevado a cabo, pero para que surtan efecto podemos reiniciar la máquina (comando `reboot`) o bien reiniciar el servicio correspondiente, que es lo que nosotros haremos, pues estamos intentando simular una situación real, con servidores reales. Para ello, ejecutaremos el comando:
 
 {% highlight shell %}
 [root@quijote ~]# systemctl restart network
@@ -1050,11 +1050,11 @@ root@dulcinea:~# sed -i 's/manage_etc_hosts: true/manage_etc_hosts: false/g' /et
 Para verificar que el valor de dicha directiva ha sido modificado, vamos a visualizar el contenido de dicho fichero, estableciendo un filtro por nombre:
 
 {% highlight shell %}
-root@dulcinea:~# cat /etc/cloud/cloud.cfg | egrep 'manage_etc_hosts'
+root@dulcinea:~# egrep 'manage_etc_hosts' /etc/cloud/cloud.cfg
 manage_etc_hosts: false
 {% endhighlight %}
 
-Efectivamente, su valor ha sido modificado, así que ya podemos proceder a modificar el fichero **/etc/hosts** y realizar las correspondientes pruebas:
+Efectivamente, su valor ha sido modificado, así que ya podemos proceder a modificar el fichero **/etc/hosts** y a realizar las correspondientes pruebas:
 
 {% highlight shell %}
 root@dulcinea:~# nano /etc/hosts
@@ -1142,7 +1142,7 @@ Y modificaremos el contenido a lo siguiente:
 quijote
 {% endhighlight %}
 
-Genial, ya hemos llevado a cabo el cambio necesario, pero para que surta efecto podemos reiniciar (comando `reboot`) o bien cerrar la sesión y volver a abrirla, que es lo que nosotros haremos, pues estamos intentando simular una situación real, con servidores reales. En caso de que tampoco muestre el nuevo _hostname_, podríamos modificar directamente el fichero **/proc/sys/kernel/hostname**, de manera que el cambio entraría en vigor automáticamente. Tras ello, ya podremos proceder a llevar a cabo las modificaciones oportunas para establecer la resolución estática:
+Genial, ya hemos llevado a cabo el cambio necesario, pero para que surta efecto podemos reiniciar la máquina (comando `reboot`) o bien cerrar la sesión y volver a abrirla, que es lo que nosotros haremos, pues estamos intentando simular una situación real, con servidores reales. En caso de que tampoco muestre el nuevo _hostname_, podríamos modificar directamente el fichero **/proc/sys/kernel/hostname**, de manera que el cambio entraría en vigor automáticamente. Tras ello, ya podremos proceder a llevar a cabo las modificaciones oportunas para establecer la resolución estática:
 
 {% highlight shell %}
 [root@quijote ~]# sudo vi /etc/hosts
@@ -1268,7 +1268,9 @@ Nov 14 19:54:09 dulcinea systemd[1]: Started Network Time Synchronization.
 Nov 14 19:54:09 dulcinea systemd-timesyncd[1066]: Synchronized to time server for the first time 162.159.200.123:123 (es.pool.ntp.org).
 {% endhighlight %}
 
-En ésta ocasión, sí ha sido capaz de arrancar (**active**) y de sincronizarse con dicho servidor, tal y como podemos apreciar en el último mensaje mostrado. Todavía no hemos terminado, ya que cuando ejecuté el comando `timedatectl`, me mostraba una hora menos de la hora local, es decir, había un problema con la zona horaria, por lo que debemos modificarla manualmente. Para ver las zonas horarias disponibles, ejecutaremos el comando:
+En ésta ocasión, sí ha sido capaz de arrancar (**active**) y de sincronizarse con dicho servidor, tal y como podemos apreciar en el último mensaje mostrado.
+
+Todavía no hemos terminado, ya que cuando ejecuté el comando `timedatectl`, me mostraba una hora menos de la hora local, es decir, había un problema con la zona horaria, por lo que debemos modificarla manualmente. Para ver las zonas horarias disponibles, ejecutaremos el comando:
 
 {% highlight shell %}
 root@dulcinea:~# timedatectl list-timezones
@@ -1341,7 +1343,9 @@ Nov 14 20:01:17 sancho systemd[1]: Started Network Time Synchronization.
 Nov 14 20:01:17 sancho systemd-timesyncd[1403]: Initial synchronization to time server 90.165.120.190:123 (es.pool.ntp.org).
 {% endhighlight %}
 
-En ésta ocasión, ha sido capaz de sincronizarse con dicho servidor, tal y como podemos apreciar en el último mensaje mostrado. Todavía no hemos terminado, ya que cuando ejecuté el comando `timedatectl`, me mostraba una hora menos de la hora local, es decir, había un problema con la zona horaria, por lo que debemos modificarla manualmente, tal y como hemos hecho en la anterior máquina, ejecutando para ello el comando:
+En ésta ocasión, ha sido capaz de sincronizarse con dicho servidor, tal y como podemos apreciar en el último mensaje mostrado.
+
+Todavía no hemos terminado, ya que cuando ejecuté el comando `timedatectl`, me mostraba una hora menos de la hora local, es decir, había un problema con la zona horaria, por lo que debemos modificarla manualmente, tal y como hemos hecho en la anterior máquina, ejecutando para ello el comando:
 
 {% highlight shell %}
 root@sancho:~# timedatectl set-timezone Europe/Madrid
@@ -1411,7 +1415,9 @@ Nov 14 20:10:16 quijote.novalocal systemd[1]: Started NTP client/server.
 Nov 14 20:10:20 quijote.novalocal chronyd[1221]: Selected source 162.159.200.1
 {% endhighlight %}
 
-En ésta ocasión, ha sido capaz de sincronizarse con dicho servidor, tal y como podemos apreciar en el último mensaje mostrado. Todavía no hemos terminado, ya que cuando ejecuté el comando `timedatectl`, me mostraba una hora menos de la hora local, es decir, había un problema con la zona horaria, por lo que debemos modificarla manualmente, tal y como hemos hecho en las anteriores ocasiones, ejecutando para ello el comando:
+En ésta ocasión, ha sido capaz de sincronizarse con dicho servidor, tal y como podemos apreciar en el último mensaje mostrado.
+
+Todavía no hemos terminado, ya que cuando ejecuté el comando `timedatectl`, me mostraba una hora menos de la hora local, es decir, había un problema con la zona horaria, por lo que debemos modificarla manualmente, tal y como hemos hecho en las anteriores ocasiones, ejecutando para ello el comando:
 
 {% highlight shell %}
 [root@quijote ~]# timedatectl set-timezone Europe/Madrid

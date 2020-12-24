@@ -566,7 +566,7 @@ table ip nat {
 }
 {% endhighlight %}
 
-Efectivamente, así ha sido. Al igual que pasaba con el **bit de forward**, esta configuración se encuentra cargada en memoria, por lo que para que conseguir que perdure en el tiempo, vamos a ejecutar el comando:
+Efectivamente, así ha sido. Al igual que pasaba con el **bit de forward**, esta configuración se encuentra cargada en memoria, por lo que para conseguir que perdure en el tiempo, vamos a ejecutar el comando:
 
 {% highlight shell %}
 root@servidor:~# nft list ruleset > /etc/nftables.conf

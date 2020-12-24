@@ -123,7 +123,7 @@ root@dns:~# sed -i 's/manage_etc_hosts: true/manage_etc_hosts: false/g' /etc/clo
 Para verificar que el valor de dicha directiva ha sido modificado, vamos a visualizar el contenido de dicho fichero, estableciendo un filtro por nombre:
 
 {% highlight shell %}
-root@dns:~# cat /etc/cloud/cloud.cfg | egrep 'manage_etc_hosts'
+root@dns:~# egrep 'manage_etc_hosts' /etc/cloud/cloud.cfg
 manage_etc_hosts: false
 {% endhighlight %}
 
