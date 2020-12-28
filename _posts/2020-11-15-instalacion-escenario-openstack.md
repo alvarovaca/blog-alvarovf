@@ -746,7 +746,7 @@ nameserver 127.0.0.53
 options edns0 trust-ad
 {% endhighlight %}
 
-En este caso, los servidores DNS no aparecen en el fichero **/etc/resolv.conf** ya que Ubuntu implementa por defecto un servidor DNS local, capaz de cachear las respuestas, consiguiendo por tanto una navegación más rápida, pero que internamente, hará uso de los servidores DNS que le hemos especificado anteriormente para dichas peticiones.
+En este caso, los servidores DNS configurados no aparecen reflejados en dicho fichero ya que Ubuntu implementa por defecto un servidor DNS local, capaz de cachear las respuestas, consiguiendo por tanto una navegación más rápida, pero que internamente, hará uso de los servidores DNS que le hemos especificado anteriormente para dichas peticiones.
 
 Para verificar que toda la configuración ha funcionado, vamos a tratar de hacer `ping` a **google.es**, para así verificar también que la resolución de nombres se realiza correctamente:
 

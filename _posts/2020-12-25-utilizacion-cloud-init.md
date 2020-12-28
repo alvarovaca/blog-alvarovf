@@ -7,25 +7,23 @@ categories: hlc openstack
 ---
 Se recomienda realizar una previa lectura del _post_ [Modificación del escenario OpenStack](https://www.alvarovf.com/hlc/openstack/2020/12/12/modificacion-escenario-openstack.html), pues en este artículo se tratarán con menor profundidad u obviarán algunos aspectos vistos con anterioridad.
 
-El objetivo de esta tarea es el de continuar con la configuración del escenario de trabajo previamente generado en **OpenStack**, concretamente, eliminando una de las instancias generadas y volviéndola a crear utilizando **cloud-init**, un estándar pensado para personalizar instancias _cloud_ en las que se hace uso de una imagen base genérica común que gracias a dicho estándar podremos personalizar y adaptar a cada una de las situaciones.
+El objetivo de esta tarea es el de continuar con la configuración del escenario de trabajo previamente generado en **OpenStack**, concretamente, eliminando una de las instancias existentes y volviéndola a crear utilizando **cloud-init**, un estándar pensado para personalizar instancias _cloud_ en las que se hace uso de una imagen base genérica para posteriormente adaptarla a cada una de las situaciones.
 
-De una forma más interna, **cloud-init** trabaja con metadatos que descarga durante el arranque de un servidor de metadatos ubicando en la dirección **169.254.169.254** y que utiliza para llevar a cabo la configuración de la instancia en el primer arranque o incluso tras un reinicio.
+De una forma más interna, dicho estándar trabaja con metadatos que descarga de un servidor de metadatos ubicado en la dirección **169.254.169.254** durante el arranque, y que posteriormente utilizará para llevar a cabo la configuración de la instancia. Dependiendo del metadato en cuestión, se utilizará únicamente para el primer arranque de la instancia o también para aquellos arranques posteriores.
 
-La configuración por parte de **cloud-init** se lleva a cabo durante varias etapas que se ejecutan secuencialmente en el arranque:
+La configuración por parte de **cloud-init** se lleva a cabo durante varias etapas que se ejecutan secuencialmente:
 
-* La primera de ellas consiste en activar **cloud-init** gracias a **systemd**, pues al fin y al cabo es un proceso que se ejecuta en la máquina. En caso de existir un fichero de nombre **/etc/cloud/cloud-init.disabled** o haberse utilizado la opción del _kernel_ **cloud-init=disabled** durante el arranque, el servicio no se iniciará y por tanto, habremos deshabilitado el estándar en nuestra máquina.
+* La primera de ellas consiste en activar **cloud-init** gracias a **systemd**, pues al fin y al cabo es un proceso que se ejecuta en la máquina. En caso de existir un fichero de nombre **/etc/cloud/cloud-init.disabled** o haberse utilizado durante el arranque la opción del _kernel_ **cloud-init=disabled**, el servicio no se iniciará y por tanto, habremos deshabilitado el estándar en nuestra máquina.
 
-* En la segunda fase se produce la obtención de la información de configuración de la red. En caso de no obtener ninguna, se hará una petición DHCP. Una vez configurada la red, se llevan a cabo una serie de ejecuciones consistentes en configurar el _hostname_, _montar sistemas de ficheros_, _generar claves ssh_...
+* En la segunda fase se obtiene la información para la configuración de la red. En caso de no obtener ninguna, se hará una petición DHCP. Una vez configurada la red, se llevará a cabo la **configuración del hostname**, **montaje de sistemas de ficheros**, **generación de claves ssh**...
 
-* Durante la tercera fase se llevan a cabo configuraciones más específicas como la configuración de _ntp_, _apt_, _contraseñas de usuarios_...
+* Durante la tercera fase se llevan a cabo configuraciones más específicas como la de **ntp**, **apt**, **contraseñas de usuarios**...
 
-* En la cuarta y última fase se producen las configuraciones finales, así como _actualización de la paquetería_, _ejecución de scripts del proveedor (**vendor-data**)_ y _ejecución de scripts del usuario (**user-data**)_.
+* En la cuarta y última fase se producen las configuraciones finales, así como la **actualización de la paquetería**, **ejecución de scripts del proveedor (_vendor-data_)** y **ejecución de scripts del usuario (_user-data_)**.
 
-Es recomendable mirar los registros (_logs_) de la máquina en cuestión durante el arranque para comprobar si la configuración por parte de **cloud-init** se ha producido correctamente o de lo contrario, ha habido algún fallo en la misma.
+Es recomendable mirar los registros (_logs_) durante el arranque de la máquina en cuestión para así comprobar que la configuración por parte de **cloud-init** se ha producido correctamente y en caso contrario, visualizar el fallo ocurrido.
 
-En este caso, vamos a eliminar la máquina **Sancho** y la volveremos a crear haciendo uso en esta ocasión de un fichero **cloud-config.yaml** en el que estableceremos la configuración deseada, para que así **cloud-init** la aplique automáticamente durante la creación de la misma.
-
-Es importante mencionar que podemos llevar a cabo la tarea ya que la máquina está contenida en un volumen, por lo que el hecho de eliminar la instancia no supone la pérdida de los datos existentes, ya que para la siguiente creación, haremos uso del volumen actual.
+En este caso, vamos a eliminar la máquina **Sancho** y la volveremos a crear haciendo uso del estándar que acabamos de mencionar, no sin antes llevar a cabo una serie de consideraciones previas. Es importante mencionar que no hay riesgo alguno ya que la máquina está contenida en un volumen, por lo que el hecho de eliminar la instancia no supone la pérdida de los datos existentes, pues para la siguiente creación, haremos uso del volumen actual.
 
 Si recordamos, en el artículo referente a la modificación del escenario OpenStack deshabilitamos el servidor DHCP en la subred de la red interna, pero ahora nos será necesario tenerlo de nuevo activo, para que así se asignen automáticamente direcciones dentro del rango a las máquinas conectadas, concretamente a **Sancho**, la máquina que tendremos que volver a crear.
 
@@ -35,21 +33,21 @@ Se nos habrá abierto un pequeño menú, así que iremos a **Detalles de subred*
 
 ![dhcp1](https://i.ibb.co/D47TZtb/dhcpenabled.jpg "Habilitar DHCP")
 
-Dado que anteriormente hemos deshabilitado **cloud-init** (o al menos una parte del mismo) en la máquina **Sancho** a la hora de llevar a cabo su configuración, tendremos que revertir dichos cambios para así volverlo a habilitar. En mi caso, deshabilité la parte referente a la configuración de la red mediante la creación de un fichero de nombre **/etc/cloud/cloud.cfg.d/99-disable-network-config.cfg** con un determinado contenido, de manera que procederé a su eliminación ejecutando para ello el comando:
+Dado que a la hora de llevar a cabo la configuración inicial en la máquina **Sancho** hemos deshabilitado **cloud-init** (o al menos una parte del mismo), tendremos que revertir dichos cambios para así volverlo a habilitar. En mi caso, deshabilité la parte referente a la configuración de la red mediante la creación de un fichero de nombre **/etc/cloud/cloud.cfg.d/99-disable-network-config.cfg** con un determinado contenido, de manera que procederé a su eliminación ejecutando para ello el comando:
 
 {% highlight shell %}
 root@sancho:~# rm /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
 {% endhighlight %}
 
-Tras ello, el estándar estará totalmente habilitado, de manera que podremos salir de la máquina **Sancho** y volver a la anfitriona, para proceder con los pasos previos a la creación.
+Tras ello, el estándar estará totalmente habilitado de nuevo, de manera que podremos salir de la máquina **Sancho** y volver a la anfitriona, para así proceder con los pasos previos a la eliminación de la instancia.
 
-Dado que es necesario hacer uso del cliente **openstack** de línea de comandos y vamos a trabajar con volúmenes, tendremos que indicar en el fichero RC previamente descargado una nueva variable de entorno (**OS_VOLUME_API_VERSION**) con la versión de la API que vamos a utilizar, en este caso, **2**, por lo que haremos uso del comando:
+De otro lado, para la posterior creación de la instancia será necesario hacer uso del cliente **openstack** de línea de comandos, además de tener que trabajar con volúmenes, por lo que tendremos que indicar en el fichero RC previamente descargado una nueva variable de entorno (**OS_VOLUME_API_VERSION**) con la versión de la API que vamos a utilizar, por lo que haremos uso del comando:
 
 {% highlight shell %}
 alvaro@debian:~/Descargas$ echo "export OS_VOLUME_API_VERSION=2" >> Proyecto\ de\ alvaro.vaca-openrc.sh 
 {% endhighlight %}
 
-La línea para declarar la correspondiente variable ya ha sido añadida, así que ya podremos ejecutar dicho script que llevará a cabo toda la configuración necesaria en la máquina anfitriona para establecer la conexión. Para ello, reutilizaremos el entorno virtual creado con anterioridad y todavía existente en la máquina anfitriona, haciendo uso a su vez del fichero RC que acabamos de modificar para así acceder a nuestro proyecto.
+La línea para declarar la correspondiente variable ya ha sido añadida, así que ya podremos ejecutar dicho script que llevará a cabo toda la configuración necesaria en la máquina anfitriona para establecer la conexión. Para ello, reutilizaremos el entorno virtual creado con anterioridad y todavía existente en la máquina anfitriona junto al fichero RC que acabamos de modificar para así acceder a nuestro proyecto.
 
 Una vez dentro del mismo, podremos proceder a listar las instancias existentes en nuestro proyecto para así verificar que funciona correctamente. El comando a ejecutar sería:
 
@@ -77,16 +75,18 @@ Tras ello, procederemos a eliminar la instancia **Sancho**, cuyo volumen asociad
 (openstackclient) alvaro@debian:~/Descargas$ openstack server delete Sancho
 {% endhighlight %}
 
-En teoría la instancia ya ha sido eliminada, pero para verificarlo, vamos a listar la información detallada la misma, haciendo uso del comando:
+En teoría la instancia ya ha sido eliminada, pero para verificarlo, vamos a listar la información detallada sobre la misma, haciendo uso del comando:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~/Descargas$ openstack server show Sancho
 No server with a name or ID of 'Sancho' exists.
 {% endhighlight %}
 
-Efectivamente, podemos concluir que la máquina **Sancho** ha sido correctamente eliminada de nuestro proyecto.
+Efectivamente, tal y como nos ha devuelto la ejecución del comando, podemos concluir que la máquina **Sancho** ha sido correctamente eliminada de nuestro proyecto.
 
-Si lo pensamos, cuando vayamos a crear la nueva instancia, el servidor DHCP nos va a proporcionar una nueva dirección IP para la misma, lo que supondría tener que llevar a cabo modificaciones en las zonas del servidor DNS para que así la nueva dirección sea conocida por el resto de máquinas. Para evitar este problema, haremos uso de los **puertos** de OpenStack, que nos permiten crearlos con direcciones fijas preestablecidas. Lo primero que haremos será listar los puertos actualmente existentes en la red interna, ejecutando para ello el comando:
+Si lo pensamos, cuando vayamos a crear la nueva instancia, el servidor DHCP existente en la subred de la red interna nos va a proporcionar una nueva dirección IP que actualmente no conocemos dentro del rango, lo que supondría tener que llevar a cabo modificaciones en las zonas del servidor DNS para que así la nueva dirección sea conocida por el resto de máquinas.
+
+Para evitar este problema, crearemos a mano un **puerto** de OpenStack, al que asignaremos una dirección fija preestablecida y que asociaremos a la máquina durante la creación. Lo primero que haremos será listar los puertos actualmente existentes en la red interna, ejecutando para ello el comando:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~/Descargas$ openstack port list --network 'red interna de alvaro.vaca'
@@ -102,9 +102,7 @@ Donde:
 
 * **--network**: Indicamos el nombre de la red para filtrar los resultados.
 
-Como se puede apreciar, actualmente existen un total de 2 puertos, uno con dirección **10.0.1.9** referente a **Dulcinea** y otro con dirección **10.0.1.7** referente a **Freston**. Sin embargo, como he mencionado con anterioridad, si creásemos una nueva máquina, y por consecuencia un nuevo puerto, la dirección IP asignada sería "aleatoria".
-
-Para solventarlo, vamos a crear dentro de dicha subred un nuevo puerto de nombre **port-sancho** con la dirección que previamente tenía asignada la máquina **Sancho**, es decir, la **10.0.1.4**, haciendo para ello uso del comando:
+Como se puede apreciar, actualmente existen un total de 2 puertos en la red interna, uno con dirección **10.0.1.9** referente a **Dulcinea** y otro con dirección **10.0.1.7** referente a **Freston**, de manera que vamos a crear dentro de dicha subred un nuevo puerto de nombre **port-sancho** con la dirección que previamente tenía asignada dicha máquina, es decir, la **10.0.1.4**, haciendo para ello uso del comando:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~/Descargas$ openstack port create --network 'red interna de alvaro.vaca' --fixed-ip subnet=34a05a46-937e-4e91-b95f-f4bcad633af0,ip-address=10.0.1.4 --no-security-group --disable-port-security port-sancho
@@ -156,7 +154,7 @@ Donde:
 * **--no-security-group**: Indicamos que no se le asigne ningún grupo de seguridad al puerto, para así evitar tener que deshabilitarlo posteriormente.
 * **--disable-port-security**: Indicamos que se deshabilite la seguridad del puerto, para así evitar tener que hacerlo posteriormente.
 
-El puerto ya ha sido generado, pero para verificarlo, vamos a listar una vez más los puertos existentes en la red interna, ejecutando una vez más el comando:
+El puerto ya ha sido generado, pero para verificarlo, vamos a listar una vez más los puertos existentes en la red interna, ejecutando para ello el comando:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~/Descargas$ openstack port list --network 'red interna de alvaro.vaca'
@@ -171,7 +169,7 @@ El puerto ya ha sido generado, pero para verificarlo, vamos a listar una vez má
 
 Efectivamente, podemos concluir que el puerto de nombre **port-sancho** con dirección **10.0.1.4** ha sido correctamente generado en la subred en cuestión.
 
-Dado que en el momento de la creación tendremos que indicar el identificador del volumen a utilizar, vamos a listar todos los existentes en nuestro proyecto, haciendo para ello uso:
+Dado que en el momento de la creación de la instancia tendremos que indicar el identificador del volumen a utilizar, vamos a listar todos los volúmenes existentes en nuestro proyecto, haciendo para ello uso del comando:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~/Descargas$ openstack volume list
@@ -187,62 +185,13 @@ Dado que en el momento de la creación tendremos que indicar el identificador de
 
 Como era de esperar, en mi proyecto existen un total de 4 volúmenes creados, uno por cada una de las máquinas existentes en el escenario, siendo aquel de nombre **Sancho**, como es lógico, el único disponible para ser utilizado.
 
-Ya conocemos toda la información necesaria para llevar a cabo la creación de la instancia, a falta del fichero en el que indiquemos la configuración que deseamos que sea llevada a cabo, de manera que lo generaremos en el directorio actual con el nombre **cloud-config.yaml**, ejecutando para ello el comando:
+Ya conocemos toda la información necesaria para llevar a cabo la creación de la instancia, a falta del fichero en el que indiquemos la configuración que deseamos realizar, de manera que lo generaremos en el directorio actual con el nombre **cloud-config.yaml**, ejecutando para ello el comando:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~/Descargas$ nano cloud-config.yaml
 {% endhighlight %}
 
-En mi caso concreto, el contenido establecido en dicho fichero, tras haber leído la [documentación](https://cloudinit.readthedocs.io/en/latest/topics/modules.html) necesaria, ha sido el siguiente:
-
-{% highlight yaml %}
-#cloud-config
-
-# Configuramos los repositorios del CICA y deshabilitamos "backports":
-apt:
-  disable_suites:
-    - backports
-  primary:
-    - arches: [default]
-      uri: http://archive.ubuntu.com/ubuntu/
-  security:
-    - arches: [default]
-      uri: http://security.ubuntu.com/ubuntu
-
-# Configuramos adecuadamente el hostname y el FQDN:
-manage_etc_hosts: true
-fqdn: sancho.alvaro.gonzalonazareno.org
-hostname: sancho
-
-# Configuramos adecuadamente el cliente NTP con un servidor cercano:
-ntp:
-  enabled: true
-  ntp_client: systemd-timesyncd
-  servers:
-    - es.pool.ntp.org
-
-# Definimos la zona horaria correcta:
-timezone: Europe/Madrid
-
-# Creamos los usuarios "ubuntu" (que tendrá contraseña) y "profesor" y les permitimos hacer "sudo" sin contraseña, así como añadir las claves públicas necesarias:
-users:
-  - name: ubuntu
-    sudo: ALL=(ALL) NOPASSWD:ALL
-    shell: /bin/bash
-    lock_passwd: false
-    hashed_passwd: $6$gVAnmatcmK9$p6k5R554E0gZZrmwT2TjiqU24ILtf7OScMqyWoDw.4OBJvBXyi91sGTJFP1auo27O4/m57/f2hCfgCXuKl1si/
-    ssh_authorized_keys:
-      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDBwe9+vDJAKmDmCoM+Kf9q3Aa8IaD/pVqMdiRkf8F7cm8U+bXIoW6IHDrZkBLWPVyikphjfLsFsOx5WMiKo/YPK/LN2+1HUTRDrXZTst66/n7Juv6bG9LkgC3ltebehRPwOav8goDvwWHOPSx0snfYQD//W6+m+Y17hFb8+Cmouzjtd7t4sd09OC+ITAtXbMdIVOpd2HPQ7ytWcHmrRzF7FbXazpghRHJCX0g6mIdQDqepF9yN5pKck5Ek/mWtnQT2XW4BpOq+cxObm7zglt947Y6wRWcfpSRFGjtwrvKmigBFD7965yeofBbWQzTb98VMLRyAMOf2luVL9BUTWHeX Generated-by-Nova
-  - name: profesor
-    sudo: ALL=(ALL) NOPASSWD:ALL
-    shell: /bin/bash
-    ssh_authorized_keys:
-      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCfk9mRtOHM3T1KpmGi0KiN2uAM6CDXM3WFcm1wkzKXx7RaLtf9pX+KCuVqHdy/N/9d9wtH7iSmLFX/4gQKQVG00jHiGf3ABufWeIpjmHtT1WaI0+vV47fofEIjDDfSZPlI3p5/c7tefHsIAK6GbQn31yepAcFYy9ZfqAh8H/Y5eLpf3egPZn9Czsvx+lm0I8Q+e/HSayRaiAPUukF57N2nnw7yhPZCHSZJqFbXyK3fVQ/UQVBeNS2ayp0my8X9sIBZnNkcYHFLIWBqJYdnu1ZFhnbu3yy94jmJdmELy3+54hqiwFEfjZAjUYSl8eGPixOfdTgc8ObbHbkHyIrQ91Kz rafa@eco
-      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCmjoVIoZCx4QFXvljqozXGqxxlSvO7V2aizqyPgMfGqnyl0J9YXo6zrcWYwyWMnMdRdwYZgHqfiiFCUn2QDm6ZuzC4Lcx0K3ZwO2lgL4XaATykVLneHR1ib6RNroFcClN69cxWsdwQW6dpjpiBDXf8m6/qxVP3EHwUTsP8XaOV7WkcCAqfYAMvpWLISqYme6e+6ZGJUIPkDTxavu5JTagDLwY+py1WB53eoDWsG99gmvyit2O1Eo+jRWN+mgRHIxJTrFtLS6o4iWeshPZ6LvCZ/Pum12Oj4B4bjGSHzrKjHZgTwhVJ/LDq3v71/PP4zaI3gVB9ZalemSxqomgbTlnT jose@debian
-      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3AUDWjyPANntK+qwHmlJihKQZ1H+AGN02k06dzRHmkvWiNgou/VcCgowhMTGR+0I6nWVwgRSWKJEUEaMu1r9rEeL63GRtUSepCWpClHJG1CuySuJKVGtRdUq+/szDntpJnJW207a78hTeQLjQsyPvbOqkbulQG7xTRCycdT3bH2UO4JI2d+341gkOlxSG/stPQ52Dsbfb274oMRom5r5f2apD3wbfxE9A6qwm4m70G9NYS7T3uKgCiXegO/3GTJD4UbK0ylGUamG5obdS5yD8Ib12vRCCXWav23SAj/4f9MzAnXX8U4ATM/du2FHZBiIzWVH12LYvIEZpUIVYKPSf alberto@roma
-{% endhighlight %}
-
-El contenido del mismo es bastante básico ya que las posibilidades de **cloud-init** son limitadas en el sentido de que únicamente nos permite llevar a cabo una configuración inicial, pues el resto, como por ejemplo configurar un servidor web, tendríamos que hacerlo a mano.
+En mi caso concreto, el contenido establecido en dicho fichero tras haber leído la [documentación](https://cloudinit.readthedocs.io/en/latest/topics/modules.html) necesaria se puede encontrar [aquí](https://pastebin.com/uKaXHdLf), siendo el mismo bastante básico, ya que las posibilidades de **cloud-init** son limitadas en el sentido de que únicamente nos permite llevar a cabo una configuración inicial, pues el resto, como por ejemplo configurar un servidor web, tendríamos que hacerlo a mano o utilizando otras tecnologías.
 
 Todo está listo para proceder con la creación de la instancia **Sancho**, de manera que haremos uso del comando:
 
@@ -284,22 +233,13 @@ Todo está listo para proceder con la creación de la instancia **Sancho**, de m
 Donde:
 
 * **--volume**: Indicamos el identificador del volumen a ser utilizado por la instancia.
-* **--flavor**: Indicamos el sabor deseado para la instancia, que en este caso será el mismo que antes tenía.
+* **--flavor**: Indicamos el sabor deseado para la instancia.
 * **--key-name**: Indicamos el par de claves que queremos inyectar en la instancia. No es relevante ya que va a ser sobreescrito por la configuración indicada en el fichero **cloud-config.yaml**.
-* **--security-group**: Indicamos un grupo de seguridad para asignar a la instancia. Posteriormente lo eliminaremos.
+* **--security-group**: Indicamos un grupo de seguridad para asignar a la instancia. No es relevante ya que no hemos asignado ninguno en el momento de la creación del puerto.
 * **--port**: Indicamos el nombre del puerto que queremos asociar, que será el que hemos generado con anterioridad.
 * **--user-data**: Indicamos el fichero que contiene la configuración por parte del usuario para ser aplicada gracias a **cloud-init**.
 
-Antes de proseguir, vamos a eliminar el grupo de seguridad que forzosamente hemos tenido que establecer en el momento de la creación, para así evitar posibles inconvenientes de conectividad entre las máquinas, ejecutando para ello el comando:
-
-{% highlight shell %}
-(openstackclient) alvaro@debian:~/Descargas$ openstack server remove security group Sancho default
-Security group 3d8d6ff9-874d-451f-b24a-d9fdaba21eea not associated with the instance 326d3022-e424-4cb6-ab5c-f0db1bd244b8 (HTTP 404) (Request-ID: req-df3e2580-2309-4808-bc55-3c7af8ef213e)
-{% endhighlight %}
-
-Por un extraño motivo, el grupo de seguridad no ha sido asignado durante la creación, así que no tenemos que preocuparnos por ello.
-
-La máquina ya se encuentra generada y operativa, de manera que volveremos a **Dulcinea** para llevar a cabo una conexión a la misma, ejecutando para ello el comando:
+La máquina ya se encuentra generada y operativa, de manera que volveremos a **Dulcinea** para llevar a cabo una conexión a la misma. En este caso, voy a utilizar la autenticación mediante contraseña, para así verificar que la nueva contraseña ha sido correctamente establecida al usuario **ubuntu**, de manera que ejecutaremos el comando:
 
 {% highlight shell %}
 debian@dulcinea:~$ ssh ubuntu@sancho
@@ -322,9 +262,9 @@ Welcome to Ubuntu 20.04.1 LTS (GNU/Linux 5.4.0-58-generic x86_64)
 0 of these updates are security updates.
 {% endhighlight %}
 
-Como se puede apreciar, la conexión **ssh** se ha producido correctamente, además de haber utilizado resolución DNS para el nombre **sancho**, pues su dirección IP no ha variado y por tanto, no ha sido necesario realizar ninguna modificación en las zonas DNS.
+Como se puede apreciar, la conexión **ssh** con autenticación mediante contraseña se ha producido correctamente, además de haber utilizado resolución DNS para el nombre **sancho**, pues su dirección IP no ha variado y por tanto, no ha sido necesario realizar ninguna modificación en las zonas DNS.
 
-Lo primero que haremos será listar la información correspondiente a las interfaces de red existentes en la máquina, así como las tablas de enrutamiento, haciendo para ello uso de los comandos:
+Lo primero que haremos será listar la información referente a las interfaces de red existentes en la máquina, así como las tablas de enrutamiento, haciendo para ello uso de los comandos:
 
 {% highlight shell %}
 ubuntu@sancho:~$ ip a
@@ -346,17 +286,17 @@ ubuntu@sancho:~$ ip r
 169.254.169.254 via 10.0.1.2 dev ens3 proto dhcp src 10.0.1.4 metric 100
 {% endhighlight %}
 
-Como se puede apreciar en la salida de ambos comandos, la interfaz **ens3** tiene configurada la dirección **10.0.1.4** pero dicha configuración ha sido obtenida por DHCP, ya que su validez no es infinita, que es lo que debería ocurrir cuando se está utilizando una configuración estática. De otro lado, la máquina no tiene puerta de enlace predeterminada, por lo que actualmente no tiene conectividad con el exterior.
+Como se puede apreciar en la salida de ambos comandos, la interfaz **ens3** tiene configurada la dirección **10.0.1.4**, habiendo sido obtenida por el DHCP de OpenStack, ya que su validez no es infinita, que es lo que debería ocurrir cuando se está utilizando una configuración estática. De otro lado, la máquina no tiene puerta de enlace predeterminada, por lo que actualmente no tiene conectividad con el exterior.
 
-Esto es debido a que en el fichero **cloud-config.yaml** no hemos establecido ninguna configuración referente a la red, ya que tras haber realizado varias pruebas, no he conseguido que funcionase. Sin embargo, esto no es un problema, ya que durante el proceso de configuración de la red por parte de **cloud-init**, en caso de no encontrar ninguna configuración referente en el fichero **cloud-config.yaml** pasado como parámetro, buscará además en un fichero local de nombre **/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg** en la máquina para así generar de manera dinámica el fichero **/etc/netplan/50-cloud-init.yaml** que contendrá la información sobre la configuración de red.
+Ambos problemas son debidos a que en el fichero **cloud-config.yaml** no hemos establecido ninguna configuración referente a la red. Sin embargo, esto no es un problema, ya que en caso de no encontrar dicha configuración en el fichero pasado como parámetro durante la correspondiente etapa de **cloud-init**, buscará además en un fichero local de nombre **/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg**, que es el que nosotros utilizaremos.
 
-En este caso, vamos a generar dicho fichero que contendrá exactamente la misma configuración de red que en anteriores artículos hemos asignado a la máquina habiendo deshabilitado **cloud-init**, ejecutando para ello el comando:
+En este caso, vamos a generar dicho fichero que contendrá exactamente la misma configuración de red que en anteriores artículos hemos asignado a la máquina, ejecutando para ello el comando:
 
 {% highlight shell %}
 root@sancho:~# nano /etc/cloud/cloud.cfg.d/50-curtin-networking.cfg
 {% endhighlight %}
 
-El contenido del mismo, como acabo de mencionar, será aquel que en anteriores artículos hemos asignado a dicha máquina, con la única diferencia de que tendremos que asignar correctamente la dirección MAC a la del nuevo puerto, quedando de la siguiente manera:
+La única diferencia con respecto a la configuración de red asignada en anteriores artículos es que tendremos que indicar correctamente la dirección MAC del nuevo puerto, quedando de la siguiente manera:
 
 {% highlight shell %}
 network:
@@ -375,7 +315,7 @@ network:
                 search: ["alvaro.gonzalonazareno.org"]
 {% endhighlight %}
 
-Tras ello, guardaremos los cambios y tendremos que aplicarlos, reiniciando para ello la máquina y forzando a **cloud-init** a cargar la nueva configuración establecida, haciendo para ello uso del comando:
+Tras ello, guardaremos los cambios y con la finalidad de aplicarlos, reiniciaremos la máquina, forzando a **cloud-init** a cargar la nueva configuración establecida, haciendo para ello uso del comando:
 
 {% highlight shell %}
 root@sancho:~# cloud-init clean -r
@@ -387,7 +327,7 @@ Donde:
 
 * **-r**: Indicamos a la máquina que se reinicie para aplicar la nueva configuración.
 
-Como se puede apreciar, la conexión ha sido cerrada por el _host_ remoto, de manera que tras el reinicio, podremos volver a llevar a cabo una nueva conexión **ssh** con la misma, siendo algo normal que muestre una advertencia ya que las claves **ssh** han sido regeneradas, al haber forzado a **cloud-init** a generar una nueva configuración.
+Como era de esperar, la conexión ha sido cerrada por el _host_ remoto, de manera que tras el reinicio podremos a llevar a cabo una nueva conexión **ssh**, siendo algo normal que muestre una advertencia al haber sido regeneradas las claves **ssh**, como consecuencia de forzar a **cloud-init** a generar una nueva configuración.
 
 Una vez dentro de la máquina, volveremos a listar la información correspondiente a las interfaces de red existentes en la máquina, así como las tablas de enrutamiento, ejecutando para ello los comandos:
 
@@ -411,7 +351,7 @@ default via 10.0.1.9 dev ens3 proto static
 10.0.1.0/24 dev ens3 proto kernel scope link src 10.0.1.4
 {% endhighlight %}
 
-Como se puede apreciar, la máquina tiene configurada una interfaz **ens3** con direccionamiento privado **10.0.1.4**, configurado de forma estática, ya que su **valid_lft** es **forever**.
+Como se puede apreciar, la máquina tiene configurada una interfaz **ens3** con direccionamiento privado **10.0.1.4** configurado de forma estática, ya que su **valid_lft** es **forever**.
 
 De otro lado, la configuración de enrutamiento es la correcta, por lo que en un principio debería tener salida al exterior. Para comprobarlo, vamos a hacer `ping` a una dirección que sabemos que nos va a responder, como por ejemplo a **google.es**:
 
@@ -427,7 +367,9 @@ PING google.es (172.217.168.163) 56(84) bytes of data.
 rtt min/avg/max/mdev = 43.464/43.862/44.493/0.451 ms
 {% endhighlight %}
 
-Como era de esperar, la máquina tiene conectividad con el exterior, además de haber logrado resolver correctamente el nombre **google.es**. Vamos a indagar un poco más visualizando el contenido del fichero que ha sido generado dinámicamente a partir del fichero **/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg**, haciendo para ello uso del comando:
+Como era de esperar, la máquina tiene conectividad con el exterior, además de haber logrado resolver correctamente el nombre **google.es**.
+
+Vamos a indagar un poco más, visualizando para ello el contenido del fichero con la información sobre la configuración de red a utilizar, de nombre **/etc/netplan/50-cloud-init.yaml** y generado dinámicamente a partir del fichero **/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg** que anteriormente hemos creado. Para ello, haremos uso del comando:
 
 {% highlight shell %}
 ubuntu@sancho:~$ cat /etc/netplan/50-cloud-init.yaml
@@ -452,9 +394,9 @@ network:
     version: 2
 {% endhighlight %}
 
-Como se puede apreciar, toda la configuración que previamente hemos establecido para que **cloud-init** utilice, ha sido correctamente plasmada en dicho fichero, de manera que por consecuencia, la configuración de red se ha realizado correctamente.
+Como se puede apreciar, toda la configuración de red que previamente hemos establecido para que **cloud-init** utilice, ha sido correctamente plasmada en dicho fichero, pudiendo por tanto concluir que la configuración de red se ha realizado correctamente.
 
-Sin embargo, vamos a visualizar el contenido del fichero donde se establecen los servidores DNS a los que consultar, es decir, el fichero **/etc/resolv.conf**, ejecutando para ello el comando:
+De otro lado, vamos a visualizar el contenido del fichero en el que se establecen los servidores DNS a consultar, es decir, el fichero **/etc/resolv.conf**, ejecutando para ello el comando:
 
 {% highlight shell %}
 ubuntu@sancho:~$ cat /etc/resolv.conf
@@ -463,9 +405,9 @@ options edns0 trust-ad
 search alvaro.gonzalonazareno.org
 {% endhighlight %}
 
-En este caso, los servidores DNS establecidos no aparecen reflejados en el fichero **/etc/resolv.conf** ya que Ubuntu implementa por defecto un servidor DNS local, capaz de cachear las respuestas, consiguiendo por tanto una navegación más rápida, pero que internamente, hará uso de los servidores DNS que le hemos especificado anteriormente para dichas peticiones. Este es además, el motivo por el que no tiene sentido configurar dicho fichero en la configuración de **cloud-init**, ya que lo que nos interesa es que el servidor DNS a utilizar sea el local.
+En este caso, los servidores DNS configurados no aparecen reflejados en dicho fichero ya que Ubuntu implementa por defecto un servidor DNS local, capaz de cachear las respuestas, consiguiendo por tanto una navegación más rápida, pero que internamente, hará uso de los servidores DNS que le hemos especificado anteriormente para dichas peticiones. Este es además, el motivo por el que no tiene sentido configurar dicho fichero con **cloud-init**, ya que lo que nos interesa es que el servidor DNS a utilizar sea el local.
 
-Para finalizar con la configuración de red, vamos a hacer `ping` a algunas máquinas y servicios nombradas en la zona DNS interna, para así verificar que hace correctamente uso del servidor DNS ubicado en **Freston**:
+Para finalizar con la configuración de red, vamos a hacer `ping` a algunas máquinas y servicios nombrados en la zona DNS interna, para así verificar que hace uso correctamente del servidor DNS ubicado en **Freston**:
 
 {% highlight shell %}
 ubuntu@sancho:~$ ping dulcinea
@@ -519,9 +461,9 @@ PING sancho.alvaro.gonzalonazareno.org (127.0.1.1) 56(84) bytes of data.
 rtt min/avg/max/mdev = 0.027/0.057/0.086/0.024 ms
 {% endhighlight %}
 
-Efectivamente, es capaz de resolver todos los nombres introducidos.
+Efectivamente, es capaz de resolver todos los nombres introducidos, al estar haciendo uso correctamente del servidor DNS ubicado en **Freston**.
 
-Cuando hayamos finalizado con la configuración de red, vamos a proceder con las últimas dos pruebas, siendo la primera de ellas referente al nombre de la máquina, por lo que vamos a visualizar el _hostname_ y el _FQDN_ asignado, para así verificar que es el correcto. Para ello, haremos uso de los comandos:
+Tras finalizar con la configuración de red, vamos a proceder con las últimas dos pruebas, siendo la primera de ellas referente al nombre de la máquina, por lo que vamos a visualizar el _hostname_ y el _FQDN_ asignado, haciendo para ello uso de los comandos:
 
 {% highlight shell %}
 ubuntu@sancho:~$ hostname
@@ -544,7 +486,9 @@ System clock synchronized: yes
           RTC in local TZ: no
 {% endhighlight %}
 
-Como era de esperar, el reloj se encuentra correctamente sincronizado (**System clock synchronized**) con la zona horaria de **Madrid**, tal y como nosotros hemos establecido en el correspondiente fichero **cloud-config.yaml**. A pesar de ello, también hemos indicado el servidor NTP con el que queremos realizar la sincronización, así que vamos a comprobar que ha hecho uso del mismo, ejecutando para ello el comando:
+Como era de esperar, el reloj se encuentra correctamente sincronizado (**System clock synchronized**) con la zona horaria de España (**Europe/Madrid**), tal y como hemos establecido en el correspondiente fichero **cloud-config.yaml**.
+
+A pesar de ello, también hemos indicado el servidor NTP con el que queremos realizar la sincronización, así que vamos a comprobar que se ha hecho uso del mismo, ejecutando para ello el comando:
 
 {% highlight shell %}
 ubuntu@sancho:~$ systemctl status systemd-timesyncd.service
