@@ -5,129 +5,115 @@ banner: "/assets/images/banners/dns.jpg"
 date:   2020-12-11 19:04:00 +0200
 categories: servicios
 ---
-Cuando se quiere acceder a una página web en Internet se necesita conocer la **dirección IP** del servidor donde está almacenada, pero, por regla general, el usuario solo conoce el nombre del dominio. La razón no es otra que la dificultad de recordar las series numéricas del tipo **51.210.109.246**. Es por este motivo por el que surgen los llamados **dominios**, permitiendo traducir un nombre más sencillo de recordar en direcciones IP.
+Cuando se quiere acceder a un sitio web en Internet se necesita conocer la **dirección IP** del servidor donde está siendo servido, pero, por regla general, el usuario solo conoce el nombre del dominio. La razón no es otra que la dificultad de recordar las series numéricas del tipo **51.210.109.246**.
 
-La función anteriormente mencionada es tarea de los servidores DNS (_Domain Name Server_). Hablando un poco sobre la historia del pasado, antiguamente existía una resolución estática, es decir, todos los nombres de dominio se encontraban contenidos en un fichero, por lo que todos los ordenadores tenían que bajarse constantemente el nuevo fichero mediante el protocolo FTP cada vez que ocurriese un cambio.
+Es por este motivo por el que surgen los llamados **dominios**, permitiendo traducir un nombre más sencillo de recordar en direcciones IP, siendo esta una tarea de los servidores DNS (_Domain Name Server_). Por ejemplo, el nombre **www.alvarovf.com** se traduce finalmente en **51.210.109.246**.
 
-Este método dejó de ser viable con el crecimiento de Internet, además de generar conflictos, pues nadie controlaba que los nombres no se repitiesen, por lo que podían llegar a coexistir varias máquinas con el mismo nombre, problema que se solucionó con la aparición del protocolo DNS, que hace uso de un sistema de base de datos distribuida.
+Antiguamente existía una resolución estática, es decir, todos los nombres de dominio y sus correspondencias se encontraban contenidas en un fichero, por lo que todos los ordenadores tenían que descargarlo mediante el protocolo FTP cada vez que ocurriese un cambio.
 
-Se trata de un sistema jerárquico, que tiene un inicio o raíz (_root_), y a partir de ahí existen varios niveles de nombres:
+Este método dejó de ser viable con el crecimiento de Internet, además de generar conflictos, pues nadie controlaba que los nombres no se repitiesen, pudiendo llegar a coexistir varias máquinas con el mismo nombre. Dicho problema se solucionó con la aparición del protocolo DNS, que hace uso de un sistema de base de datos distribuida.
+
+Se trata de un sistema jerárquico que tiene un inicio o raíz (_root_), existiendo a partir de ahí varios niveles de nombres:
 
 * **Dominio raíz (.)**: Es gestionado por la ICANN, y aunque las personas nunca lo ponemos, los navegadores hacen uso del mismo.
-* **Dominios de primer nivel (TLD)**: Se trata de un conjunto de dominios ya preestablecidos, comúnmente conocidos, como pueden ser **com**, **es**, **org**...
-* **Dominios de segundo nivel**: Son aquellos nombres que pueden ser alquilados por instituciones, personas, empresas... como puede ser **alvarovf.com**, **gonzalonazareno.org**...
+* **Dominios de primer nivel (TLD)**: Se trata de un conjunto de dominios comúnmente conocidos al estar ya preestablecidos, como por ejemplo **com**, **es**, **org**...
+* **Dominios de segundo nivel**: Son aquellos nombres que pueden ser alquilados por instituciones, personas, empresas... como por ejemplo **alvarovf.com**, **gonzalonazareno.org**...
 
-A partir de este nivel en el árbol, se pueden empezar a nombrar las máquinas o servicios dentro de nuestra **zona DNS**, o bien, crear subdominios que se encuentren gestionados por nosotros o delegar su gestión a otra institución, dentro del cuál se podrán nombrar también máquinas y servicios (lo veremos con más detalle a continuación).
+A partir de este nivel en el árbol se pueden empezar a nombrar las máquinas y servicios dentro de la **zona DNS**, e incluso crear subdominios que se encuentren gestionados por nosotros o delegar su gestión a otra persona o institución, dentro del cuál se podrán nombrar también máquinas y servicios. Lo veremos con más detalle a continuación.
 
 Para aclarar conceptos, vamos a hacer un pequeño ejemplo con el dominio **es.wikipedia.org.**:
 
 * **.**: Es el dominio raíz, que como anteriormente he mencionado, las personas nunca lo ponemos, pero los navegadores hacen uso del mismo.
 * **org**: Es el dominio de primer nivel o _TLD_ y se encuentra ya predefinido.
 * **wikipedia**: Es el dominio de segundo nivel y ha sido alquilado por la correspondiente institución.
-* **es**: Es el nombre de una máquina o servicio dentro de la zona DNS de **wikipedia.org.**.
+* **es**: Es el nombre de una máquina o servicio dentro de la zona DNS.
 
-Como he mencionado, la estructura podría continuar en caso de crear subdominios, pudiendo nombrar máquinas y servicios dentro de los mismos.
+Anteriormente hemos hecho uso del concepto **zona DNS**. Bien, una zona DNS es el conjunto de nombres y servicios definidos dentro de un dominio, algo así como una base de datos.
 
-Anteriormente hemos hecho uso del concepto **zona DNS**. Bien, una zona DNS es el conjunto de nombres y servicios definidos dentro de un dominio, algo así como una base de datos. Por ejemplo, la zona **org.** está formada por todos los dominios de segundo nivel definidos dentro de dicho dominio: **gonzalonazareno**, **google**, **alvarovf**... A su vez, la zona **gonzalonazareno.org.** está formada por todos los nombres o servicios dentro de dicho dominio: **macaco**, **papion**, **babuino**... y así sucesivamente. Existen dos tipos de zonas:
+Por ejemplo, la zona **org.** está formada por todos los dominios de segundo nivel definidos dentro de dicho dominio: **gonzalonazareno**, **alvarovf**... A su vez, la zona **gonzalonazareno.org.** está formada por todos los nombres o servicios dentro de dicho dominio: **macaco**, **papion**, **babuino**... y así sucesivamente. Existen dos tipos de zonas:
 
 * **Zona de resolución directa**: Nos permiten resolver un nombre a una dirección IP. Son las más conocidas y utilizadas.
-* **Zona de resolución inversa**: Nos permiten resolver una dirección IP a un nombre (al contrario que el caso anterior). Se utiliza en determinadas ocasiones, dado que hay sistemas de seguridad que necesitan la resolución inversa para verificar la procedencia de un paquete, por ejemplo. Están pensadas para direccionamiento privado.
+* **Zona de resolución inversa**: Nos permiten resolver una dirección IP a un nombre. Se utiliza en ocasiones muy concretas, pues están pensadas para direccionamiento privado.
 
-Cada zona DNS se encuentra guardada en un fichero que se encuentra dentro de un servidor DNS, es decir, hay un (o varios) servidor DNS que conoce una zona determinada, que se conoce como **servidor DNS con autoridad sobre la zona**. Por ejemplo, **wikipedia.org**. tendrá varios servidores DNS que conocerán todos los nombres y sus correspondientes IPs en esa zona (**es**, **nds**...), que en la mayoría de ocasiones suelen ser los servidores DNS de la empresa con la que se ha alquilado el dominio. Existirán a su vez otros servidores DNS que conocerán la zona **org.**, es decir, conocerán a los servidores que conocen la zona de **wikipedia.org.**, y así jerárquicamete.
+Cada zona DNS se encuentra definida en un fichero que se almacena en un servidor DNS, es decir, a aquel servidor DNS que conoce una zona determinada se le conoce como **servidor DNS con autoridad sobre la zona**, y pueden ser varios.
 
-Dicha estructura jerárquica es necesaria ya que así podemos conseguir que la resolución de nombres sea una tarea "descentralizada". Por ejemplo, si le preguntas a los servidores con autoridad sobre la zona **org.** por la dirección de **es.wikipedia.org.**, no te sabrán decir la dirección IP asociada, pero sí la dirección de aquellos servidores con autoridad sobre la zona **wikipedia.org.**, de manera que volveremos a hacer la misma pregunta a dichos servidores, que nos devolverán ahora sí, la dirección IP asociada.
+Por ejemplo, **wikipedia.org.** tendrá varios servidores DNS que conocerán todos los nombres y sus correspondencias en esa zona, que en la mayoría de ocasiones suelen ser los servidores DNS que proporciona la empresa con la que se ha alquilado el dominio. Existirán a su vez otros servidores DNS que conocerán la zona **org.**, es decir, conocerán a los servidores que conocen la zona de **wikipedia.org.**, y así jerárquicamente.
 
-De esta manera, existen actualmente un total de 13 servidores que conocen la zona del dominio raíz (**.**), llamados **_root servers_**, que son capaces de darte las direcciones de los servidores con autoridad sobre la zona de primer nivel. Actualmente, se encuentran replicados en una gran cantidad de sitios, de manera que gracias al tipo de peticiones _anycast_, le preguntaremos al más cercano geográficamente a nosotros.
+Dicha estructura jerárquica es necesaria para conseguir que la resolución de nombres sea una tarea "descentralizada". Por ejemplo, si le preguntas a los servidores con autoridad sobre la zona **org.** por la dirección de **es.wikipedia.org.**, no te sabrán decir la dirección IP asociada, pero sí la dirección de aquellos servidores con autoridad sobre la zona **wikipedia.org.**, de manera que volveremos a hacer la misma pregunta a dichos servidores, que nos devolverán ahora sí, la dirección IP asociada.
 
-El mayor inconveniente de este sistema es el hecho de que sea jerárquico, de manera que si el primer eslabón de la cadena (los 13 _root servers_) cayese, Internet dejaría de funcionar.
+De esta manera, existen actualmente un total de 13 servidores que conocen la zona del dominio raíz (**.**), llamados **_root servers_**, que son capaces de dar las direcciones de los servidores con autoridad sobre la zona de primer nivel. Actualmente, se encuentran replicados en una gran cantidad de sitios, preguntando siempre al más cercano geográficamente a nosotros, gracias al tipo de peticiones _anycast_.
 
-Vamos a hacer, en modo de resumen final, un ejemplo completo de una posible resolución que podría llevar a cabo una máquina cualquiera conectada a Internet, sobre el dominio **www.alvarovf.com**:
+Vamos a hacer, a modo de resumen final, un ejemplo completo de una posible resolución que podría llevar a cabo una máquina cualquiera conectada a Internet, sobre el dominio **www.alvarovf.com**:
 
-- El primer paso que nuestra máquina realiza es mirar en el fichero **hosts** de nuestra máquina, en la que podemos indicar una resolución estática de nombres de forma manual, que prevalece sobre cualquier resolución DNS.
-- En caso de no encontrar coincidencia, preguntará por la dirección de dicho dominio al primer servidor DNS que tengamos configurado, en el caso de Linux, en el fichero **/etc/resolv.conf**, que mirará si tiene _cacheada_ la respuesta o si es uno de los dominios a los que sirve, de manera que en caso de que así sea, nos dirá la dirección IP, pero en caso contrario, el proceso continúa.
-- En caso de que el servidor DNS al que hemos preguntado del tipo _forward_, dicha petición será reenviada a un servidor DNS recursivo, que llevará a cabo los siguientes pasos:
+- El primer paso consiste en mirar el fichero **hosts** de nuestra máquina, en el que podemos indicar una resolución estática de nombres de forma manual, que prevalece sobre cualquier resolución DNS.
+- En caso de no encontrar coincidencia, preguntará por la dirección de dicho dominio al primer servidor DNS que tengamos configurado, en el caso de Linux, en el fichero **/etc/resolv.conf**, que comprobará si tiene _cacheada_ la respuesta o si es uno de los dominios a los que sirve, devolviéndonos en ese caso la dirección IP, o continuando en caso contrario el proceso.
+- En caso de que el servidor DNS al que hemos preguntado sea del tipo _forward_, la petición será reenviada a un servidor DNS recursivo, mientras que si la petición se hace directamente a un servidor DNS recursivo, no será necesario reenviar nada. Dicho servidor llevará a cabo las siguientes peticiones:
     - La primera petición irá a uno de los 13 _root server_, que al no conocer la dirección final, nos devolverá las direcciones de los servidores con autoridad sobre la zona **com.**.
-    - La segunda petición ira a uno de los servidores devueltos por el _root server_ que al tampoco conocer la dirección final, nos devolverá las direcciones de los servidores con autoridad sobre la zona **alvarovf.com.**, concretamente los de la empresa con la que he alquilado el dominio (Nominalia).
-    - En este caso, la tercera petición es la última, ya que esta petición se lleva a cabo sobre un servidor DNS que conoce la zona de mi dominio en su totalidad, devolviendo por tanto la dirección IP asociada a **www.alvarovf.com**.
-- La respuesta llegará al servidor DNS al que nuestra máquina está configurada para preguntar, _cacheando_ dicha respuesta por un periodo finito de tiempo (**TTL**), con la finalidad de que en caso de recibir otra petición preguntando por el mismo nombre, pueda dar la respuesta directamente, evitando así tener que realizar dichas peticiones recursivas y ofreciendo unas respuestas mucho más rápidas.
+    - La segunda petición irá a uno de los servidores devueltos por el _root server_, que al tampoco conocer la dirección final, nos devolverá las direcciones de los servidores con autoridad sobre la zona **alvarovf.com.**, concretamente los de la empresa con la que he alquilado el dominio (Nominalia).
+    - En este caso, la tercera petición es la última, ya que se lleva a cabo sobre un servidor DNS que conoce la zona de mi dominio en su totalidad, devolviendo por tanto la dirección IP asociada a **www.alvarovf.com**.
+- La respuesta llegará al servidor DNS al que nuestra máquina ha preguntado y se la devolverá, _cacheando_ además el servidor dicha respuesta por un periodo finito de tiempo (**TTL**), con la finalidad de que en caso de recibir otra petición preguntando por el mismo nombre, pueda dar la respuesta de una manera mucho más rápida, al evitar tener que realizar dichas peticiones recursivas. 
 
-Pueden llegar a darse escenarios un poco más complejos, como por ejemplo aquel en el que un mismo dominio tenga varias zonas definidas, por ejemplo, una zona DNS alcanzable desde Internet en el servidor DNS de la empresa con la que tenemos alquilado el dominio, en la que definimos aquellas máquinas y servicios que queremos que estén expuestos a Internet asociados a direcciones IP **públicas** (como un servidor web), y otra zona en un servidor DNS en la red local, en la que definimos aquellas máquinas y servicios que no queremos que estén expuestos a Internet a direcciones IP **privadas** (como un servidor de bases de datos), o incluso que resuelvan a las mismas direcciones pero queremos obtener unas respuestas mucho más rápidas.
+Como se puede suponer, el mayor inconveniente de este sistema es el hecho de que sea jerárquico, pues en caso de que el primer eslabón de la cadena cayese, Internet dejaría de funcionar.
 
-Además, teniendo un servidor DNS local podemos evitar el problema de tener que configurar el fichero **hosts** en todas las máquinas clientes, así como tener que modificar dichas resoluciones en el fichero en caso de que la dirección IP de una máquina o servicio cambiase, pues de esta manera, tenemos la resolución centralizada en un único punto.
+Pueden llegar a darse escenarios un poco más complejos, como por ejemplo aquel en el que un mismo dominio tenga dos zonas definidas:
 
-Antes de dar paso al primer servidor DNS que trataremos, es importante conocer los tipos de registros o informaciones que se pueden almacenar en una zona DNS, siendo los más comunes:
+- Una zona DNS alcanzable desde Internet, definida en un servidor DNS de la empresa con la que se ha alquilado el dominio, en la que nombraremos aquellas máquinas y servicios que queremos que estén expuestos a Internet (como un servidor web). La correspondencia apuntará, como es lógico, a direcciones IP alcanzables desde el exterior.
+- Una zona DNS alcanzable desde la red local, definida en un servidor DNS interno, en la que nombraremos aquellas máquinas y servicios que no queremos que estén expuestos a Internet (como un servidor de bases de datos), o incluso que resuelva a las mismas direcciones que la zona DNS alcanzable desde el exterior, para así obtener unas respuestas mucho más rápidas. La correspondencia apuntará, como es lógico, a direcciones IP alcanzables desde la red local.
+
+Otra ventaja de tener un servidor DNS local es el hecho de evitar tener que configurar el fichero **hosts** en todas las máquinas clientes, así como tener que modificar dichas resoluciones en el fichero en caso de que la dirección IP de una máquina o servicio cambiase, pues de esta manera, tenemos la resolución centralizada en un único punto.
+
+Antes de dar paso al primer tipo de servidor DNS que trataremos, es importante conocer los registros o informaciones que se pueden almacenar en una zona DNS, siendo las más comunes:
 
 * **NS (Name Server)**: Indica los servidores con autoridad sobre una zona, es decir, indica a quién hay que preguntar por este dominio. Por ejemplo:
 
-_alvarovf.com	NS	dns1.nominalia.com._
+_alvarovf.com IN  NS	dns1.nominalia.com._
 
 * **A (Address)**: Indica la dirección IPv4 a la que se traduce un nombre de dominio en la zona de resolución directa. Las empresas con mucho tráfico suelen poner varios registros A, consiguiendo así un balanceador de carga. Se suele utilizar para nombrar máquinas. Por ejemplo:
 
-_alvarovf.com	A	51.210.109.246_
+_vps.alvarovf.com	IN  A	51.210.109.246_
 
 * **AAAA (Address)**: Indica la dirección IPv6 a la que se traduce un nombre de dominio en la zona de resolución directa. Por ejemplo:
 
-_ipv6.l.google.com	AAAA	2a00:1450:400c:c06::93_
+_ipv6.l.google.com	IN  AAAA	2a00:1450:400c:c06::93_
 
 * **MX (Mail Exchange)**: Indica dónde se encuentran los servidores de correo del dominio. Se pueden definir múltiples y asignarles una prioridad, siendo esta mayor mientras menor sea el número indicado. Por ejemplo:
 
 _MX 10 mail1.alvarovf.com_
-_MX 50 mail2.alvarovf.com_
 
-* **CNAME (Canonical Name)**: Permite definir un Alias, que generalmente es utilizado para los servicios, utilizando un CNAME que apunte a una máquina en la que se encuentra alojado dicho servicio, que tendrá asociado un registro A, consiguiendo así que en caso de necesitar cambiar la dirección IP de dicha máquina, únicamente haya que hacerlo en el registro A. Por ejemplo:
+* **CNAME (Canonical Name)**: Permite definir un alias que generalmente es utilizado para los servicios, apuntando así a la máquina en la que se encuentra alojado, que tendrá asociada un registro A. Gracias a este tipo de registro, conseguimos que en caso de necesitar cambiar la dirección IP de dicha máquina, únicamente haya que hacerlo en el registro A. Por ejemplo:
 
-_www.alvarovf.com	CNAME	alvarovf.com_
+_www.alvarovf.com	IN  CNAME	vps.alvarovf.com_
 
-* **TXT (Text)**: Proporciona información a fuentes externas y se utiliza por distintos fines, como por ejemplo el SPF, utilizado para luchar contra el correo SPAM y cuya función es comprobar que el origen IP de un correo está autorizado por el dominio. También puede utilizarse para comprobar la propiedad o administración de un dominio.
+* **TXT (Text)**: Proporciona información a fuentes externas y se utiliza con distintos fines, como por ejemplo para luchar contra el correo SPAM y comprobar que la dirección IP origen de un correo está autorizada por el dominio. También puede utilizarse para comprobar la propiedad o administración de un dominio.
 
-* **PTR (Pointer)**: Se utiliza en las zonas de resolución inversa para indicar a qué nombre corresponde una dirección IP. A la hora de definir el registro, la dirección IP se nombra invirtiendo el valor de sus octetos y añadiendo a la misma la cadena "**in-addr.arpa**". Por ejemplo, en el caso de la dirección _172.22.200.184_, el resultado sería _184.200.22.172.in-addr.arpa_.
+* **PTR (Pointer)**: Se utiliza en las zonas de resolución inversa para indicar a qué nombre de máquina corresponde una dirección IP. A la hora de definir el registro, la dirección IP se nombra invirtiendo el valor de sus octetos y añadiendo al resultado la cadena "**in-addr.arpa**". Por ejemplo, en el caso de la dirección _172.22.200.184_, el resultado sería _184.200.22.172.in-addr.arpa_.
 
 ## Servidor DNSmasq
 
-El servicio **dnsmasq** nos ofrece varias funcionalidades, encontrándose entre las más destacadas servidor **DNS**, servidor **DHCP** (con soporte para DHCPv6), servidor **PXE** y servidor **TFTP**. Es muy apropiado para redes pequeñas donde necesitamos que nuestros clientes puedan resolver nombres, recibir automáticamente la configuración de red o crear un sistema para arrancar por red. En este artículo nos vamos a centrar en las posibilidades que nos ofrece como **servidor DNS**.
+El servicio **dnsmasq** nos ofrece varias funcionalidades, encontrándose entre las más destacadas un servidor **DNS**, un servidor **DHCP** (con soporte para DHCPv6), un servidor **PXE** y un servidor **TFTP**. Es muy apropiado para redes pequeñas donde necesitamos que nuestros clientes puedan resolver nombres, recibir automáticamente la configuración de red o crear un sistema para arrancar por red. En este artículo nos vamos a centrar en las posibilidades que nos ofrece como **servidor DNS**.
 
-Dicho servidor actúa como servidor caché y _forward_, es decir, no es capaz de realizar las preguntas recursivas por sí mismo, sino que las reenvia a otro servidor (definido en el fichero **/etc/resolv.conf**) con dicha capacidad para que las haga en su lugar, guardando a continuación dicha resolución en caché para acelerar así las resoluciones posteriores.
+Dicho servidor actúa como servidor caché y _forward_, es decir, no es capaz de realizar las preguntas recursivas por sí mismo, sino que las reenvía a otro servidor definido en el fichero **/etc/resolv.conf** con dicha capacidad para que las haga en su lugar, almacenando tras ello la resolución en caché para acelerar así las posteriores resoluciones.
 
-La gran característica es que todos aquellos nombres definidos en el fichero **/etc/hosts** de la máquina servidora podrán ser consultados por los clientes tanto de forma directa como inversa. Esto, conlleva una serie de limitaciones como es lógico, pero se compensan con la rápida y sencilla instalación que requiere dicho servicio. De todas formas, para un uso cotidiano es más que válido, aunque a continuación trataremos otro servidor DNS un poco más complejo pero que ofrece gama de posibilidades bastante más superior.
+La gran característica de este servidor es que todos aquellos nombres definidos en el fichero **/etc/hosts** podrán ser consultados por los clientes tanto de forma directa como inversa, conviertiendo por tanto su instalación y configuración en algo realmente rápido y sencillo.
 
-Para este caso, he instalado previamente una máquina virtual con Debian Buster que es la que actuará como servidora (con dirección IP **172.22.200.184**) y sobre la que instalaremos el correspondiente servicio. Considero que la explicación de dicha instalación se sale del objetivo de este artículo, así que vamos a obviarla.
+Para este caso, he instalado previamente una máquina virtual Debian Buster con dirección IP **172.22.200.184** que es la que actuará como servidora. Considero que la explicación de dicha instalación se sale del objetivo de este artículo, así que vamos a obviarla. Sin embargo, debemos tener unas consideraciones previas en la misma.
 
-Tras ello, vamos a proceder con la instalación y configuración de dicho servidor DNS, de manera que lo primero que tendremos que hacer será instalar el paquete **dnsmasq**, no sin antes actualizar toda la paquetería existente en la máquina, ejecutando para ello el comando (con permisos de administrador, ejecutando el comando `sudo su -`):
+Es siempre recomendable que las máquinas servidoras tengan correctamente configurado el nombre (**_hostname_**), así como el nombre totalmente cualificado (**_FQDN_**), de manera que vamos a nombrarla dentro del dominio cuya zona DNS posteriormente configuraré, **iesgn.org**.
 
-{% highlight shell %}
-root@dns:~# apt update && apt upgrade && apt install dnsmasq
-{% endhighlight %}
-
-Una vez instalado, es imprescindible indicar al servicio en qué interfaz o interfaces debe escuchar peticiones (por defecto, en el puerto **53/UDP**), por lo que procederemos a modificar el fichero **/etc/dnsmasq.conf**, haciendo para ello uso del comando:
-
-{% highlight shell %}
-root@dns:~# nano /etc/dnsmasq.conf
-{% endhighlight %}
-
-Dentro del mismo, tendremos que buscar la directiva **interface** y asignarle el valor de la interfaz de red de la máquina servidora conectada al exterior, en este caso, **eth0**, quedando de la siguiente forma:
-
-{% highlight shell %}
-interface=eth0
-{% endhighlight %}
-
-Hasta aquí ha llegado la configuración del servicio, que como se ha podido apreciar, ha sido realmente simple.
-
-Es siempre recomendable que las máquinas servidoras tengan correctamente configurado el nombre (**_hostname_**), así como el nombre totalmente cualificado (**_FQDN_**), así que vamos a nombrarla dentro del dominio cuya zona DNS configuraré posteriomente, **iesgn.org**.
-
-En la máquina virtual Debian Buster que estoy utilizando existe una pequeña peculiaridad, y es que el fichero **/etc/hosts** se genera dinámicamente durante el arranque, gracias al estándar **cloud-init**, así que para deshabilitarlo y así conseguir un fichero estático, tendremos que cambiar el valor de la directiva **manage_etc_hosts** a **false** en el fichero **/etc/cloud/cloud.cfg**. Para ello, ejecutaremos el comando:
+En la máquina virtual Debian Buster que estoy utilizando existe una pequeña peculiaridad, y es que el fichero **/etc/hosts** se genera dinámicamente durante el arranque, gracias al estándar **cloud-init**. Para deshabilitarlo y conseguir un fichero estático, tendremos que cambiar el valor de la directiva **manage_etc_hosts** a **false** en el fichero **/etc/cloud/cloud.cfg**. Para ello, ejecutaremos el comando:
 
 {% highlight shell %}
 root@dns:~# sed -i 's/manage_etc_hosts: true/manage_etc_hosts: false/g' /etc/cloud/cloud.cfg
 {% endhighlight %}
 
-Para verificar que el valor de dicha directiva ha sido modificado, vamos a visualizar el contenido de dicho fichero, estableciendo un filtro por nombre:
+Para verificar que el valor de dicha directiva ha sido modificado, vamos a visualizar el contenido del fichero, estableciendo un filtro por nombre:
 
 {% highlight shell %}
 root@dns:~# egrep 'manage_etc_hosts' /etc/cloud/cloud.cfg
 manage_etc_hosts: false
 {% endhighlight %}
 
-Efectivamente, su valor ha sido modificado, así que ya podemos proceder a modificar el fichero **/etc/hosts** para así asignar correctamente la resolución del _hostname_ y _FQDN_ de la máquina, así como añadir algunos registros para comprobar la efectividad de las resoluciones por parte del servidor DNS. Para modificar dicho fichero haremos uso del comando:
+Efectivamente, su valor ha cambiado, así que ya podemos proceder a modificar el fichero **/etc/hosts** para así asignar correctamente la resolución del _hostname_ y _FQDN_ de la máquina, además de añadir algunos registros para comprobar la efectividad de las resoluciones por parte del servidor DNS. Para modificar dicho fichero haremos uso del comando:
 
 {% highlight shell %}
 root@dns:~# nano /etc/hosts
@@ -147,9 +133,9 @@ ff02::2 ip6-allrouters
 ff02::3 ip6-allhosts
 {% endhighlight %}
 
-La línea que nos interesa modificar es la primera de ellas, la cuál resuelve la dirección **127.0.1.1**, siendo lo primero que se indique el **FQDN**, en este caso, **alvaro.iesgn.org** y lo segundo, el **hostname**, en este caso, **alvaro**.
+La línea que nos interesa modificar es la primera de ellas, la cuál resuelve la dirección **127.0.1.1**, siendo lo primero que se indique el **_FQDN_**, en este caso, **alvaro.iesgn.org** y lo segundo, el **_hostname_**, en este caso, **alvaro**.
 
-Además, añadiremos nuevas líneas de la forma **[IP] [Nombre]** para unos sitios web ficticios que se podrían encontrar alojados en esta misma máquina servidora (para así comprobar el correcto funcionamiento), siendo **[IP]** la dirección IP alcanzable desde el exterior (en este caso **172.22.200.184**, ya que si ponemos la dirección **127.0.0.1**, la resolución no funcionaría correctamente para los clientes) y **[Nombre]** el nombre de dominio que vamos a resolver a dicha dirección, siendo dichos nombres en este caso **www.iesgn.org** y **departamentos.iesgn.org**, por ejemplo, de manera que la configuración final sería la siguiente:
+Además, añadiremos nuevas líneas de la forma **[IP] [Nombre]** para unos sitios web ficticios, con la finalidad de posteriormente comprobar el correcto funcionamiento, siendo **[IP]** la dirección **172.22.200.184**, por ejemplo, y **[Nombre]** el nombre de dominio que vamos a resolver a dicha dirección, en este caso **www.iesgn.org** y **departamentos.iesgn.org**, por ejemplo, de manera que la configuración final sería la siguiente:
 
 {% highlight shell %}
 127.0.1.1 alvaro.iesgn.org alvaro
@@ -165,33 +151,45 @@ ff02::2 ip6-allrouters
 ff02::3 ip6-allhosts
 {% endhighlight %}
 
-Tras ello, guardaremos los cambios realizados en el fichero. Todavía no hemos finalizado de configurar el nombre para la máquina, ya que lo que hemos establecido ha sido la resolución del mismo, faltando por configurar todavía el fichero **/etc/hostname**, que es donde se declara propiamente el nombre de la misma. Para modificar dicho fichero ejecutaremos el comando:
+Tras ello, guardaremos los cambios realizados en el fichero. Sin embargo, todavía no hemos finalizado de configurar el nombre para la máquina, faltando por configurar el fichero **/etc/hostname**, que es donde se declara propiamente el nombre de la misma. Para modificar dicho fichero ejecutaremos el comando:
 
 {% highlight shell %}
 root@dns:~# nano /etc/hostname
 {% endhighlight %}
 
-Dentro del mismo, tendremos que indicar el _hostname_ de la máquina, que deberá ser exactamente el mismo que hemos indicado hace un momento en el fichero **/etc/hosts**, en este caso, **alvaro**.
+Dentro del mismo, tendremos que indicar el **_hostname_** de la máquina, que deberá ser exactamente el mismo que hemos establecido hace un momento en el fichero **/etc/hosts**, en este caso, **alvaro**.
 
-Para que los cambios surtan efecto, tendremos que reiniciar, consiguiendo así que la máquina cargue su nuevo nombre, así como que el servicio **dnsmasq** cargue su nueva configuración (para conseguir esto último bastaría con reiniciar el servicio, pero así _matamos dos pájaros de un tiro_). Para ello, haremos uso del comando:
-
-{% highlight shell %}
-root@dns:~# reboot
-{% endhighlight %}
-
-Cuando la máquina haya completado su reinicio, podremos apreciar que el _prompt_ habrá variado, pero aun así, ejecutaremos los siguientes comandos para verificar el cambio:
+Para que los cambios surtan efecto, tendremos que reiniciar haciendo para ello uso del comando `reboot`, consiguiendo así que la máquina cargue su nuevo nombre, pudiendo ejecutar tras ello los siguientes comandos para verificar el cambio:
 
 {% highlight shell %}
-debian@alvaro:~$ hostname
+root@alvaro:~# hostname
 alvaro
 
-debian@alvaro:~$ hostname -f
+root@alvaro:~# hostname -f
 alvaro.iesgn.org
 {% endhighlight %}
 
-Efectivamente, el _hostname_ y el _FQDN_ de la máquina es ahora el correcto, por lo que nuestra labor en la máquina servidora ha finalizado, volviendo por tanto a la máquina anfitriona, que hará el papel de cliente, para así llevar a cabo las correspondientes pruebas de funcionamiento.
+Efectivamente, el **_hostname_** y el **_FQDN_** de la máquina es ahora el correcto, por lo que todo está listo para proceder con la configuración del servidor DNS.
 
-Es muy importante mencionar que es necesario que el puerto **53/UDP** de la máquina servidora se encuentre abierto, para así poder atender las solicitudes por parte de los clientes, que en este caso, lo damos por hecho.
+Como se puede suponer, lo primero que tendremos que hacer será instalar el paquete **dnsmasq**, no sin antes actualizar toda la paquetería existente en la máquina, ejecutando para ello el comando:
+
+{% highlight shell %}
+root@alvaro:~# apt update && apt upgrade && apt install dnsmasq
+{% endhighlight %}
+
+Una vez instalado, es imprescindible indicar al servicio en qué interfaz o interfaces debe escuchar peticiones (por defecto, en el puerto **53/UDP**), por lo que procederemos a modificar el fichero **/etc/dnsmasq.conf**, haciendo para ello uso del comando:
+
+{% highlight shell %}
+root@alvaro:~# nano /etc/dnsmasq.conf
+{% endhighlight %}
+
+Dentro del mismo, tendremos que localizar la directiva **interface** y asignarle el nombre de la interfaz de red de la máquina servidora desde la que pretendemos atender las peticiones, en este caso, **eth0**, quedando de la siguiente forma:
+
+{% highlight shell %}
+interface=eth0
+{% endhighlight %}
+
+Hasta aquí ha llegado la configuración del servicio, que como se ha podido apreciar, ha sido realmente simple. Nuestra labor en la máquina servidora ha finalizado, volviendo por tanto a la máquina anfitriona que hará el papel de cliente, para así llevar a cabo las correspondientes pruebas de funcionamiento.
 
 El paso anterior a la realización de pruebas consiste en indicar el servidor DNS a utilizar por defecto por parte del cliente (en una situación real, esto sería una tarea del servidor DHCP), modificando para ello el fichero **/etc/resolv.conf**, haciendo para ello uso del comando:
 
@@ -209,7 +207,7 @@ nameserver 192.168.202.2
 nameserver 192.168.204.2
 {% endhighlight %}
 
-Listo, ya está todo preparado para llevar a cabo las pruebas de funcionamiento del servidor **dnsmasq**, de manera que haremos uso de la herramienta `dig` para llevar a cabo dichas consultas al servidor DNS. Al no venir instalada por defecto, tendremos que instalarla manualmente, ejecutando para ello el comando:
+Listo, ya está todo preparado para llevar a cabo las pruebas de funcionamiento del servidor **dnsmasq**, de manera que haremos uso de la herramienta `dig` para ejecutar dichas consultas al servidor DNS. Al no venir instalada por defecto, tendremos que instalarla manualmente, ejecutando para ello el comando:
 
 {% highlight shell %}
 alvaro@debian:~$ sudo apt install dnsutils
@@ -241,9 +239,9 @@ www.iesgn.org.		0	IN	A	172.22.200.184
 ;; MSG SIZE  rcvd: 58
 {% endhighlight %}
 
-Como se puede apreciar en la **ANSWER SECTION**, el nombre **www.iesgn.org.** tiene asociado un registro **A** que apunta a la dirección IPv4 **172.22.200.184**, tal y como hemos configurado en el fichero **/etc/hosts** de la máquina servidora. Tenemos además la certeza de que el servidor que nos ha respondido ha sido **172.22.200.184**, tal y como se puede apreciar en la directiva **SERVER**.
+Como se puede apreciar en la **ANSWER SECTION**, el nombre **www.iesgn.org.** tiene asociado un registro **A** que apunta a la dirección IPv4 **172.22.200.184**, tal y como hemos configurado en el fichero **/etc/hosts** de la máquina servidora.
 
-Repetiremos la misma prueba esta vez con el nombre **departamentos.iesgn.org**, que también fue definido en el fichero de resolución estática del servidor, por lo que la respuesta mostrada debería ser la misma:
+Repetiremos la misma prueba con el nombre **departamentos.iesgn.org**, que también fue definido en el fichero de resolución estática del servidor, por lo que la respuesta mostrada debería ser la misma:
 
 {% highlight shell %}
 alvaro@debian:~$ dig +short departamentos.iesgn.org
@@ -252,9 +250,9 @@ alvaro@debian:~$ dig +short departamentos.iesgn.org
 
 Donde:
 
-* **+short**: Indicamos que muestre una respuesta más concreta, con la finalidad de no ensuciar demasiado.
+* **+short**: Indicamos que muestre una respuesta más concreta.
 
-Efectivamente, la respuesta ha sido correcta, al igual que la anterior, por lo que ahora vamos a ir un paso mas allá y vamos a realizar una consulta de un nombre que no sea conocido por nuestro servidor DNS, de manera que tendrá que actuar como servidor DNS _forward_ y reenviar dicha petición a uno de los servidores configurados en su fichero **/etc/resolv.conf**, como por ejemplo **www.josedomingo.org**:
+Efectivamente, la respuesta ha sido una vez más correcta, por lo que ahora vamos a ir un paso mas allá y vamos a realizar una consulta de un nombre que no sea conocido por nuestro servidor DNS (como por ejemplo **www.josedomingo.org**), de manera que tendrá que actuar como servidor DNS _forward_ y reenviar dicha petición a uno de los servidores configurados en su fichero **/etc/resolv.conf**:
 
 {% highlight shell %}
 alvaro@debian:~$ dig www.josedomingo.org
@@ -269,7 +267,7 @@ playerone.josedomingo.org. 542	IN	A	137.74.161.90
 ;; MSG SIZE  rcvd: 322
 {% endhighlight %}
 
-Como se puede apreciar en la salida que manualmente he recortado para no ensuciar, la resolución se ha realizado correctamente en un tiempo total de **163 ms**, informando de que el nombre por el que hemos preguntado tiene asociado un registro **CNAME** al nombre **playerone.josedomingo.org.**, teniendo este último a su vez asociado un registro **A** que apunta a la dirección IPv4 **137.74.161.90**.
+Como se puede apreciar en la salida que manualmente he recortado para no ensuciar, la resolución se ha realizado correctamente en un tiempo total de **163 ms**, informando de que el nombre por el que hemos preguntado tiene asociado un registro **CNAME** al nombre **playerone.josedomingo.org.**, teniendo este último asociado a su vez un registro **A** que apunta a la dirección IPv4 **137.74.161.90**.
 
 Como consecuencia de ser un servidor DNS caché, la respuesta que acaba de obtener la habrá almacenado, de manera que si volvemos a preguntar por el mismo nombre, la respuesta será prácticamente inmediata:
 
@@ -286,9 +284,9 @@ playerone.josedomingo.org. 542	IN	A	137.74.161.90
 ;; MSG SIZE  rcvd: 103
 {% endhighlight %}
 
-Como era de esperar, el tiempo de respuesta ha variado de **163 ms** a nada más que **4 ms**, pues la respuesta estaba cacheada, de manera que no ha sido necesario reenviar dicha petición a un servidor recursivo que proceda a realizar dichas preguntas de forma recursiva.
+Como era de esperar, el tiempo de respuesta ha variado de **163 ms** a nada más que **4 ms**, ya que no ha sido necesario reenviar dicha petición a un servidor recursivo que proceda a realizar las preguntas necesarias.
 
-Hasta ahora hemos estado haciendo resoluciones directas, es decir, hemos preguntado por un nombre y se nos ha devuelto una dirección IP, así que vamos a hacer justo lo contrario, vamos a preguntar por una dirección IP para que nos devuelva un nombre (resolución inversa), en este caso, para la dirección IP **172.22.200.184**:
+Hasta ahora hemos estado haciendo resoluciones directas, es decir, hemos preguntado por un nombre y se nos ha devuelto una dirección IP. En este caso vamos a hacer justo lo contrario, vamos a preguntar por una dirección IP para que nos devuelva un nombre (resolución inversa), concretamente por la dirección IP **172.22.200.184**:
 
 {% highlight shell %}
 alvaro@debian:~$ dig -x 172.22.200.184
@@ -306,36 +304,34 @@ Donde:
 
 * **-x**: Indicamos que queremos llevar a cabo una resolución inversa, ya que por defecto se realizan resoluciones directas.
 
-Como se puede apreciar en la respuesta, dicha dirección apunta a **www.iesgn.org** mediante un registro **PTR**. En realidad, la resolución que estamos tratando de realizar es bastante inusual, ya que la resolución inversa se suele llevar a cabo para máquinas (de manera que su dirección IP está declarada de forma única), mientras que en este caso, estamos tratando de resolver inversamente para un servicio (encontrándose dicha dirección repetida para los servicios **www** y **departamentos**), por lo que únicamente nos ha mostrado la primera coincidencia.
+Como se puede apreciar en la respuesta, dicha dirección apunta mediante un registro **PTR** a **www.iesgn.org.**. En realidad, la resolución que estamos tratando de realizar es bastante inusual, ya que las resoluciones inversas se suelen llevar a cabo para máquinas (de manera que su dirección IP está declarada de forma única), mientras que en este caso, estamos tratando de resolver inversamente para un servicio (encontrándose dicha dirección repetida para los servicios **www** y **departamentos**), por lo que únicamente nos ha mostrado la primera coincidencia.
 
-En mi opinión, el uso de **dnsmasq** ha quedado ya bastante claro, así que vamos a dar paso a la instalación y configuración de un servidor DNS un poco más completo a la vez que complejo.
+En mi opinión, el uso de **dnsmasq** ha quedado bastante claro, así que vamos a dar paso a la instalación y configuración del segundo servidor DNS.
 
-Antes de ello, tendremos que volver a la máquina servidora para así parar o desinstalar el servicio actual, ya que ambos servicios no puede estar en ejecución a la vez, pues hacen uso del mismo puerto. Para parar y evitar que el servicio **dnsmasq** se levante automáticamente junto a la máquina, ejecutaremos los comandos:
+Antes de ello, tendremos que volver a la máquina servidora para así parar o desinstalar el servicio actual, con la finalidad de evitar conflictos entre ambos. Para parar y evitar que el servicio **dnsmasq** se levante automáticamente junto a la máquina, ejecutaremos los comandos:
 
 {% highlight shell %}
 root@alvaro:~# systemctl stop dnsmasq
 root@alvaro:~# systemctl disable dnsmasq
 {% endhighlight %}
 
-El servicio **dnsmasq** ha sido ya apagado y deshabilitado su arranque durante el inicio de la máquina, de manera que el puerto a usar por el siguiente servidor DNS se encuentra otra vez operativo.
+El servicio **dnsmasq** ha sido apagado y deshabilitado su arranque durante el inicio de la máquina, de manera que el puerto a usar por el siguiente servidor DNS se encuentra otra vez operativo.
 
 ## Servidor bind9
 
-De otro lado, el servicio **bind9** es el servidor de nombres de dominio más popular en Internet, que trabaja en todas las plataformas informáticas principales y se caracteriza por su flexibilidad y seguridad. En este artículo se tratará de forma bastante detallada la configuración y mantenimiento del mismo.
+De otro lado, el servicio **bind9** es el servidor de nombres de dominio más popular en Internet. Trabaja en todas las plataformas informáticas principales y se caracteriza por su flexibilidad y seguridad. En este artículo se tratará de forma bastante detallada la configuración y mantenimiento del mismo.
 
-Dicho servidor actúa como servidor recursivo y caché, es decir, es capaz de realizar las preguntas recursivas por sí mismo, por lo que no necesita hacer uso de otro servidor para ello, además de _cachear_, al igual que ocurría con **dnsmasq**, la respuesta obtenida, para así mejorar los tiempos de las posteriores solicitudes.
+Dicho servidor actúa como servidor recursivo y caché, es decir, es capaz de realizar las preguntas recursivas por sí mismo, además de _cachear_, al igual que ocurría con **dnsmasq**, la respuesta obtenida, para así mejorar los tiempos de las posteriores solicitudes.
 
-Para este caso, he instalado previamente una máquina virtual con Debian Buster que es la que actuará como servidora y sobre la que instalaremos el correspondiente servicio. Considero que la explicación de dicha instalación se sale del objetivo de este artículo, así que vamos a obviarla.
-
-Dado que previamente hemos parado el servicio **dnsmasq** también instalado en la máquina, todo está listo para llevar a cabo la instalación de **bind9**, ejecutando para ello el comando:
+Dado que previamente hemos parado y deshabilitado el servicio **dnsmasq** también instalado en la máquina, todo está listo para llevar a cabo la instalación de **bind9**, ejecutando para ello el comando:
 
 {% highlight shell %}
 root@alvaro:~# apt install bind9
 {% endhighlight %}
 
-Una vez instalado, tendremos que proceder con la configuración inicial del servicio. La configuración de BIND consta de varios archivos que se incluyen (con directivas **include**) desde el archivo de configuración principal, de nombre **named.conf**. Estos nombres de archivos comienzan con **named** porque ese es el nombre del proceso que BIND ejecuta (abreviatura de "_domain name daemon_").
+Una vez instalado, tendremos que proceder con la configuración inicial del servicio, que consta de varios archivos que se incluyen desde el archivo de configuración principal, de nombre **named.conf**. Los nombres de dichos archivos comienzan por **_named_** en relación al nombre del proceso que BIND ejecuta (abreviatura de "_domain name daemon_").
 
-El primer fichero de configuración que modificaremos será el de opciones, de nombre **named.conf.options**, que al igual que el resto, se encuentra ubicado en **/etc/bind/**, haciendo para ello uso del comando:
+El primer fichero de configuración que modificaremos será **/etc/bind/named.conf.options**, en el que estableceremos, mediante directivas, las opciones del servicio, haciendo para ello uso del comando:
 
 {% highlight shell %}
 root@alvaro:~# nano /etc/bind/named.conf.options
@@ -350,19 +346,19 @@ listen-on { any; }; #Permitimos la escucha del servicio en todas las interfaces 
 allow-transfer { none; }; #Deshabilitamos la transferencia de zonas por defecto. Lo trataremos con más detalle a continuación.
 {% endhighlight %}
 
-Tras ello, guardaremos los cambios en el fichero y procederemos a modificar ahora el fichero **/etc/bind/named.conf.local**, en el que declararemos las zonas sobre las que tendrá autoridad y el fichero en el que están contenidas, así como algunos parámetros opciones sobre las mismas. Para ello, ejecutaremos el comando:
+Tras ello, guardaremos los cambios en el fichero y procederemos a modificar ahora el fichero **/etc/bind/named.conf.local**, en el que declararemos las zonas sobre las que tendrá autoridad y el fichero en el que están contenidas. Para ello, ejecutaremos el comando:
 
 {% highlight shell %}
 root@alvaro:~# nano /etc/bind/named.conf.local
 {% endhighlight %}
 
-Lo primero que haremos será descomentar la primera línea, correspondiente al **include** del fichero **/etc/bind/zones.rfc1918**, ya que se considera una buena práctica, ya que vamos a prevenir el envío de algunas consultas inversas innecesarias a Internet, ahorrándonos por tanto tiempo, ancho de banda y carga del servidor DNS.
+Lo primero que haremos será descomentar la primera línea, correspondiente al **include** del fichero **/etc/bind/zones.rfc1918**, pues se considera una buena práctica al prevenir el envío innecesario de algunas resoluciones inversas a Internet, ahorrándonos por tanto tiempo, ancho de banda y carga del servidor DNS.
 
-Tras ello, tendremos que añadir un bloque por cada una de las zonas sobre las que el servidor tiene autoridad, que en este caso serán 2, una zona de resolución directa, y una zona de resolución inversa.
+Tras ello, tendremos que añadir un bloque **zone** por cada una de las zonas sobre las que el servidor tiene autoridad, que en este caso serán 2, una zona de resolución directa, y una zona de resolución inversa:
 
-La primera de ellas tendrá nombre **iesgn.org**, pues es el dominio con el que vamos a trabajar. Además, la configuraremos de tipo maestro (**master**), que todavía no hemos introducido dicho concepto pero lo haremos próximamente. Por último, el fichero en el que vamos a definir la zona DNS será **db.iesgn.org**, que al no haber indicado ninguna ruta para el mismo, lo tratará de buscar por defecto en **/var/cache/bind/**.
+* La primera de ellas corresponderá a **iesgn.org**, pues es el dominio con el que vamos a trabajar. La configuraremos de tipo maestro (**master**), pues a pesar de que todavía no hemos introducido dicho concepto, lo haremos próximamente. Por último, el fichero en el que vamos a definirla será **db.iesgn.org**.
 
-La segunda de ellas, al tratarse de una zona inversa, tendrá nombre **200.22.172.in-addr.arpa**, resultado de invertir los octetos de la red con la que vamos a trabajar, que en este caso se trata de una **/24** y añadir la cadena **in-addr.arpa**. Al igual que la anterior zona, la configuraremos de tipo maestro (**master**), siendo el fichero en el que vamos a definir la zona DNS **db.200.22.172**, que lo tratará de buscar por defecto en **/var/cache/bind/**. Es muy importante comprobar que la red en la que vamos a resolver de forma inversa no se encuentra contenida en el fichero **/etc/bind/zones.rfc1918**, ya que de lo contrario, no nos contestará.
+* La segunda de ellas corresponderá a **200.22.172.in-addr.arpa**, resultado de invertir los octetos de la red con la que vamos a trabajar y añadir la cadena "**in-addr.arpa**". Al igual que la anterior zona, la configuraremos de tipo maestro (**master**), siendo el fichero en el que vamos a definirla **db.200.22.172**. Es muy importante comprobar que la zona en la que vamos a resolver de forma inversa no se encuentra contenida en el fichero **/etc/bind/zones.rfc1918**, ya que de lo contrario, no nos contestará.
 
 El resultado final del fichero sería:
 
@@ -380,7 +376,9 @@ zone "200.22.172.in-addr.arpa" {
 };
 {% endhighlight %}
 
-Una vez que hayamos guardado los cambios en el mismo, habrá llegado la hora de definir las dos zonas DNS con las que vamos a trabajar. Para facilitarnos un poco la tarea de sintaxis, podemos hacer uso de una plantilla de nombre **/etc/bind/db.empty** para a partir de ahí, modificarla a nuestras necesidades. Vamos a comenzar con la zona de resolución directa, así que copiaremos dicho fichero dentro de **/var/cache/bind/** con el nombre previamente asignado, **db.iesgn.org**, haciendo para ello uso del comando:
+Cuando hayamos guardado los cambios en el mismo, habrá llegado la hora de definir el contenido de las dos zonas DNS con las que vamos a trabajar. Para una mayor facilidad, podemos hacer uso de una plantilla de nombre **/etc/bind/db.empty** para a partir de ahí, adaptarla a nuestras necesidades.
+
+Vamos a comenzar con la configuración de la zona de resolución directa, así que copiaremos dicho fichero dentro de **/var/cache/bind/**, pues es donde se deben ubicar por defecto, con el nombre previamente asignado, **db.iesgn.org**, haciendo para ello uso del comando:
 
 {% highlight shell %}
 root@alvaro:~# cp /etc/bind/db.empty /var/cache/bind/db.iesgn.org

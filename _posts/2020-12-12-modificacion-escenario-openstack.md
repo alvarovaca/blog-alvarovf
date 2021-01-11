@@ -1020,14 +1020,14 @@ En la nueva máquina Debian Buster hay una pequeña peculiaridad, y es que el fi
 root@freston:~# sed -i 's/manage_etc_hosts: true/manage_etc_hosts: false/g' /etc/cloud/cloud.cfg
 {% endhighlight %}
 
-Para verificar que el valor de dicha directiva ha sido modificado, vamos a visualizar el contenido de dicho fichero, estableciendo un filtro por nombre:
+Para verificar que el valor de dicha directiva ha sido modificado, vamos a visualizar el contenido del fichero, estableciendo un filtro por nombre:
 
 {% highlight shell %}
 root@freston:~# egrep 'manage_etc_hosts' /etc/cloud/cloud.cfg
 manage_etc_hosts: false
 {% endhighlight %}
 
-Efectivamente, su valor ha sido modificado, así que ya podemos proceder a modificar el fichero **/etc/hosts** y a realizar las correspondientes pruebas:
+Efectivamente, su valor ha cambiado, así que ya podemos proceder a modificar el fichero **/etc/hosts** y a realizar las correspondientes pruebas:
 
 {% highlight shell %}
 root@freston:~# nano /etc/hosts
