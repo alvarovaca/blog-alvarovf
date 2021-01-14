@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Servidor DNS, Web y Base de Datos"
-banner: "/assets/images/banners/mapear.jpg"
+banner: "/assets/images/banners/openstack.png"
 date:   2020-12-15 11:44:00 +0200
 categories: servicios openstack
 ---
