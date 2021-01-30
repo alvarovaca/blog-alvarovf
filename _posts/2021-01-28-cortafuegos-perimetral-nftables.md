@@ -2,7 +2,7 @@
 layout: post
 title:  "Cortafuegos perimetral con nftables"
 banner: "/assets/images/banners/cortafuegos.jpg"
-date:   2021-01-28 13:22:00 +0200
+date:   2021-01-28 13:21:00 +0200
 categories: seguridad openstack
 ---
 ## Configuración inicial.
