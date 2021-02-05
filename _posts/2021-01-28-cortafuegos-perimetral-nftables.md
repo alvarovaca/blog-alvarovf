@@ -612,7 +612,63 @@ Reading state information... Done
 1 package can be upgraded. Run 'apt list --upgradable' to see it.
 {% endhighlight %}
 
-### 2. Almacenamos las reglas en un fichero que se importará automáticamente tras un reinicio, consiguiendo que perduren.
+### 2. Permitimos que todas las máquinas puedan acceder al puerto 123 del exterior (necesario para la sincronización NTP).
+
+#### LAN
+
+{% highlight shell %}
+nft add rule inet filter forward ip saddr 10.0.1.0/24 iifname "eth1" oifname "eth0" udp dport 123 ct state new,established counter accept
+nft add rule inet filter forward ip daddr 10.0.1.0/24 iifname "eth0" oifname "eth1" udp sport 123 ct state established counter accept
+{% endhighlight %}
+
+{% highlight shell %}
+ubuntu@sancho:~$ timedatectl
+               Local time: Mon 2021-02-01 12:06:32 CET
+           Universal time: Mon 2021-02-01 11:06:32 UTC
+                 RTC time: Mon 2021-02-01 11:06:33
+                Time zone: Europe/Madrid (CET, +0100)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+{% endhighlight %}
+
+#### DMZ
+
+{% highlight shell %}
+nft add rule inet filter forward ip saddr 10.0.2.0/24 iifname "eth2" oifname "eth0" udp dport 123 ct state new,established counter accept
+nft add rule inet filter forward ip daddr 10.0.2.0/24 iifname "eth0" oifname "eth2" udp sport 123 ct state established counter accept
+{% endhighlight %}
+
+{% highlight shell %}
+[centos@quijote ~]$ timedatectl
+               Local time: Mon 2021-02-01 12:06:57 CET
+           Universal time: Mon 2021-02-01 11:06:57 UTC
+                 RTC time: Mon 2021-02-01 11:06:57
+                Time zone: Europe/Madrid (CET, +0100)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+{% endhighlight %}
+
+#### Dulcinea
+
+{% highlight shell %}
+nft add rule inet filter output oifname "eth0" udp dport 123 ct state new,established counter accept
+nft add rule inet filter input iifname "eth0" udp sport 123 ct state established counter accept
+{% endhighlight %}
+
+{% highlight shell %}
+root@dulcinea:~# timedatectl
+               Local time: Mon 2021-02-01 11:57:32 CET
+           Universal time: Mon 2021-02-01 10:57:32 UTC
+                 RTC time: Mon 2021-02-01 10:57:33
+                Time zone: Europe/Madrid (CET, +0100)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+{% endhighlight %}
+
+### 3. Almacenamos las reglas en un fichero que se importará automáticamente tras un reinicio, consiguiendo que perduren.
 
 {% highlight shell %}
 nft list ruleset > /etc/nftables.conf
