@@ -668,7 +668,30 @@ System clock synchronized: yes
           RTC in local TZ: no
 {% endhighlight %}
 
-### 3. Almacenamos las reglas en un fichero que se importará automáticamente tras un reinicio, consiguiendo que perduren.
+### 3. Permitimos que todas las máquinas puedan acceder al puerto 8086 de la VPS (necesario para la recolección de métricas con InfluxDB).
+
+#### LAN
+
+{% highlight shell %}
+nft add rule inet filter forward ip saddr 10.0.1.0/24 iifname "eth1" ip daddr 51.210.109.246 oifname "eth0" tcp dport 8086 ct state new,established counter accept
+nft add rule inet filter forward ip daddr 10.0.1.0/24 iifname "eth0" ip saddr 51.210.109.246 oifname "eth1" tcp sport 8086 ct state established counter accept
+{% endhighlight %}
+
+#### DMZ
+
+{% highlight shell %}
+nft add rule inet filter forward ip saddr 10.0.2.0/24 iifname "eth2" ip daddr 51.210.109.246 oifname "eth0" tcp dport 8086 ct state new,established counter accept
+nft add rule inet filter forward ip daddr 10.0.2.0/24 iifname "eth0" ip saddr 51.210.109.246 oifname "eth2" tcp sport 8086 ct state established counter accept
+{% endhighlight %}
+
+#### Dulcinea
+
+{% highlight shell %}
+nft add rule inet filter output ip daddr 51.210.109.246 oifname "eth0" tcp dport 8086 ct state new,established counter accept
+nft add rule inet filter input ip saddr 51.210.109.246 iifname "eth0" tcp sport 8086 ct state established counter accept
+{% endhighlight %}
+
+### 4. Almacenamos las reglas en un fichero que se importará automáticamente tras un reinicio, consiguiendo que perduren.
 
 {% highlight shell %}
 nft list ruleset > /etc/nftables.conf

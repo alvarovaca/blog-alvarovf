@@ -5,7 +5,11 @@ banner: "/assets/images/banners/postgresql.png"
 date:   2021-02-05 14:44:00 +0200
 categories: bbdd
 ---
-El objetivo de este _post_ es el de mostrar el procedimiento a seguir para llevar a cabo una instalación básica de **PostgreSQL**, un gestor de bases de datos relacionales (_SQL_) sobre una máquina **Debian Buster**, así como la configuración necesaria para admitir peticiones desde máquinas remotas. Además, se instalará el gestor sobre una segunda máquina para así llevar a cabo una interconexión entre las mismas, pudiendo acceder a las tablas de una base de datos ubicada en un gestor remoto.
+El objetivo de este _post_ es el de mostrar el procedimiento a seguir para llevar a cabo una instalación básica de **PostgreSQL**, un gestor de bases de datos relacionales (_SQL_) sobre una máquina **Debian Buster**, así como la configuración necesaria para admitir peticiones desde máquinas remotas.
+
+Además, se instalará el gestor sobre una segunda máquina para así llevar a cabo una interconexión entre las mismas, siendo su finalidad la de permitir el acceso desde un mismo cliente a dos bases de datos de forma simultánea pero indirecta, por ejemplo, para hacer un JOIN con tablas que se encuentren en distintos servidores mediante un enlace entre ellas, de manera que uno de los servidores actuará como cliente del otro servidor, de manera unidireccional.
+
+Al fin y al cabo, el cliente únicamente abre una conexión, pues es el primer servidor al que se conecta el que posteriormente abre una conexión al segundo de ellos.
 
 Para esta ocasión, he traído los deberes hechos y he instalado previamente dos máquinas virtuales con **Debian Buster**, pero no he llevado a cabo ninguna configuración, para así partir desde un punto totalmente limpio. No considero necesario explicar el proceso de instalación de dicha distribución, ya que es bastante sencillo, además de salirse del objetivo del artículo. Las máquinas actualmente existentes en el escenario son las siguientes:
 
