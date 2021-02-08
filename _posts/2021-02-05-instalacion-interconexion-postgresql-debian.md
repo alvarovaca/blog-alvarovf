@@ -297,6 +297,31 @@ Donde:
 
 Al parecer, la consulta se ha realizado sin ningún problema y ha devuelto la información que debería, pues tal y como he mencionado con anterioridad, ambas máquinas servidoras cuentan con un direccionamiento dentro de la red local, siendo ambas totalmente alcanzables entre sí, además de estar correctamente configuradas para aceptar dichas conexiones.
 
+Otra utilidad que estos enlaces nos aportan es la capacidad de copiar las tablas de un gestor a otro, utilizando el resultado de una consulta simple para crear una tabla a partir de la misma. Por ejemplo, podríamos copiar la tabla **Departamentos** haciendo uso de la siguiente instrucción:
+
+{% highlight sql %}
+prueba1=> CREATE TABLE Departamentos
+prueba1-> AS (SELECT *
+prueba1(>     FROM dblink('dbname=prueba2 host=192.168.1.161 user=alvaro2 password=alvaro2', 'SELECT * FROM Departamentos') AS Departamentos (Identificador NUMERIC, Nombre VARCHAR, Localizacion VARCHAR));
+SELECT 4
+{% endhighlight %}
+
+En dicha instrucción, hemos realizado una consulta a la tabla **Departamentos** ubicada en la base de datos del servidor **servidor2**, utilizando la respuesta obtenida para crear una nueva tabla con el mismo nombre, que se almacenará ahora de forma local en el servidor **servidor1**, y que podremos empezar a utilizar sin necesidad de recurrir al enlace con el segundo servidor. Si consultamos la nueva tabla generada, obtendremos el siguiente resultado:
+
+{% highlight sql %}
+prueba1=> SELECT *
+prueba1-> FROM Departamentos;
+ identificador |      nombre      | localizacion 
+---------------+------------------+--------------
+            10 | Administración   | Sevilla
+            20 | Recursos Humanos | Barcelona
+            30 | Seguridad        | Madrid
+            40 | Informática      | Valencia
+(4 rows)
+{% endhighlight %}
+
+Como se puede apreciar, el contenido es exactamente el mismo que el existente en la tabla ubicada en el gestor remoto, por lo que podemos concluir que su clonación ha sido efectiva.
+
 El enlace ha funcionado del extremo **servidor1** al extremo **servidor2**, pero como ya sabemos, dichos enlaces son unidireccionales, de manera que si quisiésemos realizar la conexión a la inversa, tendríamos que repetir el mismo procedimiento en la segunda máquina, así que vamos a proceder a ello.
 
 Una vez más, tendremos que tener instalado el paquete **postgresql-contrib**, el cuál instalaremos ejecutando para ello el comando:
@@ -372,4 +397,33 @@ prueba2-> ON (Empleados.Departamento = Departamentos.Identificador);
 (10 rows)
 {% endhighlight %}
 
-Como era de esperar, la consulta ha vuelto a realizarse sin ningún problema y ha devuelto la información que debería, de manera que podemos corroborar que los servidores tienen conectividad entre sí mediante los enlaces creados, sea cual sea el sentido utilizado.
+Como era de esperar, la consulta ha vuelto a realizarse sin ningún problema y ha devuelto la información que debería, de manera que vamos a hacer una última prueba, llevando a cabo una copia de la tabla **Empleados** ubicada en el primero de los servidores, haciendo uso de la siguiente instrucción:
+
+{% highlight sql %}
+prueba2=> CREATE TABLE Empleados
+prueba2-> AS (SELECT *
+prueba2(>     FROM dblink('dbname=prueba1 host=192.168.1.160 user=alvaro1 password=alvaro1', 'SELECT * FROM Empleados') AS Empleados (DNI VARCHAR, Nombre VARCHAR, Direccion VARCHAR, Telefono VARCHAR, FechaNacimiento DATE, Salario NUMERIC, Departamento NUMERIC));
+SELECT 10
+{% endhighlight %}
+
+En dicha instrucción, hemos realizado una consulta a la tabla **Empleados** ubicada en la base de datos del servidor **servidor1**, utilizando la respuesta obtenida para crear una nueva tabla con el mismo nombre, que se almacenará ahora de forma local en el servidor **servidor2**, y que podremos empezar a utilizar sin necesidad de recurrir al enlace con el primer servidor. Si consultamos la nueva tabla generada, obtendremos el siguiente resultado:
+
+{% highlight sql %}
+prueba2=> SELECT *
+prueba2-> FROM Empleados;
+    dni    |          nombre           |       direccion        | telefono  | fechanacimiento | salario | departamento 
+-----------+---------------------------+------------------------+-----------+-----------------+---------+--------------
+ 90389058R | Joaquin Marrero Covas     | C/ Hijuela de Lojo, 22 | 618385118 | 1997-01-28      |    1446 |           10
+ 18232747A | Aristarco Caban Meraz     | Puerta Nueva, 67       | 691204722 | 1994-05-07      |    4789 |           30
+ 94106513N | Marian Fonseca Betancourt | C/ Manuel Iradier, 37  | 638415823 | 1979-07-17      |    2561 |           30
+ 12777631G | Merlino Rosado Cordero    | C/ Henan Cortes, 58    | 609841755 | 1993-11-27      |    7961 |           20
+ 68219319P | Tabare Chapa Alcantar     | C/ Arana, 12           | 682227206 | 1992-03-09      |    8568 |           40
+ 67227129S | Ian Esquivel Laboy        | C/ Inglaterra, 64      | 728005136 | 1992-07-21      |    3519 |           10
+ 52315160G | Heinz Collado Caraballo   | Escuadro, 60           | 600173822 | 1984-02-13      |    1672 |           20
+ 85145590G | Anabel Lerma Dominguez    | Crta. Cadiz, 1         | 675014823 | 1981-01-07      |    5919 |           10
+ 56228957Y | Dinorah Viera Tello       | Ctra. Villena, 22      | 642852778 | 1987-05-28      |    2567 |           30
+ 61242562W | Manases Castillo Camacho  | Ctra. Hornos, 91       | 607853354 | 1991-10-29      |    4270 |           40
+(10 rows)
+{% endhighlight %}
+
+Como se puede apreciar, el contenido es exactamente el mismo que el existente en la tabla ubicada en el gestor remoto, por lo que podemos concluir que su clonación ha sido efectiva y que los servidores tienen conectividad entre sí mediante los enlaces creados, sea cual sea el sentido utilizado.

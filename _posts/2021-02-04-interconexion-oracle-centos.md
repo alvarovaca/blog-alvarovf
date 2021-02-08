@@ -277,6 +277,32 @@ Donde:
 
 Al parecer, la consulta se ha realizado sin ningún problema y ha devuelto la información que debería, pues tal y como he mencionado con anterioridad, ambas máquinas servidoras cuentan con un direccionamiento dentro de la red local, siendo ambas totalmente alcanzables entre sí, además de estar correctamente configuradas para aceptar dichas conexiones.
 
+Otra utilidad que estos enlaces nos aportan es la capacidad de copiar las tablas de un gestor a otro, utilizando el resultado de una consulta simple para crear una tabla a partir de la misma. Por ejemplo, podríamos copiar la tabla **Departamentos** haciendo uso de la siguiente instrucción:
+
+{% highlight sql %}
+SQL> CREATE TABLE Departamentos
+AS (SELECT *
+    FROM Departamentos@oracle2link);
+
+Tabla creada.
+{% endhighlight %}
+
+En dicha instrucción, hemos realizado una consulta a la tabla **Departamentos** ubicada en la base de datos del servidor **oracle2**, utilizando la respuesta obtenida para crear una nueva tabla con el mismo nombre, que se almacenará ahora de forma local en el servidor **oracle1**, y que podremos empezar a utilizar sin necesidad de recurrir al enlace con el segundo servidor. Si consultamos la nueva tabla generada, obtendremos el siguiente resultado:
+
+{% highlight sql %}
+SQL> SELECT *      
+  2  FROM Departamentos;
+
+IDENTIFICADOR NOMBRE		   LOCALIZACION
+------------- -------------------- ---------------
+	   10 Administraci??n	   Sevilla
+	   20 Recursos Humanos	   Barcelona
+	   30 Seguridad 	   Madrid
+	   40 Inform??tica	   Valencia
+{% endhighlight %}
+
+Como se puede apreciar, el contenido es exactamente el mismo que el existente en la tabla ubicada en el gestor remoto, por lo que podemos concluir que su clonación ha sido efectiva.
+
 El enlace ha funcionado del extremo **oracle1** al extremo **oracle2**, pero como ya sabemos, dichos enlaces son unidireccionales, de manera que si quisiésemos realizar la conexión a la inversa, tendríamos que repetir el mismo procedimiento en la segunda máquina, así que vamos a proceder a ello.
 
 Una vez más, tendremos que comprobar la conectividad con el _listener_ de la máquina **oracle1**, haciendo uso de `tnsping`, indicando a su vez la dirección IP de la máquina a la que nos queremos conectar (en este caso, **192.168.1.150**):
@@ -420,4 +446,73 @@ FECHANAC    SALARIO DEPARTAMENTO
 10 filas seleccionadas.
 {% endhighlight %}
 
-Como era de esperar, la consulta ha vuelto a realizarse sin ningún problema y ha devuelto la información que debería, de manera que podemos corroborar que los servidores tienen conectividad entre sí mediante los enlaces creados, sea cual sea el sentido utilizado.
+Como era de esperar, la consulta ha vuelto a realizarse sin ningún problema y ha devuelto la información que debería, de manera que vamos a hacer una última prueba, llevando a cabo una copia de la tabla **Empleados** ubicada en el primero de los servidores, haciendo uso de la siguiente instrucción:
+
+{% highlight sql %}
+SQL> CREATE TABLE Empleados
+AS (SELECT *
+    FROM Empleados@oracle1link);
+
+Tabla creada.
+{% endhighlight %}
+
+En dicha instrucción, hemos realizado una consulta a la tabla **Empleados** ubicada en la base de datos del servidor **oracle1**, utilizando la respuesta obtenida para crear una nueva tabla con el mismo nombre, que se almacenará ahora de forma local en el servidor **oracle2**, y que podremos empezar a utilizar sin necesidad de recurrir al enlace con el primer servidor. Si consultamos la nueva tabla generada, obtendremos el siguiente resultado:
+
+{% highlight sql %}
+SQL> SELECT *
+  2  FROM Empleados;
+
+DNI	  NOMBRE			 DIRECCION		   TELEFONO
+--------- ------------------------------ ------------------------- ---------
+FECHANAC    SALARIO DEPARTAMENTO
+-------- ---------- ------------
+90389058R Joaquin Marrero Covas 	 C/ Hijuela de Lojo, 22    618385118
+28/01/97       1446	      10
+
+18232747A Aristarco Caban Meraz 	 Puerta Nueva, 67	   691204722
+07/05/94       4789	      30
+
+94106513N Marian Fonseca Betancourt	 C/ Manuel Iradier, 37	   638415823
+17/07/79       2561	      30
+
+
+DNI	  NOMBRE			 DIRECCION		   TELEFONO
+--------- ------------------------------ ------------------------- ---------
+FECHANAC    SALARIO DEPARTAMENTO
+-------- ---------- ------------
+12777631G Merlino Rosado Cordero	 C/ Henan Cortes, 58	   609841755
+27/11/93       7961	      20
+
+68219319P Tabare Chapa Alcantar 	 C/ Arana, 12		   682227206
+09/03/92       8568	      40
+
+67227129S Ian Esquivel Laboy		 C/ Inglaterra, 64	   728005136
+21/07/92       3519	      10
+
+
+DNI	  NOMBRE			 DIRECCION		   TELEFONO
+--------- ------------------------------ ------------------------- ---------
+FECHANAC    SALARIO DEPARTAMENTO
+-------- ---------- ------------
+52315160G Heinz Collado Caraballo	 Escuadro, 60		   600173822
+13/02/84       1672	      20
+
+85145590G Anabel Lerma Dominguez	 Crta. Cadiz, 1 	   675014823
+07/01/81       5919	      10
+
+56228957Y Dinorah Viera Tello		 Ctra. Villena, 22	   642852778
+28/05/87       2567	      30
+
+
+DNI	  NOMBRE			 DIRECCION		   TELEFONO
+--------- ------------------------------ ------------------------- ---------
+FECHANAC    SALARIO DEPARTAMENTO
+-------- ---------- ------------
+61242562W Manases Castillo Camacho	 Ctra. Hornos, 91	   607853354
+29/10/91       4270	      40
+
+
+10 filas seleccionadas.
+{% endhighlight %}
+
+Como se puede apreciar, el contenido es exactamente el mismo que el existente en la tabla ubicada en el gestor remoto, por lo que podemos concluir que su clonación ha sido efectiva y que los servidores tienen conectividad entre sí mediante los enlaces creados, sea cual sea el sentido utilizado.
