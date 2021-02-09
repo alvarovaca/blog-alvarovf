@@ -270,9 +270,8 @@ La intención es mostrar los datos de los **Empleados** (tabla que se encuentra 
 
 {% highlight sql %}
 prueba1=> SELECT Empleados.DNI AS DNI, Empleados.Nombre AS Nombre, Empleados.Direccion AS Direccion, Empleados.Telefono AS Telefono, Empleados.FechaNacimiento AS FechaNacimiento, Empleados.Salario AS Salario, Departamentos.Nombre AS Departamento
-prueba1-> FROM dblink('dbname=prueba2 host=192.168.1.161 user=alvaro2 password=alvaro2', 'SELECT Identificador, Nombre FROM Departamentos') AS Departamentos (Identificador NUMERIC, Nombre VARCHAR)
-prueba1-> LEFT OUTER JOIN Empleados
-prueba1-> ON (Empleados.Departamento = Departamentos.Identificador);
+prueba1-> FROM Empleados, dblink('dbname=prueba2 host=192.168.1.161 user=alvaro2 password=alvaro2', 'SELECT Identificador, Nombre FROM Departamentos') AS Departamentos (Identificador NUMERIC, Nombre VARCHAR)
+prueba1-> WHERE Empleados.Departamento = Departamentos.Identificador;
     dni    |          nombre           |       direccion        | telefono  | fechanacimiento | salario |   departamento   
 -----------+---------------------------+------------------------+-----------+-----------------+---------+------------------
  85145590G | Anabel Lerma Dominguez    | Crta. Cadiz, 1         | 675014823 | 1981-01-07      |    5919 | Administración
@@ -291,9 +290,8 @@ prueba1-> ON (Empleados.Departamento = Departamentos.Identificador);
 Donde:
 
 * **SELECT**: Indicamos las columnas que queremos mostrar de la información obtenida, de la forma **[tabla].[columna]**.
-* **FROM**: Hacemos uso del enlace que acabamos de generar, indicando en el mismo los parámetros necesarios para la conexión (base de datos, dirección IP, usuario, contraseña y consulta que realizar a la base de datos remota). Tras ello, indicamos el tipo de datos de cada una de las columnas que la consulta remota nos ha devuelto, para que el gestor pueda interpretarlas correctamente.
-* **LEFT OUTER JOIN**: Hacemos un JOIN de la consulta remota con la tabla Empleados que se encuentra en la base de datos local, para así poder mostrar información de ambas tablas en la misma consulta.
-* **ON**: Establecemos la condición del JOIN, que deberá ser aquella columna mediante la cual vamos a unir los registros devueltos. Como es lógico, será el código del departamento, pues es la columna que se repite en ambas tablas.
+* **FROM**: Hacemos un JOIN del enlace que acabamos de generar, indicando en el mismo los parámetros necesarios para la conexión (base de datos, dirección IP, usuario, contraseña y consulta que realizar a la base de datos remota) y asociando explícitamente el tipo de datos de cada una de las columnas que la consulta remota nos ha devuelto, para que el gestor pueda interpretarlas correctamente, junto a la tabla Empleados que se encuentra en la base de datos local, para así poder mostrar información de ambas tablas en la misma consulta.
+* **WHERE**: Establecemos la condición del JOIN, que deberá ser aquella columna mediante la cual vamos a unir los registros devueltos. Como es lógico, será el código del departamento, pues es la columna que se repite en ambas tablas.
 
 Al parecer, la consulta se ha realizado sin ningún problema y ha devuelto la información que debería, pues tal y como he mencionado con anterioridad, ambas máquinas servidoras cuentan con un direccionamiento dentro de la red local, siendo ambas totalmente alcanzables entre sí, además de estar correctamente configuradas para aceptar dichas conexiones.
 
@@ -379,9 +377,8 @@ La intención es realizar la misma consulta que en el caso anterior, pero adapt�
 
 {% highlight sql %}
 prueba2=> SELECT Empleados.DNI AS DNI, Empleados.Nombre AS Nombre, Empleados.Direccion AS Direccion, Empleados.Telefono AS Telefono, Empleados.FechaNacimiento AS FechaNacimiento, Empleados.Salario AS Salario, Departamentos.Nombre AS Departamento
-prueba2-> FROM dblink('dbname=prueba1 host=192.168.1.160 user=alvaro1 password=alvaro1', 'SELECT * FROM Empleados') AS Empleados (DNI VARCHAR, Nombre VARCHAR, Direccion VARCHAR, Telefono VARCHAR, FechaNacimiento DATE, Salario NUMERIC, Departamento NUMERIC)
-prueba2-> LEFT OUTER JOIN Departamentos
-prueba2-> ON (Empleados.Departamento = Departamentos.Identificador);
+prueba2-> FROM dblink('dbname=prueba1 host=192.168.1.160 user=alvaro1 password=alvaro1', 'SELECT * FROM Empleados') AS Empleados (DNI VARCHAR, Nombre VARCHAR, Direccion VARCHAR, Telefono VARCHAR, FechaNacimiento DATE, Salario NUMERIC, Departamento NUMERIC), Departamentos
+prueba2-> WHERE Empleados.Departamento = Departamentos.Identificador;
     dni    |          nombre           |       direccion        | telefono  | fechanacimiento | salario |   departamento   
 -----------+---------------------------+------------------------+-----------+-----------------+---------+------------------
  90389058R | Joaquin Marrero Covas     | C/ Hijuela de Lojo, 22 | 618385118 | 1997-01-28      |    1446 | Administración
