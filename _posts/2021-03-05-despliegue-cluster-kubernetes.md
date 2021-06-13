@@ -46,7 +46,7 @@ Para aclarar un poco los conceptos, vamos a apreciar de forma gráfica las difer
 
 * **Despliegue Kubernetes**:
 
-![grafico2](https://i.ibb.co/SwSBrwy/normal.jpg "Despliegue Kubernetes")
+![grafico2](https://i.ibb.co/MsNF7Gm/k8s.jpg "Despliegue Kubernetes")
 
 Como se puede apreciar, en la primera imagen tenemos un conjunto de máquinas (**_Frontend_**) que están expuestas al exterior y la carga se balancea entre ellas a través de un balanceador de carga. Dichas máquinas interactuan con otras máquinas internas (**_Backend_**) para responder las peticiones entrantes.
 
