@@ -5,57 +5,57 @@ banner: "/assets/images/banners/altadisponibilidad.jpg"
 date:   2021-06-13 18:02:00 +0200
 categories: seguridad
 ---
-Esta entrada corresponde al desarrollo del **T**rabajo de **F**in de **G**rado (**TFG**) del ciclo **A**dministración de **S**istemas **I**nformáticos en **R**ed (**ASIR**) durante la promoción 2019-2021 en el IES Gonzalo Nazareno, Dos Hermanas, Sevilla.
+Esta entrada corresponde al desarrollo del **T**rabajo de **F**in de **G**rado (**TFG**) del ciclo **A**dministración de **S**istemas **I**nformáticos en **R**ed (**ASIR**) cursado durante la promoción 2019-2021 en el IES Gonzalo Nazareno, Dos Hermanas, Sevilla.
 
-Mi idea a desarrollar para el TFG de forma paralela a la formación en centros de trabajo consiste en profundizar en la **alta disponibilidad** (_HA_), así como en los **sistemas de ficheros distribuidos**, necesarios para el correcto funcionamiento de por ejemplo, una base de datos replicada.
+La idea a desarrollar para el TFG de forma paralela a la formación en centros de trabajo consiste en profundizar en la **alta disponibilidad** (_HA_), así como en los **sistemas de ficheros distribuidos**, necesarios para el correcto funcionamiento de por ejemplo, una base de datos replicada.
 
-Dada la velocidad con la que se ha tratado el tema de la alta disponibilidad en la asignatura **Seguridad y Alta Disponibilidad** durante el curso, añadido además mi interés sobre el tema, considero que los conocimientos adquiridos no se adaptan a los que esperaba, siendo por tanto una ocasión perfecta para hacerlo durante el desarrollo del TFG.
+Dada la velocidad con la que se ha tratado el tema de la alta disponibilidad en la asignatura **Seguridad y Alta Disponibilidad** durante el curso, añadido además mi interés sobre el tema, considero que los conocimientos adquiridos no se adaptan a los que esperaba, convirtiéndose por tanto en una ocasión perfecta para hacerlo en el TFG.
 
-El objetivo principal de este artículo es el de mostrar de una forma muy similar a lo que nos podríamos encontrar tradicionalmente en un entorno real de producción, cómo funciona la alta disponibilidad de una determinada aplicación desplegada en un conjunto de servidores, desde el momento de la configuración inicial de los mismos hasta el despliegue descentralizado de la aplicación, para así seguir ofreciendo el servicio en todo momento. En este caso desplegaremos un _PrestaShop_.
+El objetivo principal de este artículo es el de mostrar de una forma muy similar a lo que nos podríamos encontrar tradicionalmente en un entorno real de producción cómo funciona la alta disponibilidad de una determinada aplicación desplegada en un conjunto de servidores, desde el momento de la configuración inicial de los mismos hasta el despliegue descentralizado de la aplicación, para así seguir ofreciendo el servicio en todo momento. En este caso desplegaremos un **_PrestaShop_**.
 
-Para el desarollo del mismo, he montado un escenario en OpenStack constituido por un total de 10 máquinas con sistema operativo **Debian 10.6**, tal y como se puede apreciar a continuación:
+Para el correcto desarrollo del proyecto, he montado un escenario en **OpenStack** constituido por un total de **10 máquinas** con sistema operativo **Debian 10.6**, tal y como se puede apreciar a continuación:
 
 ![escenario](https://i.ibb.co/SQTnnmg/escenario.jpg "Escenario")
 
-Sin embargo, antes de comenzar a desarrollar la tarea de manera práctica, es necesario conocer una serie de conceptos que nos ayudarán a entender mucho mejor qué es lo que pretendemos conseguir finalmente.
+Sin embargo, antes de comenzar a desarrollar la tarea de forma práctica, es necesario conocer una serie de conceptos que nos ayudarán a entender mucho mejor qué es lo que pretendemos conseguir finalmente.
 
-La **Alta Disponibilidad** (_HA_) consiste en tener un sistema redundante que permita que en caso de ocurrir algún tipo de fallo, el servicio se siga ofreciendo con normalidad. Para ello, nos serviremos de clústeres, un conjunto de equipos independientes que realizan alguna tarea común en la que se comportan como un único equipo.
+La **Alta Disponibilidad** (_HA_) consiste en tener un sistema redundante que permita a uno o varios servicios seguir ejecutándose con normalidad en caso de ocurrir algún tipo de fallo. Para ello, nos serviremos de clústeres, un conjunto de equipos independientes que realizan alguna tarea común en la que se comportan como un único equipo.
 
-Los clústeres de alta disponibilidad han ido perdiendo importancia en los últimos años dada la aparición de nuevas tecnologías como **Kubernetes**, que nos permiten hacerlo de una forma más abstracta y sencilla, aunque tradicionalmente se han configurado como vamos a mostrar aquí.
+Para ello se pretende eliminar todos los puntos únicos de fallo (_SPOF_) mediante redundancia a todos los niveles: hardware, almacenamiento, redes... y debe ser lo suficientemente inteligente como para detectar fallos, reiniciar la aplicación en otro nodo y mantener el servicio activo sin ningún tipo de interacción por parte del usuario, garantizando en todo momento su integridad.
 
-Existen varios tipos de clústeres:
+Los clústeres de alta disponibilidad han ido perdiendo importancia en los últimos años dada la aparición de nuevas tecnologías como **Kubernetes**, que nos permiten hacerlo de una forma más abstracta y sencilla, aunque tradicionalmente se han configurado como vamos a mostrar a continuación.
 
-* **Alto rendimiento** (_HPC_): Aumentamos la potencia computacional, por ejemplo, consiguiendo hacer un mayor número de cálculos en menos tiempo. Se suelen utilizar equipos físicos. Utilizados en centros de investigación, ingeniería y otras actividades.
+Existen otros tipos de clústeres, aunque de menor importancia en este caso:
 
-* **Alta disponibilidad** (_HA_): Redundancia entre equipos ofreciendo tolerancia a fallos, de manera que el servicio siempre se encuentre levantado aunque ocurran fallos. Se pretende eliminar todos los puntos únicos de fallo (_SPOF_) mediante redundancia a todos los niveles: hardware, almacenamiento, redes... Se suelen implementar con balanceo de carga para repartir las peticiones entre los nodos. Debe ser lo suficientemente inteligente como para detectar fallos, reiniciar la aplicación en otro nodo y mantener el servicio (garantizando en todo momento su integridad) sin ningún tipo de interacción por parte del usuario. Utilizados en servicios de Internet. Es el tipo de clúster que utilizaremos en este caso, haciendo uso de herramientas como **Pacemaker** y **Corosync**.
+* **Alto rendimiento** (_HPC_): Aumentamos la potencia computacional, por ejemplo, consiguiendo hacer un mayor número de cálculos en un menor tiempo. Se suelen utilizar equipos físicos. Utilizados en centros de investigación, ingeniería y otras actividades.
 
-* **Balanceo de carga**: Evitamos sobrecargar un equipo, repartiendo el tráfico entre las máquinas. Debe ir acompañado de un algoritmo para el reparto de dicha carga: aleatorio, Round Robin, carga de nodos, tiempo de respuesta... Se puede implementar un clúster de balanceo de carga sin alta disponibilidad, aunque no es lo común.
+* **Balanceo de carga**: Evitamos sobrecargar un equipo, repartiendo el tráfico entre las máquinas utilizando un algoritmo: aleatorio, _Round Robin_, carga de nodos, tiempo de respuesta... Se puede implementar un clúster de balanceo de carga sin alta disponibilidad, aunque no es lo común.
 
-* **Escalabilidad**: Propiedad que permite modificar el tamaño del clúster en función de las necesidades, siendo comúnmente utilizado con máquinas virtuales e instancias de _cloud_, dada la dificultad que supondría hacerlo con máquinas físicas. Con la escalabilidad asumimos que el número de nodos siempre crece, mientras que con la elasticidad se asume la adaptación de cada momento, creciendo o decreciendo el número de nodos. Por ejemplo, _Amazon EC2_ es una solución _IaaS_ en la que se paga por horas de uso y configuramos mediante plantillas los despliegues que se van a realizar.
-
-Originalmente, los clústeres surgieron como una alternativa al escalado vertical de las máquinas, pues para aumentar la potencia computacional, en lugar de sustituir el equipo por uno nuevo más potente, añadíamos otra máquina en paralelo (nodo) que trabajaría de forma síncrona con el anterior.
+Originalmente, los clústeres surgieron como una alternativa al escalado vertical de las máquinas, pues para aumentar la potencia computacional añadimos otro nodo en paralelo que trabajará de forma síncrona con el anterior, en lugar de sustituir el equipo por uno nuevo más potente.
 
 Gracias al uso de tecnologías de virtualización y _cloud computing_, dicho escalado horizontal se puede llevar a cabo con máquinas virtuales o instancias de _cloud_, en lugar de máquinas físicas, con las correspondientes ventajas que ello supone: versatilidad, evitar nuevo cableado, evitar nuevas instalaciones... aunque es posible utilizar combinaciones de las anteriores opciones.
 
-Dentro del mundo de la alta disponibilidad existe una serie de términos que encontraremos con una gran frecuencia y que son necesarios conocer:
+Dentro del mundo de la alta disponibilidad existen una serie de términos que encontraremos con gran frecuencia y que son necesarios conocer:
 
-* **Recurso**: Normalmente asociado a un servicio que queremos poner a prueba de fallos, que pertenece y es gestionado por el clúster como tal, mediante el software correspondiente. Por ejemplo, un servidor web.
+* **Recurso**: Normalmente asociado a un servicio que queremos poner a prueba de fallos, que pertenece y es gestionado por el clúster mediante el _software_ correspondiente. Por ejemplo, un servidor web.
 
 * **Heartbeat**: Elemento utilizado en el clúster para conocer de forma constante y mediante una comunicación generalmente dedicada y cifrada, cuáles de los nodos se encuentran activos y funcionales. Es por ello que se hace la analogía de las pulsaciones o latidos de un corazón (_heartbeat_).
 
 * **Split brain**: Mal funcionamiento que se produce cuando se pierde la comunicación entre los nodos y estos empiezan a tomar decisiones por su cuenta.
 
-* **Quorum**: Mecanismo que pretende prevenir el _split brain_, basándose en una decisión compartida entre los nodos, que decidirán por votación si un determinado nodo se encuentra o no activo (ya que la conexión puede haberse perdido entre dos nodos concretos pero no entre todos). Es necesario hacerlo así ya que no podemos delegar toda la gestión del clúster en un único equipo, pues supondría la existencia de un _SPOF_.
+* **Quorum**: Mecanismo que pretende prevenir el _split brain_ basándose en una decisión compartida entre los nodos, que decidirán por votación si un determinado nodo se encuentra o no activo. Es necesario hacerlo así ya que no podemos delegar toda la gestión del clúster en un único equipo, pues supondría la existencia de un _SPOF_.
 
-* **Stonith**: También conocido como _Shoot The Other Node In The Head_, se utiliza cuando el _quorum_ ha decidido que el nodo no se encuentra activo y por tanto, se asegura que dicho nodo no accede a los datos, evitando una corrupción en los mismos.
+* **Stonith**: También conocido como _Shoot The Other Node In The Head_. Se utiliza cuando el _quorum_ ha decidido que un nodo no se encuentra activo y por tanto, se asegura de que no acceda a los datos, evitando la corrupción de los mismos.
 
-Sin embargo, existe un problema que todavía no hemos tratado, y es que los sistemas de ficheros tradicionales sólo pueden montarse en un equipo de forma concurrente. En muchos casos, los clústeres requieren algún sistema de almacenamiento compartido con más propiedades, como por ejemplo los de bases de datos o servidores web de sitios dinámicos como WordPress, ya que necesitamos que el contenido que se sirva sea el mismo en todos ellos. Para ello, hacemos uso de los sistemas de ficheros distribuidos, de manera que cuando un nodo escriba, dicho cambio se refleje en todos los nodos.
+Sin embargo, existe un problema que todavía no hemos tratado, y es que la mayoría de los sistemas de ficheros tradicionales sólo pueden montarse en un equipo de forma concurrente.
 
-Los sistemas de ficheros distribuidos utilizan su propio protocolo para comunicar el cliente y el servidor, proporcionando almacenamiento remoto a sus clientes de forma transparente, ya que ellos lo verán como si se tratase de almacenamiento local. Incluyen tolerancia a fallos, gran escalabilidad, control de concurrencia... Entre los más conocidos se encuentran **Lustre**, **Google FileSystem**, **GlusterFS**... En este caso haremos uso de **Ceph**.
+En muchos casos, los clústeres requieren de algún sistema de almacenamiento compartido con más propiedades, como por ejemplo los de servidores web de sitios dinámicos como WordPress, ya que necesitamos que el contenido servido sea el mismo en todos ellos. Por tanto, hacemos uso de los sistemas de ficheros distribuidos, de manera que cuando un nodo escribe, el cambio es reflejado en todos los nodos.
 
-Una vez comprendidos todos los términos indispensables, todo está listo para comenzar con la creación y configuración del escenario sobre el que trabajaremos.
+Los sistemas de ficheros distribuidos utilizan su propio protocolo para comunicar el cliente y el servidor, proporcionando almacenamiento remoto de forma transparente, pues ellos lo verán como si de almacenamiento local se tratase. Incluyen tolerancia a fallos, gran escalabilidad, control de concurrencia... Entre los más conocidos se encuentran **Lustre**, **Google FileSystem**, **GlusterFS**... En este caso haremos uso de **Ceph**.
 
-En mi caso, he llevado a cabo la creación de las máquinas de forma previa, pero se encuentran sin ningún tipo de configuración, la cuál procederemos a realizarla con el cliente de comandos de OpenStack. La instalación de dicho cliente puede encontrarse detallada en [anteriores artículos](https://www.alvarovf.com/hlc/openstack/2020/11/15/instalacion-escenario-openstack.html), por lo que procederé a obviarla.
+Una vez comprendidos los términos indispensables, todo está listo para comenzar con la creación y configuración del escenario sobre el que trabajaremos.
+
+En este caso, he llevado a cabo la creación de las máquinas de forma previa, encontrándose las mismas sin ningún tipo de configuración, la cuál procederemos a realizar inicialmente con el cliente de comandos de **OpenStack**. La instalación de dicho cliente puede encontrarse detallada en [anteriores artículos](https://www.alvarovf.com/hlc/openstack/2020/11/15/instalacion-escenario-openstack.html), por lo que podemos obviarla.
 
 Una vez dentro del mismo, podremos proceder a listar las instancias existentes en nuestro proyecto para así verificar que funciona correctamente. El comando a ejecutar sería:
 
@@ -77,7 +77,7 @@ Una vez dentro del mismo, podremos proceder a listar las instancias existentes e
 +--------------------------------------+--------------+--------+----------------------------------------------+--------------------+-----------+
 {% endhighlight %}
 
-Efectivamente, el cliente de OpenStack se encuentra actualmente operativo y nos ha mostrado la información referente a las 10 instancias creadas en mi proyecto, que como se puede apreciar los sabores (_flavors_) se encuentran comprendidos entre los siguientes:
+Efectivamente, el cliente de **OpenStack** se encuentra actualmente operativo y nos ha mostrado la información referente a las 10 instancias creadas en mi proyecto, que como se puede apreciar, los sabores (_flavors_) asignados a las mismas se encuentran comprendidos entre los siguientes:
 
 - **m1.mini**:
     - **vCPUs**: 1
@@ -89,24 +89,24 @@ Efectivamente, el cliente de OpenStack se encuentra actualmente operativo y nos 
     - **vCPUs**: 2
     - **RAM**: 2 GB
 
-Es importante asignar los suficientes recursos a las máquinas, ya que tendrán que alojar varios servicios medianamente exigentes en cuanto a prestaciones.
+Es importante asignar suficientes recursos a las máquinas, ya que tendrán que ejecutar varios servicios medianamente exigentes en cuanto a prestaciones.
 
-De forma adicional, he asociado 3 volúmenes de una capacidad de 5 GiB cada uno a las máquinas **OSD**, que tal y como posteriormente veremos, son las encargadas del almacenamiento en el clúster que montaremos. Vamos a verificar que dichos volúmenes han sido correctamente creados y asociados haciendo uso del comando:
+De forma adicional, he asociado **3 volúmenes** de una capacidad de **5 GiB** cada uno a las máquinas **OSD**, que tal y como posteriormente veremos, son las encargadas del almacenamiento en el clúster que montaremos. Vamos a verificar que dichos volúmenes han sido correctamente creados y asociados haciendo uso del comando:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~$ openstack volume list
 +--------------------------------------+---------+----------------+------+------------------------------------+
 | ID                                   | Name    | Status         | Size | Attached to                        |
 +--------------------------------------+---------+----------------+------+------------------------------------+
-| 6c59d1cd-54a8-4402-9aec-65819cf217c4 | ceph-3  | in-use         |    5 | Attached to ceph-osd3 on /dev/vdb  |
-| 48aa0185-f772-4e7d-9181-0b48ac6e061e | ceph-2  | in-use         |    5 | Attached to ceph-osd2 on /dev/vdb  |
-| cd84226f-ca74-4be8-8538-1f706fab7b2b | ceph-1  | in-use         |    5 | Attached to ceph-osd1 on /dev/vdb  |
+| be00866a-367e-4eea-94b9-7f979b510a88 | ceph-3  | in-use         |    5 | Attached to ceph-osd3 on /dev/vdb  |
+| e85306e6-77a1-44a4-96df-febd62ecd99f | ceph-2  | in-use         |    5 | Attached to ceph-osd2 on /dev/vdb  |
+| c8035f39-38b9-482e-9c22-3a262ed9cbf2 | ceph-1  | in-use         |    5 | Attached to ceph-osd1 on /dev/vdb  |
 +--------------------------------------+---------+----------------+------+------------------------------------+
 {% endhighlight %}
 
-De forma predeterminada, al crear una máquina en OpenStack se le asigna un grupo de seguridad con unas reglas de cortafuegos que en este caso no necesitamos, pues únicamente van a causarnos conflictos al asignarles direcciones IP virtuales a algunas interfaces de red para el correcto funcionamiento de la alta disponibilidad, tal y como veremos durante el desarrollo del artículo.
+De forma predeterminada, al crear una máquina en **OpenStack** se le asigna un grupo de seguridad con unas reglas de cortafuegos que en este caso no necesitamos, pues únicamente van a causarnos conflictos al intentar asignarles direcciones IP virtuales a algunas interfaces de red para el correcto funcionamiento de la alta disponibilidad, tal y como veremos durante el desarrollo del artículo.
 
-Para solventar dicho problema, haremos uso de una instrucción iterativa que procederá a deshabilitar dicho grupo de seguridad en todas las máquinas existentes en el clúster, ejecutando para ello el comando:
+Para solventar dicho problema, utilizaremos una instrucción iterativa que procederá a deshabilitar el grupo de seguridad en todas las máquinas existentes en el proyecto, ejecutando para ello el comando:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~$ for i in admin osd{1..3} mon{1..3} client{1..2} dns
@@ -115,9 +115,9 @@ Para solventar dicho problema, haremos uso de una instrucción iterativa que pro
 > done
 {% endhighlight %}
 
-Esto no es todo, ya que también tenemos que deshabilitar la seguridad en los correspondientes puertos de las máquinas, ya que cuando una máquina no tiene ningún grupo de seguridad asignado, el _modus operandi_ por defecto es el de bloquear la conexión en todos los puertos asociados a la misma.
+Esto no es todo, ya que también tenemos que deshabilitar la seguridad en los correspondientes puertos de las máquinas, pues el _modus operandi_ por defecto de una máquina sin ningún grupo de seguridad asignado, es el de bloquear la conexión en todos los puertos asociados a la misma.
 
-Una vez más, utilizaremos una instrucción iterativa que deshabilitará la seguridad en los puertos existentes en las máquinas del clúster, obteniendo en un primer paso la dirección IP de la máquina para posteriormente buscar el identificador del puerto asociado a dicha dirección, para finalmente, en una tercera instrucción, deshabilitar dicha seguridad. Para ello, haremos uso del comando:
+Una vez más, utilizaremos una instrucción iterativa que deshabilitará la seguridad en los puertos existentes en las máquinas del proyecto, obteniendo en un primer paso la dirección IP de la máquina para posteriormente buscar el identificador del puerto asociado a dicha dirección. Finalmente, en una tercera instrucción, deshabilitará la seguridad en el mismo. Para ello, haremos uso del comando:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~$ for i in admin osd{1..3} mon{1..3} client{1..2} dns
@@ -128,17 +128,17 @@ Una vez más, utilizaremos una instrucción iterativa que deshabilitará la segu
 > done
 {% endhighlight %}
 
-Listo, ya hemos deshabilitado la seguridad en los mismos, de manera que ya tenemos accesible todo el rango de puertos sin limitación alguna y podemos asociar nuevas direcciones IP a las interfaces de red en caso de así necesitarlo. Es importante mencionar que deshabilitar el cortafuegos es una acción un tanto precipitada, por lo que únicamente debe llevarse a cabo en un entorno controlado.
+Listo, ya hemos deshabilitado la seguridad en los puertos, de manera que ya tenemos accesible todo el rango de puertos sin limitación alguna y podemos asociar direcciones IP virtuales a las interfaces de red en caso de así necesitarlo. Es importante mencionar que deshabilitar el cortafuegos es una acción un tanto precipitada, por lo que únicamente debe llevarse a cabo en un entorno controlado.
 
-Ya hemos realizado todas las acciones necesarias en el cliente de OpenStack, así que llega el momento de conectarnos a las 10 instancias y configurar una por una... o quizás no, ya que existen **herramientas de orquestación** como **Ansible** que automatiza el aprovisionamiento de software, la gestión de configuraciones y el despliegue de aplicaciones. Su ámbito se puede limitar a un único servidor o a una granja de ellos.
+Ya hemos realizado todas las acciones necesarias en el cliente de **OpenStack**, así que llega el momento de conectarnos a las 10 instancias para seguir configurándolas una por una... o quizás no, ya que existen **herramientas de orquestación** como **Ansible** que automatizan el aprovisionamiento de _software_, la gestión de configuraciones y el despliegue de aplicaciones en servidores.
 
 En otras palabras, **Ansible** permite a los _DevOps_ gestionar sus servidores, configuraciones y aplicaciones de forma sencilla, robusta y paralela, ahorrando tiempo y esfuerzo. En caso de que la ejecución falle en uno de los servidores, se seguirá ejecutando de forma paralela sobre el resto.
 
-No debe importar las veces que ejecutemos **Ansible** ya que el resultado de una ejecución repetida debe dejar nuestro escenario en el mismo punto que una ejecución única (idempotencia).
+No debe importar las veces que ejecutemos **Ansible** ya que el resultado de una ejecución reiterada debe ser el mismo que el de una ejecución única (idempotencia).
 
 La gestión de los diferentes nodos se lleva a cabo utilizando **SSH** y únicamente requiere **Python** en el servidor remoto en el que se vaya a ejecutar para poder utilizarlo, paquete que generalmente suele venir instalado por defecto.
 
-A pesar de que este proyecto no está enfocado a enseñar a utilizar **Ansible**, sí considero que ha sido una herramienta de gran utilidad y que por tanto, es necesario mencionar aquellas características indispensables para poder aplicarlo a nuestro escenario, empezando por la instalación del mismo en la máquina controladora, la cuál es recomendable llevar a cabo sobre un entorno virtual Python.
+A pesar de que este proyecto no está enfocado a enseñar a utilizar **Ansible**, considero que ha sido una herramienta de gran utilidad y que por tanto, es necesario mencionar aquellas características indispensables para poder aplicarlo a nuestro escenario, empezando por la instalación del mismo en la máquina controladora, la cual es recomendable llevar a cabo sobre un entorno virtual Python.
 
 En esta ocasión, el nombre que le voy a asignar al nuevo entorno virtual es **ansible**, así que lo generaré dentro de mi directorio donde almaceno todos los entornos virtuales, ejecutando para ello sobre una nueva terminal el comando:
 
@@ -158,20 +158,22 @@ Una vez activado, ya podremos proceder a instalar dicha herramienta haciendo uso
 (ansible) alvaro@debian:~$ pip install --upgrade pip
 {% endhighlight %}
 
-Una vez actualizado el gestor de paquetes, podremos instalar el paquete en cuestión de nombre **ansible**, ejecutando para ello el comando:
+Cuando el gestor de paquetes haya sido actualizado, podremos instalar el paquete en cuestión de nombre **ansible**, ejecutando para ello el comando:
 
 {% highlight shell %}
 (ansible) alvaro@debian:~$ pip install ansible
 {% endhighlight %}
 
-Nuestro nuevo entorno virtual se encuentra ahora equipado para hacer uso de la herramienta **Ansible**, sin embargo, dadas las características del proyecto que pretendemos llevar a cabo, no nos será suficiente con las funcionalidades predeterminadas que incluye, de manera que necesitaremos instalar nuevas **colecciones** para así ampliar sus funciones. En este caso, las colecciones a instalar son **ansible.posix** y **community.mysql**, de manera que haremos uso de los comandos:
+Nuestro nuevo entorno virtual se encuentra ahora equipado para hacer uso de la herramienta **Ansible**, sin embargo, dadas las características del proyecto que pretendemos llevar a cabo no nos será suficiente con las funcionalidades predeterminadas que incluye, de manera que necesitaremos instalar nuevas **colecciones** para así ampliar sus funciones.
+
+En este caso, las colecciones que instalaremos son **ansible.posix** y **community.mysql**, haciendo uso de los comandos:
 
 {% highlight shell %}
 (ansible) alvaro@debian:~$ ansible-galaxy collection install ansible.posix
 (ansible) alvaro@debian:~$ ansible-galaxy collection install community.mysql
 {% endhighlight %}
 
-Todo está listo para llevar a cabo la clonación del repositorio de **GitHub** que contiene el proyecto **Ansible** que utilizaremos para configurar de forma automática nuestro escenario compuesto por las 10 máquinas previamente mostradas, de manera que en mi caso me he movido al directorio **GitHub/** (haciendo uso de `cd`), pues es donde almaceno todos los repositorios de GitHub, y por consecuencia, el que voy a [clonar](https://github.com/alvarovaca/ansible-tfg), ejecutando para ello el comando:
+Todo está listo para llevar a cabo la clonación del repositorio de **GitHub** que contiene el proyecto **Ansible** que utilizaremos para configurar de forma automática nuestro escenario, de manera que en mi caso me he movido al directorio **GitHub/** (haciendo uso de `cd`), pues es donde almaceno todos los repositorios de **GitHub**, y por consecuencia, el que voy a [clonar](https://github.com/alvarovaca/ansible-tfg), ejecutando para ello el comando:
 
 {% highlight shell %}
 (ansible) alvaro@debian:~/GitHub$ git clone git@github.com:alvarovaca/ansible-tfg.git
@@ -183,7 +185,7 @@ remote: Total 40 (delta 0), reused 37 (delta 0), pack-reused 0
 Recibiendo objetos: 100% (40/40), 9.32 KiB | 9.32 MiB/s, listo.
 {% endhighlight %}
 
-Una vez completada la clonación, me he movido al directorio **ansible-tfg/** resultante de dicha clonación (haciendo uso de `cd`), de manera que procederé ahora a listar el contenido de dicho directorio de forma recursiva y arborescente, para así poder apreciar de una forma mucho más gráfica de lo que se compone nuestro proyecto **Ansible**, haciendo para ello uso del comando:
+Una vez completada la clonación, me he movido al directorio **ansible-tfg/** resultante (haciendo uso de `cd`), procediendo ahora a listar el contenido del mismo de forma recursiva y arborescente, para así poder apreciar de una manera mucho más gráfica de lo que se compone nuestro proyecto **Ansible**, haciendo para ello uso del comando:
 
 {% highlight shell %}
 (ansible) alvaro@debian:~/GitHub/ansible-tfg$ tree
@@ -228,11 +230,9 @@ Una vez completada la clonación, me he movido al directorio **ansible-tfg/** re
 17 directories, 19 files
 {% endhighlight %}
 
-Como se puede apreciar, existen varios directorios que contienen a su vez ficheros, pero no hay de qué preocuparse, ya que los cambios a realizar sobre dicho proyecto para poder adaptarlos a cada caso son prácticamente mínimos y no requieren ningún tipo de conocimientos sobre **Ansible**.
+Como se puede apreciar, existen varios directorios que contienen a su vez ficheros, pero no hay de qué preocuparse, ya que los cambios a realizar sobre dicho proyecto para poder adaptarlo a cada caso son prácticamente mínimos y no requieren ningún tipo de conocimiento sobre **Ansible**.
 
-Existen diferentes maneras de decirle a **Ansible** qué servidores debe gestionar. La más fácil es añadir nuestras máquinas a un inventario de nombre **hosts** separadas por grupos, dependiendo del ámbito a la que estén dirigidas (servidores web, bases de datos...).
-
-La separación en grupos no es obligatoria pero sí recomendable, pudiendo pertenecer un mismo nodo a varios grupos, para así poder disponer de una mayor granularidad. En mi caso, el resultado final sería el siguiente (sustituir las direcciones IP por las correspondientes alcanzables):
+Existen diferentes maneras de decirle a **Ansible** qué servidores debe gestionar. La más fácil es añadir nuestras máquinas separadas por grupos a un inventario de nombre **hosts**, dependiendo del ámbito al que estén dirigidas. En mi caso, el resultado final sería el siguiente (sustituir las direcciones IP por las correspondientes alcanzables):
 
 {% highlight shell %}
 (ansible) alvaro@debian:~/GitHub/ansible-tfg$ cat hosts
@@ -258,16 +258,14 @@ client2 ansible_host=172.22.201.128
 dns1 ansible_host=172.22.201.131
 {% endhighlight %}
 
-Una buena práctica en **Ansible** es la de no almacenar las variables en el fichero principal de inventario, ya que puede llegar a afectar notablemente en la legibilidad del mismo.
+De forma complementaria, es recomendable generar un directorio de nombre **group_vars** en el que se incluyan todas las variables que apliquen a determinados grupos pertenecientes al inventario, que posteriormente podrán utilizarse dentro de plantillas o ejecución de **plays** (conjunto ordenado de tareas que se ejecutan).
 
-Por dicha razón, es recomendable generar un directorio de nombre **group_vars** en el que se incluyan todas las variables que apliquen a determinados grupos pertenecientes al inventario, que posteriormente podrán utilizarse dentro de la ejecución de **plays** (conjunto ordenado de tareas que se ejecutan).
+En este caso, he generado un fichero de nombre **all** dentro del directorio previamente mencionado en el que se almacenarán las variables visibles para todos los nodos del proyecto, existiendo en este caso las siguientes:
 
-En este caso, he generado un fichero de nombre **all** dentro del directorio previamente mencionado para que así dichas variables sean visibles para todos los nodos del proyecto, existiendo las siguientes variables:
-
-__*_ip__: Indica la dirección IP privada de cada uno de los nodos pertenecientes al clúster, ya que ellos no utilizarán la dirección IP "pública" para comunicarse entre ellos. Es necesario cambiarlas para adaptarlas a cada caso.
-__*_virt_ip__: Indica la dirección IP virtual que será asignada a cada uno de los recursos que se configurán en alta disponibilidad. Puede modificarse pero no es necesario.
-**hacluster_crypt_pass**: Indica la contraseña encriptada para el usuario **hacluster** que posteriormente tendremos que configurar. Puede modificarse pero no es necesario.
-**hacluster_plain_pass**: Indica la contraseña en texto plano para el usuario **hacluster** que posteriormente tendremos que configurar. Puede modificarse pero no es necesario.
+* **xxx_ip**: Dirección IP privada de cada uno de los nodos del proyecto. Es necesario cambiarlas para adaptarlas a cada caso.
+* **xxx_virt_ip**: Dirección IP virtual que será asignada a cada uno de los recursos que se configurarán en alta disponibilidad. Puede modificarse pero no es necesario.
+* **hacluster_crypt_pass**: Contraseña encriptada para el usuario **hacluster**. Puede modificarse pero no es necesario.
+* **hacluster_plain_pass**: Contraseña en texto plano para el usuario **hacluster**. Puede modificarse pero no es necesario.
 
 {% highlight shell %}
 (ansible) alvaro@debian:~/GitHub/ansible-tfg$ cat group_vars/all
@@ -290,7 +288,7 @@ hacluster_crypt_pass: $6$vs272OD3toORiva2$SNDSrdhEDPfWo28ZoTmrC21NWVxoueRfuYbatN
 hacluster_plain_pass: hacluster
 {% endhighlight %}
 
-En el fichero de nombre **ansible.cfg** podemos incluir parámetros de configuración comunes a todo el proyecto, como por ejemplo indicar el nombre del inventario, el usuario remoto que se utilizará en las máquinas a las que vamos a conectarnos, la ruta a la clave privada para la conexión SSH (es necesario modificarla)...
+Por último, en el fichero de nombre **ansible.cfg** podemos incluir parámetros de configuración comunes a todo el proyecto, como por ejemplo el usuario remoto que se utilizará en las máquinas a las que vamos a conectarnos, la ruta a la clave privada para la conexión SSH...
 
 {% highlight shell %}
 (ansible) alvaro@debian:~/GitHub/ansible-tfg$ cat ansible.cfg
@@ -304,44 +302,44 @@ private_key_file = /home/alvaro/.ssh/linux.pem
 ansible_python_interpreter = /usr/bin/python3
 {% endhighlight %}
 
-Los proyectos **Ansible** suelen organizarse en forma de **roles** en los que se definen una serie de tareas ordenadas (**play**) a las que se le asigna posteriormente un nombre identificativo al conjunto en sí. Por último, se genera un **playbook** en el que se indicará la correspondencia entre los **roles** y las máquinas o grupos de máquinas del inventario a los que hay que aplicar dichas tareas.
+Los proyectos **Ansible** suelen organizarse en forma de **roles** en los que se definen una serie de tareas ordenadas a realizar (**play**). Por último, se genera un **playbook** en el que se indicará la correspondencia entre los **roles** y las máquinas o grupos de máquinas del inventario a los que aplicar dichas tareas.
 
-En este caso, disponemos de un **playbook** inicial de nombre **pre.yml** que hace uso de un total de 3 roles previamente definidos, aplicando las siguientes tareas sobre los siguientes grupos de máquinas:
+En este caso, disponemos de un **playbook** inicial de nombre **pre.yml** que hace uso de un total de 3 roles previamente definidos, aplicando las siguientes tareas sobre determinados grupos de máquinas:
 
 - **all**:
     - **Ensure apt does not use debian replica**: Elimina cualquier repositorio de **debian.org** del fichero **/etc/apt/sources.list**.
-    - **Ensure apt uses cica replica**: Añade los repositorios necesarios de **cica.es** al fichero **/etc/apt/sources.list** para evitar problemas con el proxy.
+    - **Ensure apt uses cica replica**: Añade los repositorios de **cica.es** al fichero **/etc/apt/sources.list** para evitar problemas con el proxy.
     - **Ensure system is updated**: Actualiza la paquetería instalada.
     - **Set timezone to Europe/Madrid**: Establece la zona horaria a Europa/Madrid.
-    - **Ensure hosts file is not managed by cloud_init**: Evita que _cloud init_ gestione el fichero **/etc/hosts**, para evitar cambios tras un reinicio.
-    - **Ensure hosts file does not resolve hostname**: Elimina la línea referente a la resolución de su _hostname_ en el fichero **/etc/hosts**, para así delegar dicha tarea al servidor DNS.
-    - **Add DNS server to resolvconf configuration**: Añade la dirección IP del servidor DNS existente en el clúster al fichero **/etc/resolvconf/resolv.conf.d/head**.
-    - **Add search pattern to resolvconf configuration**: Añade la cadena **search example.com** al fichero **/etc/resolvconf/resolv.conf.d/base**.
-    - **restart resolvconf**: Reinicia el servicio **resolvconf**, generando así un fichero **/etc/resolv.conf** acorde a las configuraciones previamente realizadas. Las peticiones DNS irán a partir de ahora al servidor DNS existente en el clúster, pudiendo obviar el nombre de dominio **example.com**.
+    - **Ensure hosts file is not managed by cloud_init**: Evita que _cloud init_ gestione el fichero **/etc/hosts**, haciendo que perdure.
+    - **Ensure hosts file does not resolve hostname**: Elimina la línea referente a la resolución del _hostname_ en el fichero **/etc/hosts**, delegando dicha tarea al servidor DNS.
+    - **Add DNS server to resolvconf configuration**: Añade la dirección IP del servidor DNS al fichero **/etc/resolvconf/resolv.conf.d/head**.
+    - **Add search pattern to resolvconf configuration**: Añade la cadena "**search example.com**" al fichero **/etc/resolvconf/resolv.conf.d/base**.
+    - **restart resolvconf**: Reinicia el servicio **resolvconf**, generando así un fichero **/etc/resolv.conf** acorde a las configuraciones previamente realizadas.
 - **dns**:
     - **Ensure bind9 is installed**: Instala el paquete **bind9**.
     - **Copy named.conf.options file**: Copia el fichero **named.conf.options** a **/etc/bind/**.
     - **Copy named.conf.local file**: Copia el fichero **named.conf.local** a **/etc/bind/**.
-    - **Copy db.example.com zone using template**: Utiliza la plantilla **db.example.com.j2** para generar un fichero de nombre **/var/cache/bind/db.example.com**, utilizando para ello las variables de las direcciones IP privadas.
+    - **Copy db.example.com zone using template**: Utiliza una plantilla para generar un fichero de nombre **/var/cache/bind/db.example.com**.
     - **restart bind9**: Reinicia el servicio **bind9**, surtiendo así efecto las configuraciones previamente realizadas.
 - **admin, osd, mon, client**:
-    - **Create cephuser user**: Crea un usuario **cephuser** con un directorio en **/home** asociado, que necesitaremos posteriormente para la creación del clúster.
-    - **Allow cephuser to execute sudo commands without password**: Añade una línea al fichero **/etc/sudoers** para permitir al usuario **cephuser** ejecutar comandos con sudo sin contraseña.
-    - **Create .ssh structure**: Crea el directorio **.ssh** en el directorio del usuario **cephuser**.
+    - **Create cephuser user**: Crea un usuario **cephuser** con un directorio personal.
+    - **Allow cephuser to execute sudo commands without password**: Añade una línea al fichero **/etc/sudoers** para permitir al usuario **cephuser** ejecutar comandos _sudo_ sin contraseña.
+    - **Create .ssh structure**: Crea el directorio **.ssh** en el directorio personal del usuario **cephuser**.
     - **Copy ansible_rsa private key**: Copia una clave privada previamente generada a la ruta **.ssh/id_rsa**.
     - **Copy ansible_rsa public key**: Copia una clave pública previamente generada a la ruta **.ssh/id_rsa.pub**.
-    - **Copy authorized_keys file**: Copia la clave pública previamente copiada a un fichero de nombre **.ssh/authorized_keys**, de manera que todas las máquinas podrán conectarse entre sí.
+    - **Copy authorized_keys file**: Copia la clave pública previamente generada a la ruta **.ssh/authorized_keys**.
     - **Check if known_hosts file exists**: Comprueba si el fichero **.ssh/known_hosts** existe, para que en caso de que no, realizar la siguiente tarea.
-    - **Scan and add SSH keys of the machines to known_hosts file**: Genera el fichero **.ssh/known_hosts** y escanea y añade las claves SSH del resto de máquinas al mismo, para así evitar tener que introducir confirmación la primera vez.
+    - **Scan and add SSH keys of the machines to known_hosts file**: Genera el fichero **.ssh/known_hosts** y escanea y añade las claves SSH del resto de máquinas al mismo.
     - **Change known_hosts file owner**: Establece correctamente el propietario y grupo del fichero **.ssh/known_hosts**.
-    - **Add Ceph apt key**: Añade la clave apt de **Ceph**, necesaria para descargar paquetería de sus repositorios y verificar su integridad.
-    - **Add Ceph repository**: Añade el repositorio de **Ceph**, del que posteriormente descargaremos la paquetería necesaria.
+    - **Add Ceph apt key**: Añade la clave apt de _Ceph_.
+    - **Add Ceph repository**: Añade el repositorio de _Ceph_.
     - **Ensure needed packages are installed**: Instala la paquetería necesaria para el correcto funcionamiento.
 
-Por último, procederemos a ejecutar dicho **playbook** para así llevar a cabo las tareas previamente mencionadas sobre las máquinas, ejecutando para ello el comando:
+Por último, procederemos a ejecutar dicho **playbook** para así llevar a cabo las tareas previamente mencionadas sobre las máquinas:
 
 {% highlight shell %}
-(ansible) alvaro@debian:~/GitHub/ansible-tfg$ ansible-playbook pre.yml 
+(ansible) alvaro@debian:~/GitHub/ansible-tfg$ ansible-playbook pre.yml
 
 PLAY [all] ***************************************************************************************************************************************************************************
 
@@ -372,13 +370,13 @@ osd2                       : ok=23   changed=20   unreachable=0    failed=0    s
 osd3                       : ok=23   changed=20   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 {% endhighlight %}
 
-Tras alrededor de 30 minutos, todas las tareas se han completado correctamente, tal y como podemos apreciar en el resumen mostrado al final de la ejecución del mismo.
+Tras alrededor de 30 minutos, todas las tareas se han completado correctamente, tal y como podemos apreciar en el resumen mostrado al final de la ejecución del **playbook**.
 
-Dado el tamaño de la salida por pantalla resultante de dicha ejecución, he decidido recortarla para no ensuciar demasiado. No obstante, es posible encontrar [aquí](https://pastebin.com/8nz4Xk9w) la salida de dicho comando al completo.
+Dado el tamaño de la salida por pantalla resultante de dicha ejecución, he decidido recortarla para no ensuciar demasiado. No obstante, es posible encontrarla [aquí](https://pastebin.com/8nz4Xk9w) al completo.
 
 Tras ello, todo estaría listo para continuar con la configuración del escenario, sin embargo, entre las tareas realizadas en todas las máquinas se encuentra una referente a la actualización de la paquetería instalada, encontrándose en dicha paquetería la versión del último núcleo disponible, que no se cargará en memoria hasta que ocurra un reinicio.
 
-Para producir dicho reinicio, volveremos a nuestra terminal con el entorno virtual del cliente OpenStack y ejecutaremos la siguiente instrucción iterativa, que reiniciará todas las máquinas existentes:
+Para producir dicho reinicio, volveremos a nuestra terminal con el entorno virtual del cliente **OpenStack** y ejecutaremos la siguiente instrucción iterativa, que reiniciará todas las máquinas existentes:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~/GitHub/ansible-tfg$ for i in admin osd{1..3} mon{1..3} client{1..2} dns
@@ -486,11 +484,11 @@ La solución _open source_ de la que haremos uso es conocida como **Ceph**, que 
 
 Al tener una aplicación de creciente tamaño, no sabemos cuál será la cantidad de datos a gestionar en un futuro, por tanto, los sistemas deben poder ampliarse fácilmente, sin dejar de funcionar, con servidores adicionales que puedan integrarse sin obstáculos en el sistema de almacenamiento dado, que en todo momento se mostrará al usuario como un sencillo directorio de un sistema de archivos tradicional, sin necesidad de que el mismo conozca absolutamente nada sobre la distribución de los mismos.
 
-Otra de las características indispensables, como se puede suponer, en la redundancia de dichos datos, ya que de nada nos sirve tener los datos distribuidos incluso en diferentes áreas geográficas del planeta si un simple fallo en uno de los discos puede llegar a causarnos la corrupción total o parcial de los datos almacenados. Por ello, el sistema de autogestión y autorrecuperación de Ceph reduce dramáticamente las interrupciones, convirtiéndolo en una excelente elección para las empresas. **Facebook** y **Dropbox** son de las empresas más grandes que utilizan Ceph.
+Otra de las características indispensables, como se puede suponer, en la redundancia de dichos datos, ya que de nada nos sirve tener los datos distribuidos incluso en diferentes áreas geográficas del planeta si un simple fallo en uno de los discos puede llegar a causarnos la corrupción total o parcial de los datos almacenados. Por ello, el sistema de autogestión y autorrecuperación de **Ceph** reduce dramáticamente las interrupciones, convirtiéndolo en una excelente elección para las empresas. **Facebook** y **Dropbox** son de las empresas más grandes que utilizan **Ceph**.
 
 ![replicacion](https://i.ibb.co/sJLdH7L/cephreplication.png "Replicación Ceph")
 
-Aunque en este caso no vamos a hacer uso de estas características, es importante mencionar que las aplicaciones pueden acceder a _Ceph Object Storage_ a través de una interfaz **RESTful** que admite las API de **Amazon S3** y **Openstack Swift**.
+Aunque en este caso no vamos a hacer uso de estas características, es importante mencionar que las aplicaciones pueden acceder a **_Ceph Object Storage_** a través de una interfaz **RESTful** que admite las API de **Amazon S3** y **Openstack Swift**.
 
 Entrando un poco más en profundidad, el sistema se mantiene mediante una red de demonios que se ejecutan entre los diferentes nodos constituyentes del clúster:
 
@@ -507,7 +505,7 @@ La distribución de los archivos en **Ceph** se realiza de forma pseudoaleatoria
 
 Por si no era suficiente, con la finalidad de garantizar la seguridad de los datos, al nivel del OSD se utiliza un **_journaling_** (registro de cambios con fecha y hora, dificultando por tanto la corrupción de los datos). Allí se guardan temporalmente los archivos que se pretenden almacenar mientras se espera a que se ubiquen correctamente en todos los OSD previstos.
 
-No todo podía ser bonito, y es que como podemos apreciar, para utilizar este software necesitamos una red relativamente "grande" para así poder albergar de forma redundante los componentes del clúster. De otro lado, Ceph únicamente es compatible con sistemas Linux, aunque estoy seguro que esto último no es un problema para nosotros.
+No todo podía ser bonito, y es que como podemos apreciar, para utilizar este _software_ necesitamos una red relativamente "grande" para así poder albergar de forma redundante los componentes del clúster. De otro lado, **Ceph** únicamente es compatible con sistemas Linux, aunque estoy seguro que esto último no es un problema para nosotros.
 
 Una vez comprendido de forma superficial el funcionamiento de **Ceph**, vamos a proceder a crear un clúster, así que vamos a aprovechar nuestra conexión SSH existente con la máquina **ceph-admin** que será la que utilizaremos para ello.
 
@@ -590,7 +588,7 @@ cephuser@ceph-admin:~/cephcluster$ ceph-deploy admin ceph-admin ceph-mon{1..3} c
 Una vez finalizada la copia en todos los nodos, tendremos que ajustar los permisos del fichero **/etc/ceph/ceph.client.admin.keyring** para que así pueda hacer uso del mismo el usuario **cephuser** previamente generado, al cuál estableceremos como propietario del mismo. Comenzaremos por realizar dicha modificación en la máquina actual, **ceph-admin**, ejecutando para ello el comando:
 
 {% highlight shell %}
-cephuser@ceph-admin:~/cephcluster$ cephuser@ceph-admin:~/cephcluster$ sudo chown cephuser:cephuser /etc/ceph/ceph.client.admin.keyring
+cephuser@ceph-admin:~/cephcluster$ sudo chown cephuser:cephuser /etc/ceph/ceph.client.admin.keyring
 {% endhighlight %}
 
 Tras ello, tendremos que repetir el mismo procedimiento en el resto de máquinas, sin embargo, podemos automatizarlo con una pequeña estructura iterativa, que quedará de la siguiente forma:
@@ -641,14 +639,14 @@ Una vez finalizada la ejecución del comando, vamos a verificar que los demonios
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph mds stat
- 1 up:standby
+ 3 up:standby
 {% endhighlight %}
 
 Como se puede apreciar, los 3 demonios han sido correctamente ubicados (aunque todavía se encuentran en estado **standby**, dada la carencia de un sistema de ficheros), teniendo por tanto, todos los servicios necesarios para el correcto funcionamiento del clúster activos y configurados.
 
 Estamos llegando a la recta final, y es que a pesar de tener nuestro clúster creado, todavía no existe ninguna _pool_ en su interior, y por consecuencia, ningún sistema de ficheros.
 
-Para hacer uso de CephFS necesitamos un mínimo de 2 _pools_ para los **MDs**, uno para **datos** y otro para **metadatos**. Dado el frecuente acceso a los mismos, es recomendable que se utilicen discos de baja latencia para aumentar así la eficiencia de lectura y escritura. Para la generación de dichos _pools_, ejecutaremos los siguientes comandos:
+Para hacer uso de **CephFS** necesitamos un mínimo de 2 _pools_ para los **MDs**, uno para **datos** y otro para **metadatos**. Dado el frecuente acceso a los mismos, es recomendable que se utilicen discos de baja latencia para aumentar así la eficiencia de lectura y escritura. Para la generación de dichos _pools_, ejecutaremos los siguientes comandos:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph osd pool create cephfs_data 64
@@ -694,19 +692,21 @@ Efectivamente, el estado general del clúster es correcto (**HEALTH_OK**), sin e
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph status
   cluster:
-    id:     073817c1-bd48-451e-ad7a-2fe769245057
+    id:     5d47d41b-b223-4a16-bbac-688d8a61c359
     health: HEALTH_OK
  
   services:
-    mon: 3 daemons, quorum ceph-mon2,ceph-mon1,ceph-mon3 (age 2m)
-    mgr: ceph-admin(active, since 102s)
-    osd: 3 osds: 3 up (since 36s), 3 in (since 49s)
+    mon: 3 daemons, quorum ceph-mon2,ceph-mon1,ceph-mon3 (age 7m)
+    mgr: ceph-mon1(active, since 7m), standbys: ceph-mon2, ceph-mon3
+    mds: 1/1 daemons up, 2 standby
+    osd: 3 osds: 3 up (since 6m), 3 in (since 11m)
  
   data:
-    pools:   1 pools, 1 pgs
-    objects: 0 objects, 0 B
-    usage:   15 MiB used, 15 GiB / 15 GiB avail
-    pgs:     1 active+clean
+    volumes: 1/1 healthy
+    pools:   3 pools, 81 pgs
+    objects: 22 objects, 2.8 KiB
+    usage:   47 MiB used, 15 GiB / 15 GiB avail
+    pgs:     81 active+clean
 {% endhighlight %}
 
 Como se puede apreciar de una forma más concreta en la salida del comando, contamos con un total de 3 _pools_ y los servicios actualmente activos se encuentran en las siguientes máquinas:
@@ -716,11 +716,11 @@ Como se puede apreciar de una forma más concreta en la salida del comando, cont
 * **osd**: **ceph-osd1**, **ceph-osd2** y **ceph-osd3**
 * **mds**: **ceph-osd1**, **ceph-osd2** y **ceph-osd3**
 
-Las labores en nuestro clúster Ceph han finalizado, encontrándose a partir de ahora totalmente disponible para albergar ficheros en su interior, así que es hora de explicar todo lo referente al despliegue de la aplicación sobre dicho clúster de almacenamiento distribuido, sobre el que utilizaremos también _software_ para asegurar la alta disponibilidad de los servicios relacionados.
+Las labores en nuestro clúster **Ceph** han finalizado, encontrándose a partir de ahora totalmente disponible para albergar ficheros en su interior, así que es hora de explicar todo lo referente al despliegue de la aplicación sobre dicho clúster de almacenamiento distribuido, sobre el que utilizaremos también _software_ para asegurar la alta disponibilidad de los servicios relacionados.
 
-Tal y como se mencionó al principio del artículo, vamos a utilizar **Pacemaker** cuya finalidad es la de permitir controlar y coordinar las máquinas del clúster y **Corosync**, cuya finalidad es la de permitir la comunicación de las máquinas pertenecientes al mismo y enviar órdenes a _Pacemaker_.
+Tal y como se mencionó al principio del artículo, vamos a utilizar **Pacemaker** cuya finalidad es la de permitir controlar y coordinar las máquinas del clúster y **Corosync**, cuya finalidad es la de permitir la comunicación de las máquinas pertenecientes al mismo y enviar órdenes a **Pacemaker**.
 
-Para interconectar las máquinas del clúster de Pacemaker, que serán aquellas sobre las que se ejecuten los servicios necesarios para el despliegue de la aplicación y tengan acceso al sistema de ficheros previamente generado, es decir, **ceph-client1** y **ceph-client2**, necesitaremos un usuario de nombre **hacluster** cuya contraseña sea la misma en ambas máquinas, para posibilitar la comunicación entre las mismas.
+Para interconectar las máquinas del clúster de **Pacemaker**, que serán aquellas sobre las que se ejecuten los servicios necesarios para el despliegue de la aplicación y tengan acceso al sistema de ficheros previamente generado, es decir, **ceph-client1** y **ceph-client2**, necesitaremos un usuario de nombre **hacluster** cuya contraseña sea la misma en ambas máquinas, para posibilitar la comunicación entre las mismas.
 
 En total vamos a desplegar un total de 4 recursos:
 
@@ -786,13 +786,13 @@ client1                    : ok=34   changed=31   unreachable=0    failed=0    s
 client2                    : ok=13   changed=12   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
 {% endhighlight %}
 
-Tras alrededor de 15 minutos, todas las tareas se han completado correctamente, tal y como podemos apreciar en el resumen mostrado al final de la ejecución del mismo.
+Tras alrededor de 15 minutos, todas las tareas se han completado correctamente, tal y como podemos apreciar en el resumen mostrado al final de la ejecución del **playbook**.
 
-Dado el tamaño de la salida por pantalla resultante de dicha ejecución, he decidido recortarla para no ensuciar demasiado. No obstante, es posible encontrar [aquí](https://pastebin.com/D5KUyugH) la salida de dicho comando al completo.
+Dado el tamaño de la salida por pantalla resultante de dicha ejecución, he decidido recortarla para no ensuciar demasiado. No obstante, es posible encontrarla [aquí](https://pastebin.com/D5KUyugH) al completo.
 
-Nuestra aplicación ya ha sido desplegada correctamente, sin embargo, existe un problema que posiblemente no habíais planteado hasta ahora. La dirección IP virtual a través de la cuál accederemos al servicio web es una IP dentro de un rango interno de mi proyecto de OpenStack, lo que imposibilita su acceso de forma directa, ya que no es una red enrutable.
+Nuestra aplicación ya ha sido desplegada correctamente, sin embargo, existe un problema que posiblemente no habíais planteado hasta ahora. La dirección IP virtual a través de la cuál accederemos al servicio web es una IP dentro de un rango interno de mi proyecto de **OpenStack**, lo que imposibilita su acceso de forma directa, ya que no es una red enrutable.
 
-Sin embargo, existe una posibilidad un tanto "retorcida" que consiste en crear un balanceador de carga en OpenStack con una IP flotante dentro del rango alcanzable y asociarlo a dicha IP interna, de manera que a través de una especie de DNAT, conseguiríamos acceder al servidor web desde el exterior. El inconveniente es que el cliente de línea de comandos de OpenStack que hemos estado utilizando hasta ahora no nos sirve, ya que la versión que se está utilizando no soporta dicha característica, de manera que tendremos que instalar en un nuevo entorno virtual el cliente del [elemento](https://docs.openstack.org/ocata/cli-reference/neutron.html) de OpenStack responsable de la gestión de las redes, **neutron**.
+Sin embargo, existe una posibilidad un tanto "retorcida" que consiste en crear un balanceador de carga en **OpenStack** con una IP flotante dentro del rango alcanzable y asociarlo a dicha IP interna, de manera que a través de una especie de DNAT, conseguiríamos acceder al servidor web desde el exterior. El inconveniente es que el cliente de línea de comandos de **OpenStack** que hemos estado utilizando hasta ahora no nos sirve, ya que la versión que se está utilizando no soporta dicha característica, de manera que tendremos que instalar en un nuevo entorno virtual el cliente del [elemento](https://docs.openstack.org/ocata/cli-reference/neutron.html) de **OpenStack** responsable de la gestión de las redes, **neutron**.
 
 En esta ocasión, el nombre que le voy a asignar al nuevo entorno virtual es **neutronclient**, así que lo generaré dentro de mi directorio donde almaceno todos los entornos virtuales, ejecutando para ello sobre una nueva terminal el comando:
 
@@ -812,7 +812,7 @@ Una vez activado, ya podremos proceder a instalar dicha herramienta haciendo uso
 (neutronclient) alvaro@debian:~$ pip install --upgrade pip
 {% endhighlight %}
 
-Una vez actualizado el gestor de paquetes, podremos instalar el paquete en cuestión de nombre **neutron**, ejecutando para ello el comando:
+Cuando el gestor de paquetes haya sido actualizado, podremos instalar el paquete en cuestión de nombre **neutron**, ejecutando para ello el comando:
 
 {% highlight shell %}
 (neutronclient) alvaro@debian:~$ pip install neutron
@@ -895,7 +895,7 @@ Transcurridos unos minutos, la instalación concluirá, en mi caso, sin ningún 
 
 Tal y como se muestra en la advertencia, por razones de seguridad es necesario eliminar el directorio **install/**, de manera que volveremos a nuestra terminal para proceder a ello.
 
-Actualmente nos encontramos con una sesión SSH abierta a la máquina **ceph-admin**, sin embargo, dicha máquina no cuenta con acceso al sistema de ficheros CephFS y por tanto, no podríamos llevar a cabo ninguna modificación. La única solución consiste en abrir una segunda conexión SSH a uno de los clientes desde dicha máquina, concretamente al usuario **cephuser**, ejecutando para ello el comando:
+Actualmente nos encontramos con una sesión SSH abierta a la máquina **ceph-admin**, sin embargo, dicha máquina no cuenta con acceso al sistema de ficheros **CephFS** y por tanto, no podríamos llevar a cabo ninguna modificación. La única solución consiste en abrir una segunda conexión SSH a uno de los clientes desde dicha máquina, concretamente al usuario **cephuser**, ejecutando para ello el comando:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ssh cephuser@ceph-client1
@@ -935,28 +935,28 @@ drwxr-xr-x  2 www-data www-data      3 Dec  2  2020 bin
 drwxr-xr-x  8 www-data www-data      9 Dec  2  2020 cache
 drwxr-xr-x 25 www-data www-data    133 Dec  2  2020 classes
 -rw-r--r--  1 www-data www-data 365681 Dec  2  2020 composer.lock
-drwxr-xr-x  5 www-data www-data     16 Jun  9 15:26 config
+drwxr-xr-x  5 www-data www-data     16 Jun 15 11:30 config
 drwxr-xr-x  4 www-data www-data      4 Dec  2  2020 controllers
 drwxr-xr-x  6 www-data www-data      7 Dec  2  2020 docs
-drwxr-xr-x  2 www-data www-data      2 Jun  9 15:26 download
+drwxr-xr-x  2 www-data www-data      2 Jun 15 11:28 download
 -rw-r--r--  1 www-data www-data   2466 Dec  2  2020 error500.html
 -rw-r--r--  1 www-data www-data   4830 Dec  2  2020 images.inc.php
-drwxr-xr-x 19 www-data www-data     35 Jun  9 15:26 img
+drwxr-xr-x 19 www-data www-data     35 Jun 15 11:28 img
 -rw-r--r--  1 www-data www-data   1169 Dec  2  2020 index.php
 -rw-r--r--  1 www-data www-data   1256 Dec  2  2020 init.php
 -rw-r--r--  1 www-data www-data   5072 Dec  2  2020 INSTALL.txt
 drwxr-xr-x  7 www-data www-data     19 Dec  2  2020 js
 -rw-r--r--  1 www-data www-data 186018 Dec  2  2020 LICENSES
 drwxr-xr-x  3 www-data www-data     97 Dec  2  2020 localization
-drwxr-xr-x  5 www-data www-data      5 Jun  9 15:32 mails
-drwxr-xr-x 74 www-data www-data     74 Jun  9 15:37 modules
+drwxr-xr-x  5 www-data www-data      5 Jun 15 11:36 mails
+drwxr-xr-x 74 www-data www-data     74 Jun 15 11:41 modules
 drwxr-xr-x  5 www-data www-data      5 Dec  2  2020 override
 drwxr-xr-x  2 www-data www-data     39 Dec  2  2020 pdf
 drwxr-xr-x  5 www-data www-data      4 Dec  2  2020 src
 drwxr-xr-x  4 www-data www-data      8 Dec  2  2020 themes
 drwxr-xr-x  3 www-data www-data      3 Dec  2  2020 tools
-drwxr-xr-x  4 www-data www-data      4 Jun  9 15:26 translations
-drwxr-xr-x  2 www-data www-data      2 Jun  9 15:26 upload
+drwxr-xr-x  4 www-data www-data      4 Jun 15 11:28 translations
+drwxr-xr-x  2 www-data www-data      2 Jun 15 11:28 upload
 drwxr-xr-x  5 www-data www-data      6 Dec  2  2020 var
 drwxr-xr-x 49 www-data www-data     49 Dec  2  2020 vendor
 drwxr-xr-x  2 www-data www-data      2 Dec  2  2020 webservice
@@ -991,34 +991,34 @@ Lo primero que haremos será visualizar el estado del clúster **Ceph**, para as
 {% highlight shell %}
 cephuser@ceph-client1:~$ ceph status
   cluster:
-    id:     073817c1-bd48-451e-ad7a-2fe769245057
+    id:     5d47d41b-b223-4a16-bbac-688d8a61c359
     health: HEALTH_OK
  
   services:
     mon: 3 daemons, quorum ceph-mon2,ceph-mon1,ceph-mon3 (age 55m)
-    mgr: ceph-admin(active, since 55m)
-    mds: 1/1 daemons up
-    osd: 3 osds: 3 up (since 54m), 3 in (since 54m)
+    mgr: ceph-mon1(active, since 55m), standbys: ceph-mon2, ceph-mon3
+    mds: 1/1 daemons up, 2 standby
+    osd: 3 osds: 3 up (since 53m), 3 in (since 59m)
  
   data:
     volumes: 1/1 healthy
     pools:   3 pools, 81 pgs
-    objects: 38.43k objects, 707 MiB
+    objects: 38.36k objects, 723 MiB
     usage:   3.7 GiB used, 11 GiB / 15 GiB avail
     pgs:     81 active+clean
 {% endhighlight %}
 
 Como se puede apreciar en la salida del comando ejecutado, hay un total de más de 38000 objetos en el sistema de ficheros distribuido, suponiendo un tamaño total de más de **700 MiB**. Sin embargo, al existir redundancia, el espacio ocupado es superior, llegando a más de **3.7 GiB**.
 
-Hasta ahora hemos visualizado en varias ocasiones el estado del clúster Ceph pero no hemos visto ninguna información relacionado al clúster Pacemaker, así que vamos a proceder a ello, haciendo uso del comando:
+Hasta ahora hemos visualizado en varias ocasiones el estado del clúster **Ceph** pero no hemos visto ninguna información relacionado al clúster **Pacemaker**, así que vamos a proceder a ello, haciendo uso del comando:
 
 {% highlight shell %}
 cephuser@ceph-client1:~$ sudo pcs status
 Cluster name: mycluster
 Stack: corosync
 Current DC: ceph-client1 (version 2.0.1-9e909a5bdd) - partition with quorum
-Last updated: Wed Jun  9 15:45:39 2021
-Last change: Wed Jun  9 15:23:26 2021 by root via cibadmin on ceph-client1
+Last updated: Tue Jun 15 11:58:02 2021
+Last change: Tue Jun 15 11:25:06 2021 by root via cibadmin on ceph-client1
 
 2 nodes configured
 4 resources configured
@@ -1062,15 +1062,15 @@ Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
 permitted by applicable law.
 {% endhighlight %}
 
-Acto seguido vamos a proceder a visualizar de nuevo el estado del clúster de Pacemaker, ya que dicho clúster es el afectado en caso de fallo del nodo **ceph-client1**, pues para el clúster Ceph, dicho nodo es un simple cliente y no supone ninguna variación en su funcionamiento. Para verificar el estado del mismo, ejecutaremos el comando:
+Acto seguido vamos a proceder a visualizar de nuevo el estado del clúster de **Pacemaker**, ya que dicho clúster es el afectado en caso de fallo del nodo **ceph-client1**, pues para el clúster **Ceph**, dicho nodo es un simple cliente y no supone ninguna variación en su funcionamiento. Para verificar el estado del mismo, ejecutaremos el comando:
 
 {% highlight shell %}
 cephuser@ceph-client2:~$ sudo pcs status
 Cluster name: mycluster
 Stack: corosync
 Current DC: ceph-client2 (version 2.0.1-9e909a5bdd) - partition with quorum
-Last updated: Wed Jun  9 15:46:37 2021
-Last change: Wed Jun  9 15:23:26 2021 by root via cibadmin on ceph-client1
+Last updated: Tue Jun 15 11:59:54 2021
+Last change: Tue Jun 15 11:59:43 2021 by hacluster via crmd on ceph-client2
 
 2 nodes configured
 4 resources configured
@@ -1118,24 +1118,24 @@ Una vez apagado el nodo, podremos verificar el estado del clúster **Ceph** para
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph status
   cluster:
-    id:     073817c1-bd48-451e-ad7a-2fe769245057
+    id:     5d47d41b-b223-4a16-bbac-688d8a61c359
     health: HEALTH_WARN
             1 osds down
             1 host (1 osds) down
-            Degraded data redundancy: 23343/77528 objects degraded (30.109%), 49 pgs degraded
+            Degraded data redundancy: 23026/76760 objects degraded (29.997%), 49 pgs degraded, 49 pgs undersized
  
   services:
     mon: 3 daemons, quorum ceph-mon2,ceph-mon1,ceph-mon3 (age 60m)
-    mgr: ceph-admin(active, since 59m)
-    mds: 1/1 daemons up
-    osd: 3 osds: 2 up (since 23s), 3 in (since 58m)
+    mgr: ceph-mon1(active, since 60m), standbys: ceph-mon2, ceph-mon3
+    mds: 1/1 daemons up, 1 standby
+    osd: 3 osds: 2 up (since 112s), 3 in (since 64m)
  
   data:
     volumes: 1/1 healthy
     pools:   3 pools, 81 pgs
-    objects: 38.76k objects, 707 MiB
-    usage:   3.0 GiB used, 12 GiB / 15 GiB avail
-    pgs:     23343/77528 objects degraded (30.109%)
+    objects: 38.38k objects, 722 MiB
+    usage:   3.7 GiB used, 11 GiB / 15 GiB avail
+    pgs:     23026/76760 objects degraded (29.997%)
              49 active+undersized+degraded
              32 active+clean
 {% endhighlight %}
@@ -1159,25 +1159,28 @@ Una vez apagado el nodo, podremos verificar el estado del clúster **Ceph** para
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph status
   cluster:
-    id:     073817c1-bd48-451e-ad7a-2fe769245057
+    id:     5d47d41b-b223-4a16-bbac-688d8a61c359
     health: HEALTH_WARN
+            1 filesystem is degraded
+            insufficient standby MDS daemons available
+            1 MDSs report slow metadata IOs
             2 osds down
             2 hosts (2 osds) down
             Reduced data availability: 25 pgs stale
-            Degraded data redundancy: 38764/77528 objects degraded (50.000%), 80 pgs degraded, 81 pgs undersized
+            Degraded data redundancy: 38380/76760 objects degraded (50.000%), 80 pgs degraded, 81 pgs undersized
  
   services:
-    mon: 3 daemons, quorum ceph-mon2,ceph-mon1,ceph-mon3 (age 61m)
-    mgr: ceph-admin(active, since 61m)
+    mon: 3 daemons, quorum ceph-mon2,ceph-mon1,ceph-mon3 (age 62m)
+    mgr: ceph-mon1(active, since 62m), standbys: ceph-mon2, ceph-mon3
     mds: 1/1 daemons up
-    osd: 3 osds: 1 up (since 75s), 3 in (since 60m)
+    osd: 3 osds: 1 up (since 95s), 3 in (since 66m)
  
   data:
-    volumes: 1/1 healthy
+    volumes: 0/1 healthy, 1 recovering
     pools:   3 pools, 81 pgs
-    objects: 38.76k objects, 707 MiB
-    usage:   3.0 GiB used, 12 GiB / 15 GiB avail
-    pgs:     38764/77528 objects degraded (50.000%)
+    objects: 38.38k objects, 722 MiB
+    usage:   3.7 GiB used, 11 GiB / 15 GiB avail
+    pgs:     38380/76760 objects degraded (50.000%)
              55 active+undersized+degraded
              25 stale+active+undersized+degraded
              1  active+undersized
@@ -1187,7 +1190,7 @@ Como era de esperar, los _monitor nodes_ han vuelto a detectar el problema ocurr
 
 En consecuencia a lo ocurrido, la redundancia de datos se encuentra degradada, además de ser inaccesible la información, ya que si lo pensamos, tenemos un total de 2 copias de la información distribuidas entre 3 volúmenes, de manera que el único volumen funcional no contiene una copia al completo, imposibilitando por tanto el acceso a dicha información. Si en lugar de configurar el clúster para tener 2 copias lo hubiésemos configurado para que tuviese 3, la información todavía sería accesible.
 
-Antes de proceder con la última de las pruebas, quizás una de las más útiles, vamos a recuperar el estado funcional del clúster Ceph, levantando para ello las máquinas **ceph-osd1** y **ceph-osd2**. Para ello, volveremos a nuestra terminal con el cliente de comandos de OpenStack y haremos uso de los siguientes comandos:
+Antes de proceder con la última de las pruebas, quizás una de las más útiles, vamos a recuperar el estado funcional del clúster **Ceph**, levantando para ello las máquinas **ceph-osd1** y **ceph-osd2**. Para ello, volveremos a nuestra terminal con el cliente de comandos de **OpenStack** y haremos uso de los siguientes comandos:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~/GitHub/ansible-tfg$ openstack server start ceph-osd1
@@ -1203,9 +1206,9 @@ HEALTH_OK
 
 Efectivamente, el clúster vuelve a estar ahora totalmente operativo y por tanto, nuestra aplicación vuelve a estar disponible.
 
-La última prueba consiste en simular un fallo en uno de los volúmenes empleados para nuestro clúster Ceph, algo que podría pasar en una situación cotidiana, y llevar a cabo un reemplazo del mismo, asegurando que la información es correctamente recuperada en el mismo.
+La última prueba consiste en simular un fallo en uno de los volúmenes empleados para nuestro clúster **Ceph**, algo que podría pasar en una situación cotidiana, y llevar a cabo un reemplazo del mismo, asegurando que la información es correctamente recuperada en el mismo.
 
-Una vez más, volveremos a nuestra terminal con el cliente de comandos de OpenStack y desasociaremos en caliente el disco del nodo **ceph-osd3**, simulando un fallo en el disco duro de uno de los nodos como si de una situación real se tratase, haciendo para ello uso del comando:
+Una vez más, volveremos a nuestra terminal con el cliente de comandos de **OpenStack** y desasociaremos en caliente el disco del nodo **ceph-osd3**, simulando un fallo en el disco duro de uno de los nodos como si de una situación real se tratase, haciendo para ello uso del comando:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~/GitHub/ansible-tfg$ openstack server remove volume ceph-osd3 ceph-3
@@ -1230,10 +1233,10 @@ Supuestamente, el volumen creado ya ha sido asociado, pero para verificarlo, vam
 +--------------------------------------+---------------+----------------+------+------------------------------------+
 | ID                                   | Name          | Status         | Size | Attached to                        |
 +--------------------------------------+---------------+----------------+------+------------------------------------+
-| 9223fe20-d624-410c-82f0-5a5f838b78c2 | ceph-recovery | in-use         |    5 | Attached to ceph-osd3 on /dev/vdb  |
-| 6c59d1cd-54a8-4402-9aec-65819cf217c4 | ceph-3        | available      |    5 |                                    |
-| 48aa0185-f772-4e7d-9181-0b48ac6e061e | ceph-2        | in-use         |    5 | Attached to ceph-osd2 on /dev/vdb  |
-| cd84226f-ca74-4be8-8538-1f706fab7b2b | ceph-1        | in-use         |    5 | Attached to ceph-osd1 on /dev/vdb  |
+| 69177591-bb69-45ca-b832-cdd9f29d48d0 | ceph-recovery | in-use         |    5 | Attached to ceph-osd3 on /dev/vdb  |
+| be00866a-367e-4eea-94b9-7f979b510a88 | ceph-3        | available      |    5 |                                    |
+| e85306e6-77a1-44a4-96df-febd62ecd99f | ceph-2        | in-use         |    5 | Attached to ceph-osd2 on /dev/vdb  |
+| c8035f39-38b9-482e-9c22-3a262ed9cbf2 | ceph-1        | in-use         |    5 | Attached to ceph-osd1 on /dev/vdb  |
 +--------------------------------------+---------------+----------------+------+------------------------------------+
 {% endhighlight %}
 
@@ -1244,24 +1247,24 @@ Una vez cambiado el volumen, podremos verificar el estado del clúster **Ceph** 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph status
   cluster:
-    id:     073817c1-bd48-451e-ad7a-2fe769245057
+    id:     5d47d41b-b223-4a16-bbac-688d8a61c359
     health: HEALTH_WARN
             1 osds down
             1 host (1 osds) down
-            Degraded data redundancy: 27264/78152 objects degraded (34.886%), 55 pgs degraded, 56 pgs undersized
+            Degraded data redundancy: 26952/76760 objects degraded (35.112%), 55 pgs degraded, 56 pgs undersized
  
   services:
-    mon: 3 daemons, quorum ceph-mon2,ceph-mon1,ceph-mon3 (age 69m)
-    mgr: ceph-admin(active, since 68m)
-    mds: 1/1 daemons up
-    osd: 3 osds: 2 up (since 68s), 3 in (since 68m)
+    mon: 3 daemons, quorum ceph-mon2,ceph-mon1,ceph-mon3 (age 67m)
+    mgr: ceph-mon1(active, since 67m), standbys: ceph-mon2, ceph-mon3
+    mds: 1/1 daemons up, 2 standby
+    osd: 3 osds: 2 up (since 77s), 3 in (since 71m)
  
   data:
     volumes: 1/1 healthy
     pools:   3 pools, 81 pgs
-    objects: 39.08k objects, 710 MiB
-    usage:   2.1 GiB used, 13 GiB / 15 GiB avail
-    pgs:     27264/78152 objects degraded (34.886%)
+    objects: 38.38k objects, 722 MiB
+    usage:   2.7 GiB used, 12 GiB / 15 GiB avail
+    pgs:     26952/76760 objects degraded (35.112%)
              55 active+undersized+degraded
              25 active+clean
              1  active+undersized
@@ -1303,38 +1306,33 @@ cephuser@ceph-admin:~/cephcluster$ ceph-deploy osd create --data /dev/vdc ceph-o
 El volumen ha sido correctamente particionado y se debería encontrar listo para su uso, así que vamos a verificar el estado del clúster **Ceph** para comprobar si ha ocurrido algún tipo de modificación en el mismo, ejecutando para ello el comando:
 
 {% highlight shell %}
-cephuser@ceph-admin:~$ ceph status
+cephuser@ceph-admin:~/cephcluster$ ceph status
   cluster:
-    id:     073817c1-bd48-451e-ad7a-2fe769245057
+    id:     5d47d41b-b223-4a16-bbac-688d8a61c359
     health: HEALTH_WARN
-            Degraded data redundancy: 35183/79334 objects degraded (44.348%), 120 pgs degraded, 120 pgs undersized
-            1 daemons have recently crashed
+            Degraded data redundancy: 31830/76760 objects degraded (41.467%), 47 pgs degraded, 47 pgs undersized
  
   services:
-    mon: 3 daemons, quorum ceph-mon2,ceph-mon1,ceph-mon3 (age 2h)
-    mgr: ceph-admin(active, since 2h)
-    mds: 1/1 daemons up
-    osd: 4 osds: 3 up (since 80m), 3 in (since 79m); 120 remapped pgs
+    mon: 3 daemons, quorum ceph-mon2,ceph-mon1,ceph-mon3 (age 99m)
+    mgr: ceph-mon1(active, since 98m), standbys: ceph-mon2, ceph-mon3
+    mds: 1/1 daemons up, 2 standby
+    osd: 4 osds: 3 up (since 29m), 3 in (since 22m); 48 remapped pgs
  
   data:
     volumes: 1/1 healthy
-    pools:   3 pools, 273 pgs
-    objects: 39.67k objects, 701 MiB
-    usage:   2.4 GiB used, 13 GiB / 15 GiB avail
-    pgs:     35183/79334 objects degraded (44.348%)
-             3415/79334 objects misplaced (4.305%)
-             152 active+clean
-             107 active+recovery_wait+undersized+degraded+remapped
-             12  active+undersized+degraded+remapped+backfill_wait
-             1   active+recovering+undersized+degraded+remapped
-             1   active+remapped+backfill_wait
+    pools:   3 pools, 81 pgs
+    objects: 38.38k objects, 723 MiB
+    usage:   1.8 GiB used, 13 GiB / 15 GiB avail
+    pgs:     31830/76760 objects degraded (41.467%)
+             1347/76760 objects misplaced (1.755%)
+             40 active+recovery_wait+undersized+degraded+remapped
+             33 active+clean
+             6  active+undersized+degraded+remapped+backfill_wait
+             1  active+remapped+backfill_wait
+             1  active+recovering+undersized+degraded+remapped
  
   io:
-    recovery: 17 KiB/s, 5 objects/s
- 
-  progress:
-    Global Recovery Event (70m)
-      [===============.............] (remaining: 56m)
+    recovery: 180 KiB/s, 9 objects/s
 {% endhighlight %}
 
 Como se puede apreciar en la parte inferior de la salida del comando ejecutado, el clúster ha comenzado un proceso de auto-reparación, pues se estará rellenando el nuevo volumen con la parte de información correspondiente, que en este caso duró hasta 2 horas.
@@ -1342,22 +1340,23 @@ Como se puede apreciar en la parte inferior de la salida del comando ejecutado, 
 Una vez transcurrido un periodo de tiempo considerable, podremos volver a hacer uso del comando anterior para verificar si el proceso ha finalizado:
 
 {% highlight shell %}
-debian@ceph-admin:~$ ceph status
+cephuser@ceph-admin:~/cephcluster$ ceph status
   cluster:
-    id:     073817c1-bd48-451e-ad7a-2fe769245057
-    health: HEALTH_OK
+    id:     5d47d41b-b223-4a16-bbac-688d8a61c359
+    health: HEALTH_WARN
+            1 daemons have recently crashed
  
   services:
-    mon: 3 daemons, quorum ceph-mon2,ceph-mon1,ceph-mon3 (age 18h)
-    mgr: ceph-admin(active, since 18h)
-    mds: 1/1 daemons up
-    osd: 4 osds: 3 up (since 17h), 3 in (since 17h)
+    mon: 3 daemons, quorum ceph-mon2,ceph-mon1,ceph-mon3 (age 4h)
+    mgr: ceph-mon1(active, since 4h), standbys: ceph-mon2, ceph-mon3
+    mds: 1/1 daemons up, 2 standby
+    osd: 4 osds: 3 up (since 3h), 3 in (since 3h)
  
   data:
     volumes: 1/1 healthy
     pools:   3 pools, 81 pgs
-    objects: 39.67k objects, 701 MiB
-    usage:   3.3 GiB used, 12 GiB / 15 GiB avail
+    objects: 38.38k objects, 723 MiB
+    usage:   2.7 GiB used, 12 GiB / 15 GiB avail
     pgs:     81 active+clean
 {% endhighlight %}
 
