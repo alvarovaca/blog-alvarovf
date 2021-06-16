@@ -43,7 +43,7 @@ Dentro del mundo de la alta disponibilidad existen una serie de términos que en
 
 * **Split brain**: Mal funcionamiento que se produce cuando se pierde la comunicación entre los nodos y estos empiezan a tomar decisiones por su cuenta.
 
-* **Quorum**: Mecanismo que pretende prevenir el _split brain_ basándose en una decisión compartida entre los nodos, que decidirán por votación si un determinado nodo se encuentra o no activo. Es necesario hacerlo así ya que no podemos delegar toda la gestión del clúster en un único equipo, pues supondría la existencia de un _SPOF_.
+* **Quorum**: Mecanismo que pretende prevenir el _split brain_ basándose en una decisión compartida entre los nodos, que decidirán por votación si un determinado nodo se encuentra o no activo. Es necesario que exista un número impar de nodos, para evitar empates. Es la alternativa a delegar toda la gestión del clúster en un único equipo, pues supondría la existencia de un _SPOF_.
 
 * **Stonith**: También conocido como _Shoot The Other Node In The Head_. Se utiliza cuando el _quorum_ ha decidido que un nodo no se encuentra activo y por tanto, se asegura de que no acceda a los datos, evitando la corrupción de los mismos.
 
@@ -374,9 +374,7 @@ Tras alrededor de 30 minutos, todas las tareas se han completado correctamente, 
 
 Dado el tamaño de la salida por pantalla resultante de dicha ejecución, he decidido recortarla para no ensuciar demasiado. No obstante, es posible encontrarla [aquí](https://pastebin.com/8nz4Xk9w) al completo.
 
-Tras ello, todo estaría listo para continuar con la configuración del escenario, sin embargo, entre las tareas realizadas en todas las máquinas se encuentra una referente a la actualización de la paquetería instalada, encontrándose en dicha paquetería la versión del último núcleo disponible, que no se cargará en memoria hasta que ocurra un reinicio.
-
-Para producir dicho reinicio, volveremos a nuestra terminal con el entorno virtual del cliente **OpenStack** y ejecutaremos la siguiente instrucción iterativa, que reiniciará todas las máquinas existentes:
+Antes de continuar, vamos a producir un reinicio para así cargar en memoria la nueva versión del núcleo instalada en las máquinas, volviendo para ello a nuestra terminal con el entorno virtual del cliente **OpenStack** y ejecutando la siguiente instrucción iterativa, que reiniciará todas las máquinas existentes:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~/GitHub/ansible-tfg$ for i in admin osd{1..3} mon{1..3} client{1..2} dns
@@ -385,7 +383,7 @@ Para producir dicho reinicio, volveremos a nuestra terminal con el entorno virtu
 > done
 {% endhighlight %}
 
-Una vez ejecutada la instrucción, tendremos que esperar unos segundos a que todas las máquinas terminen de arrancar para seguidamente realizar un par de gestiones que nos serán necesarias durante el desarrollo del artículo. La primera de ellas consiste en listar las redes existentes en nuestro proyecto, haciendo para ello uso del comando:
+Una vez ejecutada la instrucción y mientras esperamos a que todas las máquinas terminen de arrancar, vamos a realizar un par de gestiones necesarias para el posterior desarrollo del artículo. La primera de ellas consiste en listar las redes existentes en nuestro proyecto, haciendo para ello uso del comando:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~$ openstack network list
@@ -397,20 +395,9 @@ Una vez ejecutada la instrucción, tendremos que esperar unos segundos a que tod
 +--------------------------------------+--------------------+----------------------------------------------------------------------------+
 {% endhighlight %}
 
-Como se puede apreciar, en mi proyecto existen un total de 2 redes, sin embargo, la primera de ellas debe contener a su vez una subred con el direccionamiento 10.0.0.0/24, así que procederemos a listar las subredes creadas ejecutando para ello el comando:
+Como se puede apreciar, en mi proyecto existen un total de **2 redes**, una interna y una externa, sin embargo, la primera de ellas contiene a su vez una subred con el direccionamiento **10.0.0.0/24**, pudiendo observar el identificador de la misma.
 
-{% highlight shell %}
-(openstackclient) alvaro@debian:~$ openstack subnet list
-+--------------------------------------+------+--------------------------------------+-------------+
-| ID                                   | Name | Network                              | Subnet      |
-+--------------------------------------+------+--------------------------------------+-------------+
-| 747952ea-a0a0-4bd5-8ad6-8dec0666a299 |      | 2526bd3a-3c01-40b3-b37d-605d99adb980 | 10.0.0.0/24 |
-+--------------------------------------+------+--------------------------------------+-------------+
-{% endhighlight %}
-
-Efectivamente, la subred se encuentra generada. Es normal que todavía no se entienda qué es lo que pretendo con todo esto, sin embargo, lo iremos viendo con mayor detenimiento durante el desarrollo de este _post_.
-
-Por último, vamos a generar una IP flotante dentro del rango enrutable de forma directa desde nuestra máquina. Dicha dirección IP deberá generarse en la red externa, que como podemos apreciar en el comando superior, tiene asociado el identificador **49812d85-8e7a-4c31-baa2-d427692f6568**, de manera que haremos uso del comando:
+Por último, vamos a generar una IP flotante dentro del rango enrutable de forma directa desde nuestra máquina, es decir, en la red externa, que como podemos apreciar en la salida del comando superior, tiene asociado el identificador **49812d85-8e7a-4c31-baa2-d427692f6568**, de manera que haremos uso del comando:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~$ openstack floating ip create 49812d85-8e7a-4c31-baa2-d427692f6568
@@ -439,7 +426,7 @@ Por último, vamos a generar una IP flotante dentro del rango enrutable de forma
 +---------------------+--------------------------------------+
 {% endhighlight %}
 
-Como se puede apreciar, la ejecución del comando ha resultado en la efectiva creación de una IP flotante, concretamente la **172.22.200.28**, sin embargo, vamos a proceder a verificarlo listando para ello todas las direcciones IP flotantes asociadas a nuestro proyecto, ejecutando para ello el comando:
+La ejecución del comando ha resultado en la efectiva creación de una IP flotante, concretamente la **172.22.200.28**, sin embargo, vamos a verificarlo listando para ello todas las direcciones IP flotantes asociadas a nuestro proyecto, ejecutando para ello el comando:
 
 {% highlight shell %}
 (openstackclient) alvaro@debian:~$ openstack floating ip list
@@ -460,12 +447,12 @@ Como se puede apreciar, la ejecución del comando ha resultado en la efectiva cr
 +--------------------------------------+---------------------+------------------+--------------------------------------+--------------------------------------+----------------------------------+
 {% endhighlight %}
 
-Como era de esperar, la IP flotante ha sido correctamente asociada a nuestro proyecto y actualmente se encuentra disponible para asociar a una dirección IP del rango de la red interna.
+Como era de esperar, la IP flotante ha sido correctamente asignada a nuestro proyecto y se encuentra actualmente disponible para ser asociada a una dirección IP fija del rango de la red interna.
 
-Tras ello, estableceremos una conexión SSH con la máquina de nombre **ceph-admin** que utilizaremos para realizar la mayor parte de las gestiones restantes. Para ello, haremos uso del comando:
+Tras ello, estableceremos una conexión SSH con la máquina **ceph-admin**, la cual utilizaremos para realizar la mayor parte de las gestiones restantes, haciendo uso del comando:
 
 {% highlight shell %}
-(ansible) alvaro@debian:~/GitHub/ansible-tfg$ ssh debian@172.22.200.103 -i /home/alvaro/.ssh/linux.pem
+(openstackclient) alvaro@debian:~$ ssh debian@172.22.200.103 -i /home/alvaro/.ssh/linux.pem
 Linux ceph-admin 4.19.0-16-cloud-amd64 #1 SMP Debian 4.19.181-1 (2021-03-19) x86_64
 
 The programs included with the Debian GNU/Linux system are free software;
@@ -480,54 +467,48 @@ La conexión SSH se ha establecido correctamente, sin embargo, antes de proceder
 
 Tal y como previamente hemos mencionado, necesitamos un sistema de ficheros distribuido para desplegar en alta disponibilidad cualquier aplicación que requiera compartir el almacenamiento entre los diferentes nodos sobre los que se ejecutará la misma, como es este caso.
 
-La solución _open source_ de la que haremos uso es conocida como **Ceph**, que es basada en objetos binarios y evita en todo momento las rígidas jerarquías de los sistemas convencionales. Para el almacenamiento utilizamos discos duros, como es lógico, sin embargo, un algoritmo se encarga de gestionar los objetos binarios, que están divididos en numerosas partes y repartidos entre muchos servidores (nunca almacenando más de una copia en el mismo nodo), pero vuelven luego a unificarse.
+La solución _open source_ de la que haremos uso es conocida como **Ceph**. Se basa en objetos binarios y evita en todo momento las rígidas jerarquías de los sistemas convencionales. Para el almacenamiento utilizamos discos duros, como es lógico, sin embargo, un algoritmo se encarga de gestionar los objetos binarios, que están divididos en numerosas partes y repartidos entre muchos servidores de forma pseudoaleatoria (nunca almacenando más de una copia en el mismo nodo), que posteriormente vuelven a unificarse.
 
-Al tener una aplicación de creciente tamaño, no sabemos cuál será la cantidad de datos a gestionar en un futuro, por tanto, los sistemas deben poder ampliarse fácilmente, sin dejar de funcionar, con servidores adicionales que puedan integrarse sin obstáculos en el sistema de almacenamiento dado, que en todo momento se mostrará al usuario como un sencillo directorio de un sistema de archivos tradicional, sin necesidad de que el mismo conozca absolutamente nada sobre la distribución de los mismos.
+Al tener una aplicación de creciente tamaño, no sabemos cuál será la cantidad de datos a gestionar en un futuro, por tanto, el sistema de almacenamiento debe poder ampliarse fácilmente sin dejar de funcionar, mediante servidores adicionales. El cliente lo percibirá en todo momento como un sencillo directorio de un sistema de archivos tradicional, sin necesidad de que el mismo conozca absolutamente nada sobre la distribución de los mismos.
 
-Otra de las características indispensables, como se puede suponer, en la redundancia de dichos datos, ya que de nada nos sirve tener los datos distribuidos incluso en diferentes áreas geográficas del planeta si un simple fallo en uno de los discos puede llegar a causarnos la corrupción total o parcial de los datos almacenados. Por ello, el sistema de autogestión y autorrecuperación de **Ceph** reduce dramáticamente las interrupciones, convirtiéndolo en una excelente elección para las empresas. **Facebook** y **Dropbox** son de las empresas más grandes que utilizan **Ceph**.
+Otra de las características indispensables es la redundancia de los datos, ya que de nada nos sirve tener los datos distribuidos incluso en diferentes áreas geográficas del planeta si un simple fallo en uno de los discos puede causarnos la corrupción total o parcial de los datos almacenados. Por ello, el sistema de autogestión y autorrecuperación de **Ceph** reduce dramáticamente las interrupciones, convirtiéndolo en una excelente elección para las empresas. **Facebook** y **Dropbox** son dos de los ejemplos más influyentes.
 
 ![replicacion](https://i.ibb.co/sJLdH7L/cephreplication.png "Replicación Ceph")
 
-Aunque en este caso no vamos a hacer uso de estas características, es importante mencionar que las aplicaciones pueden acceder a **_Ceph Object Storage_** a través de una interfaz **RESTful** que admite las API de **Amazon S3** y **Openstack Swift**.
+Aunque en este caso no vamos a hacer uso de la siguiente característica, me parece curioso mencionar que las aplicaciones pueden acceder a **_Ceph Object Storage_** a través de una interfaz **RESTful** que admite las API de **Amazon S3** y **Openstack Swift**.
 
-Entrando un poco más en profundidad, el sistema se mantiene mediante una red de demonios que se ejecutan entre los diferentes nodos constituyentes del clúster:
+Entrando un poco más en profundidad, el sistema consta de una red de demonios que se ejecutan entre los diferentes nodos constituyentes del clúster:
 
-* **Monitor (MONs)**: Gestionan el estado de cada uno de los nodos en el clúster y vigilan en especial los componentes _manager service_, _object storage service_ y _metadata server_. Para poder asegurar cierta seguridad, se recomienda disponer de al menos tres _monitor nodes_.
-* **Manager (MGRs)**: Gestionan el estado de la utilización del espacio, de la carga del sistema y del nivel de utilización de los nodos.
-* **OSDs**: También conocidos como _Object Storage Devices_, son los servicios que realmente se encargan de gestionar los archivos: son responsables del almacenamiento, el duplicado y la restauración de los datos. Se recomienda tener al menos tres _OSDs_ en el cluster. Se ejecuta un OSD por cada disco.
-* **MDs**: Se encargan de almacenar metadatos como por ejemplo rutas de almacenamiento, sellos de tiempo y nombres de los archivos guardados en CephFS, por motivos de rendimiento.
+* **Monitor (MONs)**: Gestionan en todo momento el estado de cada uno de los nodos en el clúster, informando de fallos lo antes posible. Se recomienda disponer de al menos tres _monitor nodes_.
+* **Manager (MGRs)**: Gestionan la utilización del espacio, la carga del sistema y el nivel de utilización de los nodos.
+* **Object Storage Devices (OSDs)**: Son los servicios que realmente gestionan los archivos: son responsables del almacenamiento, el duplicado y la restauración de los datos. Se recomienda tener al menos tres OSDs en el cluster. Se ejecuta un OSD por cada disco.
+* **Metadata (MDs)**: Se encargan de almacenar metadatos por motivos de rendimiento, como rutas de almacenamiento, sellos de tiempo y nombres de los archivos.
 
-Lo dicho anteriormente hace que **Ceph** sea capaz de lo mejor, pero también que sea más complejo que otras opciones como **GlusterFS**, su principal competidor.
+El componente clave del almacenamiento de datos es el algoritmo **CRUSH** (_Controlled Replication Under Scalable Hashing_). Este algoritmo es capaz de encontrar un **OSD** con el archivo solicitado gracias a una tabla de asignaciones almacenada en los **MDs**.
 
-El componente clave del almacenamiento de datos es un algoritmo llamado **CRUSH** (_Controlled Replication Under Scalable Hashing_). Este algoritmo es capaz de encontrar un OSD con el archivo solicitado gracias a una tabla de asignaciones almacenada en los **MDs**.
+Por si no era suficiente, al nivel del OSD se utiliza un **_journaling_** o registro de cambios con fecha y hora, dificultando por tanto la corrupción de los datos. Allí se guardan temporalmente los archivos que se pretenden almacenar mientras se espera a que se ubiquen correctamente en todos los OSD previstos.
 
-La distribución de los archivos en **Ceph** se realiza de forma pseudoaleatoria, calculándose el lugar más adecuado para almacenarlos basándose en criterios definidos por el administrador de la red. Al hacerlo, además, se duplican los archivos y se almacenan en soportes físicos separados.
+No todo podía ser bonito, y es que como se puede apreciar, para utilizar este _software_ necesitamos una red relativamente "grande" para así poder albergar de forma redundante los componentes. También se necesitan unos conocimientos suficientes, dada su complejidad. Su compatibilidad se limita a sistemas Linux, aunque estoy seguro que esto último no es un problema para nosotros.
 
-Por si no era suficiente, con la finalidad de garantizar la seguridad de los datos, al nivel del OSD se utiliza un **_journaling_** (registro de cambios con fecha y hora, dificultando por tanto la corrupción de los datos). Allí se guardan temporalmente los archivos que se pretenden almacenar mientras se espera a que se ubiquen correctamente en todos los OSD previstos.
-
-No todo podía ser bonito, y es que como podemos apreciar, para utilizar este _software_ necesitamos una red relativamente "grande" para así poder albergar de forma redundante los componentes del clúster. De otro lado, **Ceph** únicamente es compatible con sistemas Linux, aunque estoy seguro que esto último no es un problema para nosotros.
-
-Una vez comprendido de forma superficial el funcionamiento de **Ceph**, vamos a proceder a crear un clúster, así que vamos a aprovechar nuestra conexión SSH existente con la máquina **ceph-admin** que será la que utilizaremos para ello.
-
-El primero de los pasos será cambiarnos al usuario **cephuser**, pues tiene los privilegios necesarios para ejecutar comandos sin contraseña, además de poder realizar conexiones SSH al resto de máquina, mediante el mismo usuario. Para ello, haremos uso del comando:
+Una vez comprendido de forma superficial el funcionamiento de **Ceph**, vamos a proceder a crear un clúster, cambiándonos para ello al usuario **cephuser**, pues tiene los privilegios necesarios para ejecutar comandos sin contraseña y realizar conexiones SSH al resto de máquinas. Para ello, haremos uso del comando:
 
 {% highlight shell %}
 debian@ceph-admin:~$ sudo su - cephuser
 {% endhighlight %}
 
-Tras ello, nos encontraremos haciendo uso del nuevo usuario generado, así que el siguiente paso consistirá en generar un directorio en el que se almacenarán los ficheros resultantes de dicho clúster. Su nombre no es relevante aunque es recomendable que sea significativo para evitar eliminarlo por error, de manera que en mi caso lo generaré y accederé al mismo ejecutando para ello el comando:
+El siguiente paso consistirá en generar un directorio en el que se almacenarán los ficheros resultantes del clúster. Su nombre no es relevante aunque es recomendable que sea significativo para evitar eliminarlo por error, de manera que en mi caso lo generaré y accederé al mismo ejecutando para ello el comando:
 
 {% highlight shell %}
 cephuser@ceph-admin:~$ mkdir cephcluster && cd cephcluster/
 {% endhighlight %}
 
-Para el tercero de los pasos haremos uso del binario **ceph-deploy** previamente instalado durante la ejecución del **playbook** de **Ansible**, que nos permitirá llevar a cabo de forma automatizada dicho proceso. Para comenzar, tendremos que indicar el nombre de las máquinas que actuarán como _monitor nodes_, siendo en mi caso **ceph-mon1**, **ceph-mon2** y **ceph-mon3**, pudiendo indicarlo de la forma **ceph-mon{1..3}** para evitar indicar los tres nombres. El comando final del que haré uso sería:
+Para el tercero de los pasos haremos uso del binario **ceph-deploy** previamente instalado durante la ejecución del **playbook** de **Ansible**, que nos permitirá llevar a cabo de forma automatizada el proceso de creación del clúster. Para comenzar, tendremos que indicar el nombre de las máquinas que actuarán como _monitor nodes_. El comando final del que haré uso será:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph-deploy new ceph-mon{1..3}
 {% endhighlight %}
 
-Como consecuencia de la ejecución de dicho comando se habrán generado un total de 3 ficheros en el directorio actual, de manera que procederemos a verificarlo listando para ello el contenido existente gracias a a la ejecución del comando:
+En consecuencia de la ejecución de dicho comando se habrán generado un total de 3 ficheros en el directorio actual, de manera que procederemos a verificarlo listando para ello el contenido existente mediante la ejecución del comando:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ls -l
@@ -537,13 +518,11 @@ total 16
 -rw------- 1 cephuser cephuser   73 Jun  9 14:47 ceph.mon.keyring
 {% endhighlight %}
 
-De todos los ficheros únicamente nos importa el primero de ellos, de nombre **ceph.conf**, cuya finalidad es la de albergar parámetros de configuración del clúster, pues el segundo (**ceph-deploy-ceph.log**) almacena _logs_ que por ahora no son relevantes y el tercero (**ceph.mon.keyring**) una clave que utilizarán los _monitor nodes_ pertenecientes al clúster para autenticarse, que será distribuida a los mismos de forma totalmente automatizada.
+De todos los ficheros existentes únicamente nos importa el primero de ellos, de nombre **ceph.conf**, cuya finalidad es la de albergar parámetros de configuración del clúster, pues el segundo almacena _logs_ que por ahora no son relevantes y el tercero, una clave que utilizarán los _monitor nodes_ pertenecientes al clúster para autenticarse, que será distribuida a los mismos de forma totalmente automatizada.
 
-Por defecto, **Ceph** crea un total de 3 réplicas de los datos almacenados (una en cada uno de los OSD), lo que a _grosso modo_ podemos llamar un **RAID-1**. Como consecuencia, el tamaño total disponible y útil sería aproximadamente el de uno de los discos, ya que disponemos de 3 discos de 5 GiB, pero los otros 2 se limitarían a almacenar una copia (es decir, 1/3 del total). Con dicho valor predeterminado, podrían dejar de funcionar un máximo de 2 de 3 OSD, ya que la información seguiría ubicada en aquel nodo funcional.
+Por defecto, **Ceph** crea un total de **3 réplicas** de los datos almacenados (en este caso, una en cada OSD), lo que a _grosso modo_ podemos llamar un **RAID-1**. Como consecuencia, el tamaño total disponible y útil sería aproximadamente el de uno de los discos, ya que disponemos de 3 discos de 5 GiB, pero los otros 2 se limitarían a almacenar una copia (es decir, 1/3 del total disponible). Con dicho valor predeterminado, podrían dejar de funcionar un máximo de **2 de 3 OSD**, ya que la información seguiría existiendo en aquel nodo funcional.
 
-Por ello, vamos a modificar dicho valor por defecto y vamos a establecer que el número de copias sea 2, pudiendo aprovechar por tanto una mayor cantidad de espacio, pero sacrificando como es lógico, seguridad, pues únicamente podría morir 1 de 3 OSD.
-
-En realidad, no es necesario llevar a cabo ninguna modificación sobre dicho fichero, aunque en mi caso he decidido hacerlo para que así las posteriores pruebas se vean de una forma mucho más clara, de manera que vamos a hacer uso del siguiente comando:
+Por ello, vamos a modificar dicho valor y a establecer el número de copias en 2, pudiendo aprovechar por tanto una mayor cantidad de espacio, pero sacrificando como es lógico, seguridad, pues únicamente podría morir **1 de 3 OSD**, haciendo uso del comando:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ echo "osd pool default size = 2" >> ceph.conf
@@ -563,35 +542,35 @@ auth_client_required = cephx
 osd pool default size = 2
 {% endhighlight %}
 
-Efectivamente, la línea especificada ha sido correctamente introducida en el mismo, además de los _monitor nodes_ previamente especificados junto con sus correspondientes direcciones IP.
+Efectivamente, la línea especificada ha sido correctamente introducida, además de los _monitor nodes_ junto con sus correspondientes direcciones IP.
 
-En un entorno más real, se utilizarían además dos redes diferentes, una **pública** que sería indicada mediante la directiva **public network** que es aquella a través de la cuál los clientes van a hacer uso del sistema de ficheros y una **privada** que sería indicada mediante la directiva **private network** que es aquella a través de la cuál los OSD realizarían las replicaciones de datos, que debe tener un ancho de banda considerable, para evitar cuellos de botella durante las mismas. En este caso, al únicamente existir una red, no es necesario realizar distinción entre las mismas.
+En un entorno más real, se utilizarían dos redes diferentes, una **pública** que sería indicada mediante la directiva **public network** que es aquella a través de la cual los clientes van a hacer uso del sistema de ficheros y una **privada** que sería indicada mediante la directiva **private network** que es aquella a través de la cual los OSD realizarán las replicaciones de datos, que debe contar con un ancho de banda considerable, para evitar cuellos de botella durante las mismas. En este caso, al únicamente existir una red, no es necesario realizar distinción.
 
-El quinto paso para la configuración de nuestro clúster **Ceph** consiste en llevar a cabo la instalación del _software_ en todos los nodos pertenecientes al mismo. En este caso, la instalación la llevaremos a cabo sobre 9 de las 10 máquinas (ya que el DNS no pertenece al clúster como tal), haciendo para ello uso del comando:
+El quinto paso consiste en llevar a cabo la instalación del _software_ en todos los nodos pertenecientes al clúster. En este caso, la instalación la realizaremos sobre 9 de las 10 máquinas (ya que el servidor DNS no pertenece al clúster como tal), haciendo para ello uso del comando:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph-deploy install ceph-admin ceph-mon{1..3} ceph-osd{1..3} ceph-client{1..2}
 {% endhighlight %}
 
-La instalación puede llevar unos minutos en completarse, consistiendo el siguiente paso en llevar a cabo todas las gestiones necesarias en los 3 _monitor nodes_ indicados en el momento de la creación del clúster, como por ejemplo establecer el **quorum**, que será el encargado de determinar por mayoría el estado de los nodos (por ello siempre es necesario que exista un número impar de nodos, para evitar empates), ejecutando para ello el comando:
+La instalación puede tomar unos minutos en completarse, consistiendo el siguiente paso en llevar a cabo las gestiones necesarias en los 3 _monitor nodes_ previamente indicados, como por ejemplo establecer el **quorum**, que será el encargado de determinar por mayoría el estado de los nodos, ejecutando para ello el comando:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph-deploy mon create-initial
 {% endhighlight %}
 
-El séptimo paso refiere a la copia del fichero de configuración y la clave de administración en todos y cada uno de los nodos pertenecientes al clúster, para así poder utilizar el intérprete de comandos de Ceph desde cualquiera de las máquinas y sin necesidad de indicar ningún parámetro adicional. Para ello, haremos uso del comando:
+El séptimo paso refiere a la copia del fichero de configuración y la clave de administración en todos y cada uno de los nodos pertenecientes al clúster para así poder utilizar el intérprete de comandos de **Ceph** desde cualquiera de las máquinas y sin necesidad de indicar ningún parámetro adicional. Para ello, haremos uso del comando:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph-deploy admin ceph-admin ceph-mon{1..3} ceph-osd{1..3} ceph-client{1..2}
 {% endhighlight %}
 
-Una vez finalizada la copia en todos los nodos, tendremos que ajustar los permisos del fichero **/etc/ceph/ceph.client.admin.keyring** para que así pueda hacer uso del mismo el usuario **cephuser** previamente generado, al cuál estableceremos como propietario del mismo. Comenzaremos por realizar dicha modificación en la máquina actual, **ceph-admin**, ejecutando para ello el comando:
+Una vez finalizada la transferencia a todos los nodos, tendremos que ajustar el propietario del fichero **/etc/ceph/ceph.client.admin.keyring** a **cephuser** para que así pueda hacer uso del mismo. Comenzaremos por realizar dicha modificación en la máquina actual, ejecutando para ello el comando:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ sudo chown cephuser:cephuser /etc/ceph/ceph.client.admin.keyring
 {% endhighlight %}
 
-Tras ello, tendremos que repetir el mismo procedimiento en el resto de máquinas, sin embargo, podemos automatizarlo con una pequeña estructura iterativa, que quedará de la siguiente forma:
+Tras ello, tendremos que llevar a cabo la misma acción sobre el resto de máquinas, sin embargo, podemos automatizarlo con una pequeña estructura iterativa, que quedará de la siguiente forma:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ for i in mon{1..3} osd{1..3} client{1..2}
@@ -600,13 +579,13 @@ cephuser@ceph-admin:~/cephcluster$ for i in mon{1..3} osd{1..3} client{1..2}
 > done
 {% endhighlight %}
 
-Posteriormente llevaremos a cabo el establecimiento del **_manager_**, que en este caso y por recomendación por parte de la documentación de Ceph, serán las mismas máquinas que albergan el demonio _monitor_. Para ello, haremos uso del comando:
+Posteriormente estableceremos los demonios de los **_manager_**, que por recomendación por parte de la documentación de **Ceph**, deberían ser las mismas máquinas que albergan el demonio _monitor_. Para ello, haremos uso del comando:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph-deploy mgr create ceph-mon{1..3}
 {% endhighlight %}
 
-Una vez desplegados los demonios _manager_, es hora de configurar los **OSD** con su correspondiente almacenamiento, así que de forma previa a ello, vamos a verificar que los 3 nodos destinados a dicha finalidad tengan correctamente asociado dicho volumen secundario de 5 GiB, ejecutando para ello el comando:
+Una vez desplegados los demonios _manager_, es hora de configurar los **OSD**, así que de forma previa a ello, vamos a verificar que los 3 nodos destinados a dicha finalidad tengan correctamente asociado un volumen secundario de 5 GiB, ejecutando para ello el comando:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph-deploy disk list ceph-osd{1..3}
@@ -621,7 +600,7 @@ cephuser@ceph-admin:~/cephcluster$ ceph-deploy disk list ceph-osd{1..3}
 [ceph-osd3][INFO  ] Disk /dev/vdb: 5 GiB, 5368709120 bytes, 10485760 sectors
 {% endhighlight %}
 
-Como era de esperar, en las tres máquinas existe un volumen en **/dev/vdb** de 5 GiB, así que procederemos a implementar la funcionalidad de OSD en dichas máquinas, utilizando para ello la ruta al disco vacío, en los que se crearán las particiones de datos y _journal_, haciendo para ello uso de los comandos:
+Como era de esperar, en las tres máquinas existe un volumen en **/dev/vdb** de 5 GiB, así que procederemos a implementar la funcionalidad de OSD en dichas máquinas, utilizando para ello las rutas a los discos vacíos, en los que se crearán las particiones de datos y _journal_, haciendo para ello uso de los comandos:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph-deploy osd create --data /dev/vdb ceph-osd1
@@ -629,24 +608,17 @@ cephuser@ceph-admin:~/cephcluster$ ceph-deploy osd create --data /dev/vdb ceph-o
 cephuser@ceph-admin:~/cephcluster$ ceph-deploy osd create --data /dev/vdb ceph-osd3
 {% endhighlight %}
 
-Los tres volúmenes han sido correctamente particionados y listos para su uso, sin embargo, todavía nos falta un elemento esencial en nuestro clúster, los **MDs**, que debido a que "únicamente" contamos con 10 máquinas, tendremos que alojar dichos demonios en las mismas máquinas que ejecutan los **OSDs**, aunque en un caso práctico real, sería mucho más óptimo tenerlo lo más distribuido posible. Para ello, ejecutaremos el comando:
+Los tres volúmenes han sido correctamente particionados y se encuentran listos para su uso, sin embargo, todavía nos falta un elemento esencial en nuestro clúster: los **MDs**.
+
+Dado que "únicamente" contamos con 9 máquinas, tendremos que alojar dichos demonios en las mismas máquinas que ejecutan los _OSD_, aunque en un caso práctico real, sería mucho más óptimo tenerlo lo más distribuido posible. Para ello, ejecutaremos el comando:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph-deploy mds create ceph-osd{1..3}
 {% endhighlight %}
 
-Una vez finalizada la ejecución del comando, vamos a verificar que los demonios se han generado correctamente en dichas 3 máquinas, haciendo para ello uso del comando:
+Una vez finalizada la ejecución del comando tendremos todos los componentes necesarios para el correcto funcionamiento del clúster activos y configurados.
 
-{% highlight shell %}
-cephuser@ceph-admin:~/cephcluster$ ceph mds stat
- 3 up:standby
-{% endhighlight %}
-
-Como se puede apreciar, los 3 demonios han sido correctamente ubicados (aunque todavía se encuentran en estado **standby**, dada la carencia de un sistema de ficheros), teniendo por tanto, todos los servicios necesarios para el correcto funcionamiento del clúster activos y configurados.
-
-Estamos llegando a la recta final, y es que a pesar de tener nuestro clúster creado, todavía no existe ninguna _pool_ en su interior, y por consecuencia, ningún sistema de ficheros.
-
-Para hacer uso de **CephFS** necesitamos un mínimo de 2 _pools_ para los **MDs**, uno para **datos** y otro para **metadatos**. Dado el frecuente acceso a los mismos, es recomendable que se utilicen discos de baja latencia para aumentar así la eficiencia de lectura y escritura. Para la generación de dichos _pools_, ejecutaremos los siguientes comandos:
+Para hacer uso de **CephFS** necesitamos un mínimo de **2 _pools_**, uno para **datos** y otro para **metadatos**. Dado el frecuente acceso a los mismos, es recomendable que se utilicen discos de baja latencia para aumentar así la eficiencia de lectura y escritura. Para la generación de dichos _pools_, ejecutaremos los siguientes comandos:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph osd pool create cephfs_data 64
@@ -662,25 +634,25 @@ cephuser@ceph-admin:~/cephcluster$ ceph osd lspools
 3 cephfs_metadata
 {% endhighlight %}
 
-Efectivamente, se han generado 2 nuevos pools con los nombres **cephfs_data** y **cephfs_metadata**, habiendo sido asignados los identificadores **2** y **3**, respectivamente.
+Efectivamente, se han generado 2 nuevos _pools_ con los nombres **cephfs_data** y **cephfs_metadata**, habiéndoles sido asignados los identificadores **2** y **3**, respectivamente.
 
-El último paso consiste en crear un sistema de ficheros en el que podremos empezar a alojar objetos, que hará uso de los 2 _pools_ creados con anterioridad, por ejemplo, con nombre **cephfs**. El comando a ejecutar sería:
+El último paso consiste en crear un sistema de ficheros en el que podremos empezar a alojar objetos, que hará uso de los 2 _pools_ creados con anterioridad, con nombre **cephfs**, por ejemplo. El comando a ejecutar sería:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph fs new cephfs cephfs_metadata cephfs_data
 new fs with metadata pool 3 and data pool 2
 {% endhighlight %}
 
-Una vez finalizada la ejecución del comando, vamos a verificar que el sistema de ficheros se ha generado correctamente en las correspondientes máquinas, haciendo para ello uso del comando:
+Finalmente vamos a verificar que el sistema de ficheros se ha generado correctamente en las correspondientes máquinas, haciendo para ello uso del comando:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph fs ls
 name: cephfs, metadata pool: cephfs_metadata, data pools: [cephfs_data ]
 {% endhighlight %}
 
-Como era de esperar, se ha generado un nuevo sistema de ficheros de nombre **cephfs** que hace uso del _pool_ de datos **cephfs_data** y del _pool_ de metadatos **cephfs_metadata**. A partir de este momento, los **MDs** habrán pasado a estado **active**.
+Como era de esperar, se ha generado un nuevo sistema de ficheros de nombre **cephfs** que hace uso del _pool_ de datos **cephfs_data** y del _pool_ de metadatos **cephfs_metadata**.
 
-Por último, vamos a verificar el estado general del clúster, para así comprobar que todos los pasos llevados a cabo han sido efectivos y no ha ocurrido ningún problema durante el mismo, ejecutando para ello el comando:
+Adicionalmente, vamos a verificar el estado general del clúster para así comprobar que todos los pasos llevados a cabo han sido efectivos y no ha ocurrido ningún problema, ejecutando para ello el comando:
 
 {% highlight shell %}
 cephuser@ceph-admin:~/cephcluster$ ceph health
@@ -709,66 +681,68 @@ cephuser@ceph-admin:~/cephcluster$ ceph status
     pgs:     81 active+clean
 {% endhighlight %}
 
-Como se puede apreciar de una forma más concreta en la salida del comando, contamos con un total de 3 _pools_ y los servicios actualmente activos se encuentran en las siguientes máquinas:
+Como se puede apreciar de una forma más concreta en la salida del comando, contamos con un total de 3 _pools_ y los servicios actualmente activos se encuentran alojados en las siguientes máquinas:
 
 * **mon**: **ceph-mon1**, **ceph-mon2** y **ceph-mon3**
 * **mgr**: **ceph-mon1**, **ceph-mon2** y **ceph-mon3**
-* **osd**: **ceph-osd1**, **ceph-osd2** y **ceph-osd3**
 * **mds**: **ceph-osd1**, **ceph-osd2** y **ceph-osd3**
+* **osd**: **ceph-osd1**, **ceph-osd2** y **ceph-osd3**
 
-Las labores en nuestro clúster **Ceph** han finalizado, encontrándose a partir de ahora totalmente disponible para albergar ficheros en su interior, así que es hora de explicar todo lo referente al despliegue de la aplicación sobre dicho clúster de almacenamiento distribuido, sobre el que utilizaremos también _software_ para asegurar la alta disponibilidad de los servicios relacionados.
+Las labores en nuestro clúster **Ceph** han finalizado, encontrándose a partir de ahora totalmente disponible para albergar ficheros en su interior, así que es hora de explicar todo lo referente al despliegue de la aplicación sobre dicho clúster de almacenamiento distribuido, sobre el que también utilizaremos _software_ para asegurar la alta disponibilidad de los servicios relacionados.
 
-Tal y como se mencionó al principio del artículo, vamos a utilizar **Pacemaker** cuya finalidad es la de permitir controlar y coordinar las máquinas del clúster y **Corosync**, cuya finalidad es la de permitir la comunicación de las máquinas pertenecientes al mismo y enviar órdenes a **Pacemaker**.
+En este caso, vamos a utilizar **Pacemaker**, cuya finalidad es la de controlar y coordinar las máquinas del clúster junto a **Corosync**, cuya finalidad es la de permitir la comunicación entre las máquinas pertenecientes al mismo y enviar órdenes a _Pacemaker_.
 
-Para interconectar las máquinas del clúster de **Pacemaker**, que serán aquellas sobre las que se ejecuten los servicios necesarios para el despliegue de la aplicación y tengan acceso al sistema de ficheros previamente generado, es decir, **ceph-client1** y **ceph-client2**, necesitaremos un usuario de nombre **hacluster** cuya contraseña sea la misma en ambas máquinas, para posibilitar la comunicación entre las mismas.
+**Pacemaker** intenta gestionar de la mejor manera posible la distribución de los recursos, teniendo en cuenta factores como el uso de recursos de cada uno de los nodos. A pesar de ello, es posible forzar las colocaciones de los recursos en caso de así necesitarlo, por ejemplo, cuando un nodo tiene más recursos que otro y preferimos que la ejecución se lleve a cabo sobre el mismo siempre que sea posible.
 
-En total vamos a desplegar un total de 4 recursos:
+Para interconectar las máquinas que ejecutan los servicios necesarios para el despliegue de la aplicación y tienen acceso al sistema de ficheros previamente generado, necesitaremos un usuario de nombre **hacluster** cuya contraseña sea la misma en ambas máquinas para así posibilitar la comunicación entre las mismas (**ceph-client1** y **ceph-client2**).
+
+Vamos a desplegar un total de 4 recursos:
 
 * **WebVirtualIP**: Dirección IP virtual (**10.0.0.200**) que se asignará de forma dinámica a cualquiera de los dos nodos, dependiendo de su disponibilidad.
-* **WebSite**: Encargado de gestionar el demonio de **apache2** y que irá de la mano al recurso anterior, ya que deben estar siempre ejecutándose en la misma máquina.
+* **WebSite**: Encargado de gestionar el demonio de **apache2** y que irá de la mano con el recurso anterior, ya que deben estar siempre ejecutándose en la misma máquina.
 * **DBVirtualIP**: Dirección IP virtual (**10.0.0.201**) que se asignará de forma dinámica a cualquiera de los dos nodos, dependiendo de su disponibilidad.
-* **Database**: Encargado de gestionar el demonio de **mariadb** y que irá de la mano al recurso anterior, ya que deben estar siempre ejecutándose en la misma máquina.
+* **Database**: Encargado de gestionar el demonio de **mariadb** y que irá de la mano con el recurso anterior, ya que deben estar siempre ejecutándose en la misma máquina.
 
-**Pacemaker** intenta gestionar de la mejor manera posible la distribución de los recursos, teniendo en cuenta valores como el uso de recursos de cada uno de los nodos, aunque podemos forzar las colocaciones de los recursos en caso de así necesitarlo, por ejemplo, cuando un nodo tiene más recursos y que otro y preferimos que la ejecución se lleve a cabo sobre el mismo siempre que sea posible.
+Quizás puede llegar a ser algo confuso, así que para aclarar un poco las ideas, vamos a ir haciéndolo y entendiéndolo sobre la marcha.
 
-Quizás puede llegar a ser algo confuso, así que para aclarar un poco las ideas, vamos a ir haciéndolo y entendiéndolo sobre la marcha. Para ello, vamos a volver a nuestra terminal con el entorno virtual **ansible** y vamos a ejecutar el **playbook** de nombre **post.yml**, que hace uso de un rol previamente definido, aplicando las siguientes tareas sobre el siguiente grupo de máquinas:
+Para ello, vamos a volver a nuestra terminal con el entorno virtual **ansible** y vamos a ejecutar el **playbook** de nombre **post.yml** que hace uso de un rol previamente definido, aplicando las siguientes tareas sobre el siguiente grupo de máquinas:
 
 - **client**:
     - **Ensure needed packages are installed**: Instala la paquetería necesaria para el correcto funcionamiento.
-    - **disable apache2**: Para y deshabilita el servicio **apache2**, ya que a partir de ahora será gestionado por _Pacemaker_ y _Corosync_.
-    - **disable mariadb**: Para y deshabilita el servicio **mariadb**, ya que a partir de ahora será gestionado por _Pacemaker_ y _Corosync_.
+    - **disable apache2**: Para y deshabilita el servicio **apache2**, ya que a partir de ahora será gestionado por _Pacemaker_.
+    - **disable mariadb**: Para y deshabilita el servicio **mariadb**, ya que a partir de ahora será gestionado por _Pacemaker_.
     - **Obtain secret key and save as a variable**: Busca la clave secreta en el fichero **/etc/ceph/ceph.client.admin.keyring** y la almacena en una variable.
     - **Store the secret key in admin.secret file**: Almacena la clave secreta en un fichero de nombre **/home/cephuser/admin.secret** con los permisos apropiados.
-    - **Mount CephFS on /ceph and add to fstab**: Monta el sistema de ficheros previamente generado en **/ceph** (generará dicho directorio) y añade una entrada al **/etc/fstab** para su montaje automático durante el arranque, haciendo uso de la clave privada que acabamos de almacenar para la autenticación.
-    - **Create the necessary structure on /ceph**: Crea los subdirectorios **/ceph/sql** y **/ceph/prestashop** para almacenar datos de la base de datos y de la aplicación, respectivamente.
+    - **Mount CephFS on /ceph and add to fstab**: Monta el sistema de ficheros en **/ceph** y añade una entrada al **/etc/fstab**.
+    - **Create the necessary structure on /ceph**: Crea los subdirectorios **/ceph/sql** y **/ceph/prestashop**.
     - **Check if /ceph/prestashop folder is empty before proceeding**: Comprueba si el directorio **/ceph/prestashop** está vacío, para en ese caso, realizar las 3 siguientes tareas.
     - **Download and unzip prestashop_1.7.7.0.zip package**: Descarga y descomprime el paquete de PrestaShop 1.7.7.0 en el directorio **/ceph/prestashop**.
     - **Unzip prestashop.zip package**: Descomprime el paquete resultante de la previa descompresión en el mismo directorio, estableciendo correctamente los permisos y propietarios.
-    - **Delete unnecessary PrestaShop files**: Elimina los ficheros **Install_PrestaShop.html** y **prestashop.zip** de **/ceph** dada su nula utilidad, y así liberar espacio.
+    - **Delete unnecessary PrestaShop files**: Elimina los ficheros **Install_PrestaShop.html** y **prestashop.zip** dada su nula utilidad.
     - **Copy prestashop.conf VirtualHost file**: Copia el fichero **prestashop.conf** a **/etc/apache2/sites-available/**.
-    - **Create prestashop.conf VirtualHost symlink**: Crea un enlace simbólico al fichero anterior en **/etc/apache2/sites-enabled/** para así habilitar el VirtualHost.
-    - **Delete 000-default.conf VirtualHost symlink**: Elimina el enlace simbólico existente en **/etc/apache2/sites-enabled/000-default.conf** para así deshabilitar el VirtualHost por defecto.
-    - **Create rewrite module symlink**: Crea un enlace simbólico al fichero **/etc/apache2/mods-available/rewrite.load** en **/etc/apache2/mods-enabled/** para así habilitar el módulo.
-    - **Change MariaDB datadir to /ceph/sql**: Modifica el fichero **/etc/mysql/mariadb.conf.d/50-server.cnf** y cambia el _datadir_ de **/var/lib/mysql** a **/ceph/sql**.
-    - **Change MariaDB bind-address to 0.0.0.0**: Modifica el fichero **/etc/mysql/mariadb.conf.d/50-server.cnf** y cambia la _bind-address_ de **127.0.0.1** a **0.0.0.0**.
+    - **Create prestashop.conf VirtualHost symlink**: Crea un enlace simbólico al fichero anterior en **/etc/apache2/sites-enabled/**.
+    - **Delete 000-default.conf VirtualHost symlink**: Elimina el enlace simbólico en **/etc/apache2/sites-enabled/000-default.conf**.
+    - **Create rewrite module symlink**: Crea un enlace simbólico al fichero **/etc/apache2/mods-available/rewrite.load** en **/etc/apache2/mods-enabled/**.
+    - **Change MariaDB datadir to /ceph/sql**: Modifica el fichero **/etc/mysql/mariadb.conf.d/50-server.cnf** y cambia el _datadir_ a **/ceph/sql**.
+    - **Change MariaDB bind-address to 0.0.0.0**: Modifica el fichero **/etc/mysql/mariadb.conf.d/50-server.cnf** y cambia la _bind-address_ a **0.0.0.0**.
     - **Check if /ceph/sql folder is empty before proceeding**: Comprueba si el directorio **/ceph/sql** está vacío, para en ese caso, realizar la siguiente tarea.
-    - **Install DB prerequisites**: Instala los ficheros necesarios en el directorio **/ceph/sql** para que **mariadb** pueda utilizar dicho directorio como _datadir_.
-    - **Set hacluster user password**: Establece la contraseña común para el usuario **hacluster**, utilizando para ello la variable encriptada previamente definida.
+    - **Install DB prerequisites**: Instala los ficheros necesarios en el directorio **/ceph/sql** para poder utilizarlo como _datadir_.
+    - **Set hacluster user password**: Establece una contraseña común para el usuario **hacluster**.
     - **Destroy default cluster**: Elimina el clúster de _Pacemaker_ que se genera por defecto.
-    - **Add hosts to the new cluster**: Añade a ambos nodos al nuevo clúster de _Pacemaker_, autenticándose mediante el uso de la variable en texto plano previamente definida.
+    - **Add hosts to the new cluster**: Añade ambos nodos al nuevo clúster de _Pacemaker_.
     - **Create, start and enable the new cluster**: Crea, inicia y habilita el nuevo clúster de _Pacemaker_ que acabamos de definir.
-    - **Disable STONITH property**: Deshabilita la propiedad STONITH, para evitar conflictos en el quorum al únicamente disponer de dos nodos.
-    - **Create VirtualIP resource for Apache2**: Crea el recurso de nombre **WebVirtualIP** previamente mencionado.
-    - **Create Apache2 resource**: Crea el recurso de nombre **WebSite** previamente mencionado.
-    - **Create Apache2 and VirtualIP colocation**: Crea una colocación para que los recursos **WebVirtualIP** y **WebSite** siempre se ejecuten en el mismo nodo.
-    - **Create VirtualIP resource for MariaDB**: Crea el recurso de nombre **DBVirtualIP** previamente mencionado.
-    - **Create MariaDB resource**: Crea el recurso de nombre **Database** previamente mencionado.
-    - **Create MariaDB and VirtualIP colocation**: Crea una colocación para que los recursos **DBVirtualIP** y **Database** siempre se ejecuten en el mismo nodo.
-    - **Create constraint to preferably run all resources on the first node**: Crea una restricción para que preferiblemente se ejecuten todos los recursos en el nodo **ceph-client1**, para así posteriormente poder apreciar los resultados de las pruebas de una forma más clara. No es necesario ni recomendable en un entorno de producción real.
-    - **Create a new MariaDB database**: Crea una nueva base de datos en MariaDB de nombre **prestashop**.
-    - **Create a new user with privileges in the previous database**: Crea un nuevo usuario de nombre **usuario** y contraseña **usuario**, cuyo acceso estará permitido desde todas las direcciones (**%**) y cuenta con los privilegios suficientes sobre la base de datos previamente generada.
+    - **Disable STONITH property**: Deshabilita la propiedad STONITH, para evitar conflictos en el _quorum_.
+    - **Create VirtualIP resource for Apache2**: Crea el recurso de nombre **WebVirtualIP**.
+    - **Create Apache2 resource**: Crea el recurso de nombre **WebSite**.
+    - **Create Apache2 and VirtualIP colocation**: Crea una colocación para que los anteriores recursos se ejecuten en el mismo nodo.
+    - **Create VirtualIP resource for MariaDB**: Crea el recurso de nombre **DBVirtualIP**.
+    - **Create MariaDB resource**: Crea el recurso de nombre **Database**.
+    - **Create MariaDB and VirtualIP colocation**: Crea una colocación para que los anteriores recursos se ejecuten en el mismo nodo.
+    - **Create constraint to preferably run all resources on the first node**: Crea una restricción para que preferiblemente se ejecuten todos los recursos en el nodo **ceph-client1**.
+    - **Create a new MariaDB database**: Crea una nueva base de datos de nombre **prestashop**.
+    - **Create a new user with privileges in the previous database**: Crea un nuevo usuario de nombre **usuario** y contraseña **usuario** que cuenta con los privilegios suficientes sobre la base de datos previamente generada.
 
-Por último, procederemos a ejecutar dicho **playbook** para así llevar a cabo las tareas previamente mencionadas sobre las máquinas, ejecutando para ello el comando:
+Por último, procederemos a ejecutar dicho **playbook** para así llevar a cabo las tareas previamente mencionadas sobre las máquinas:
 
 {% highlight shell %}
 (ansible) alvaro@debian:~/GitHub/ansible-tfg$ ansible-playbook post.yml 
@@ -790,7 +764,7 @@ Tras alrededor de 15 minutos, todas las tareas se han completado correctamente, 
 
 Dado el tamaño de la salida por pantalla resultante de dicha ejecución, he decidido recortarla para no ensuciar demasiado. No obstante, es posible encontrarla [aquí](https://pastebin.com/D5KUyugH) al completo.
 
-Nuestra aplicación ya ha sido desplegada correctamente, sin embargo, existe un problema que posiblemente no habíais planteado hasta ahora. La dirección IP virtual a través de la cuál accederemos al servicio web es una IP dentro de un rango interno de mi proyecto de **OpenStack**, lo que imposibilita su acceso de forma directa, ya que no es una red enrutable.
+Nuestra aplicación ya ha sido desplegada correctamente, sin embargo, existe un problema que posiblemente no habíais planteado hasta ahora. La dirección IP virtual a través de la cual accederemos al servicio web es una IP dentro de un rango interno de mi proyecto de **OpenStack**, lo que imposibilita su acceso de forma directa, ya que no es una red enrutable.
 
 Sin embargo, existe una posibilidad un tanto "retorcida" que consiste en crear un balanceador de carga en **OpenStack** con una IP flotante dentro del rango alcanzable y asociarlo a dicha IP interna, de manera que a través de una especie de DNAT, conseguiríamos acceder al servidor web desde el exterior. El inconveniente es que el cliente de línea de comandos de **OpenStack** que hemos estado utilizando hasta ahora no nos sirve, ya que la versión que se está utilizando no soporta dicha característica, de manera que tendremos que instalar en un nuevo entorno virtual el cliente del [elemento](https://docs.openstack.org/ocata/cli-reference/neutron.html) de **OpenStack** responsable de la gestión de las redes, **neutron**.
 
